@@ -1,0 +1,35 @@
+<HTML>
+<HEAD>
+  <TITLE>Delt.SetImage(System.Drawing.Bitmap) (Idmr.LfdReader)</TITLE>
+  <link rel="stylesheet" type="text/css" href="../stylesheet.css" />
+</HEAD>
+<BODY>
+<Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<param name="Keyword" value="SetImage">
+	<param name="Keyword" value="Methods">
+	<param name="Keyword" value="Modifiers">
+</OBJECT>
+  <h1>Delt.SetImage(System.Drawing.Bitmap)</h1>
+  <B>Namespace:</B> <a href="../Idmr.LfdReader.html">Idmr.LfdReader</a><BR>
+  <B>Assembly:</B> Idmr.LfdReader.dll<BR>
+  <B>Syntax:</B> <span>public void</span> SetImage(System.Drawing.<span>Bitmap</span> image)<BR>
+  <hr>
+  <h3>Parameters</h3>
+  <TABLE>
+	<TR><TH class=namecol>Name</TH><TH>Description</TH></TR>
+    <TR><TD>image</TD><TD>8bppIndexed image</TD></TR>
+  </TABLE>
+  <h3>Exceptions</h3>
+  <TABLE>
+    <TR><TH class=namecol>Name</TH><TH>Description</TH></TR>
+	<TR><TD>System.ArgumentException</TD><TD>Thrown when image.Height > 480 or image.Width > 640</TD></TR>
+  </TABLE>
+  <hr>
+  <h2>Remarks</h2>
+  New image must be 640x480px or smaller. PixelFormat is not strict, image will be converted to 8bppIndexed and match the original Palette as best as possible.
+  <hr>
+  Copyright (C) 2010 Michael Gaisser (mjgaisser@gmail.com)<BR><BR>
+  This library is free software, distributed under the <a href="http://www.gnu.org/licenses/gpl.html" target=_blank>GNU General Public License</a>.
+  <HR>
+</BODY>
+</HTML>

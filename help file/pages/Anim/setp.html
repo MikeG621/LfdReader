@@ -1,0 +1,41 @@
+<HTML>
+<HEAD>
+  <TITLE>Anim.SetFramePosition( ) (Idmr.LfdReader)</TITLE>
+  <link rel="stylesheet" type="text/css" href="../stylesheet.css" />
+</HEAD>
+<BODY>
+<Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<param name="Keyword" value="setFramePosition">
+</OBJECT>
+  <h1>Anim.SetFramePosition( )</h1>
+  <B>Namespace:</B> <a href="../Idmr.LfdReader.html">Idmr.LfdReader</a><BR>
+  <B>Assembly:</B> Idmr.LfdReader.dll<BR>
+  <B>Syntax:</B><br>
+  &nbsp;&nbsp;*<span>public void</span> SetFramePosition(<span>int</span> index, <span>short</span> left, <span>short</span> top)<BR>
+  &nbsp;&nbsp;<span>public void</span> SetFramePosition(<span>int</span> index, System.Drawing.<span>Point</span> position)<BR>
+  <hr>
+  <h3>Parameters</h3>
+  <TABLE>
+	<TR><TH class=namecol>Name</TH><TH>Description</TH></TR>
+    <TR><TD>index</TD><TD>Zero-indexed frame to be updated</TD></TR>
+	<TR><TD>left</TD><TD>Global left position</TD></TR>
+	<TR><TD>position</TD><TD>Global position</TD></TR>
+	<TR><TD>top</TD><TD>Global top position</TD></TR>
+  </TABLE>
+  <h3>Exceptions</h3>
+  <TABLE>
+    <TR><TH class=namecol>Name</TH><TH>Description</TH></TR>
+	<TR><TD>System.ArgumentException</TD><TD>Thrown when <i>left</i>, <i>top</i> or <i>position</i> results in portions of the frame being outside the animation boundary</TD></TR>
+	<TR><TD>System.IndexOutOfRangeException</TD><TD>Thrown when and invalid <i>index</i> value is given</TD></TR>
+  </TABLE>
+  <hr>
+  <h2>Remarks</h2>
+  Global position is referenced to screen 0,0 whic is the upper left corner.<BR>
+  Think of a large picture frame on a wall, and then place a wallet photo on it.  That wallet photo has its own X/Y coordinates relative to the wall, and those are the coordinates stored. The exceptions are thrown if the edge of the wallet pass the edge of the picture frame.<BR><BR>
+  <small><i>*indicates primary overload</i></small>
+  <hr>
+  Copyright (C) 2010 Michael Gaisser (mjgaisser@gmail.com)<BR><BR>
+  This library is free software, distributed under the <a href="http://www.gnu.org/licenses/gpl.html" target=_blank>GNU General Public License</a>.
+  <HR>
+</BODY>
+</HTML>

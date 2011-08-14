@@ -1,0 +1,29 @@
+<HTML>
+<HEAD>
+  <TITLE>Font.BitsPerScanLine (Idmr.LfdReader)</TITLE>
+  <link rel="stylesheet" type="text/css" href="../stylesheet.css" />
+</HEAD>
+<BODY>
+<Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<param name="Keyword" value="BitsPerScanLine">
+	<param name="Keyword" value="Properties">
+</OBJECT>
+  <h1>Font.BitsPerScanLine</h1>
+  <B>Namespace:</B> <a href="../Idmr.LfdReader.html">Idmr.LfdReader</a><BR>
+  <B>Assembly:</B> Idmr.LfdReader.dll<BR>
+  <B>Syntax:</B> <span>public short</span> BitsPerScanLine { <span>get</span>; <span>set</span>; }<BR><BR>
+  Gets or sets the length of values required per scanline
+  <h3>Exceptions</h3>
+  <TABLE>
+    <TR><TH class=namecol>Name</TH><TH>Description</TH></TR>
+	<TR><TD>System.Exception</TD><TD>Thrown if <i>value</i> is negative, or not a multiple of eight.</TD></TR>
+  </TABLE>
+  <hr>
+  <h2>Remarks</h2>
+  When setting, <i>value</i> must be a multiple of eight. Effectively determines number of bytes to be read per character. Higher values allow for wider characters.
+  <hr>
+  Copyright (C) 2010 Michael Gaisser (mjgaisser@gmail.com)<BR><BR>
+  This library is free software, distributed under the <a href="http://www.gnu.org/licenses/gpl.html" target=_blank>GNU General Public License</a>.
+  <HR>
+</BODY>
+</HTML>

@@ -1,0 +1,43 @@
+<HTML>
+<HEAD>
+  <TITLE>Film.Block (Idmr.LfdReader)</TITLE>
+  <link rel="stylesheet" type="text/css" href="../stylesheet.css" />
+</HEAD>
+<BODY>
+<Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<param name="Keyword" value="Structures">
+	<param name="Keyword" value="Block">
+</OBJECT>
+  <h1>Film.Block</h1>
+  <B>Namespace:</B> <a href="../Idmr.LfdReader.html">Idmr.LfdReader</a><BR>
+  <B>Assembly:</B> Idmr.LfdReader.dll<BR>
+  <B>Syntax:</B> <span>public struct</span> Block(<span>string</span> type, <span>string</span> name, <span>int</span> length, <span>short</span>[] rawData)<BR><BR>
+  Represents the primary controller that drives FILM behaviour.
+  <hr><h2>Members</h2><hr>
+  <h3>Parameters</h3>
+  <TABLE>
+	<TR><TH class=namecol>Name</TH><TH>Description</TH></TR>
+    <TR><TD>type</TD><TD>Resource type the commands pertain to</TD></TR>
+	<TR><TD>name</TD><TD>Name of the resource being given commands</TD></TR>
+	<TR><TD>length</TD><TD>Size of Block data</TD></TR>
+	<TR><TD>rawData</TD><TD>Raw data contained within the Block</TD></TR>
+  </TABLE>
+  <h3>Properties</h3>
+  <TABLE>
+	<TR><TH class=iconcol></TH><TH>Name</TH><TH>Description</TH></TR>
+	<TR><TD><img src="../../images/prop.gif"></TD><TD><a href="chk.html">Chunk</a>[] Chunks</TD><TD>Gets the Chunk data for the Block</TD></TR>
+	<TR><TD><img src="../../images/prop.gif"></TD><TD>string Name</TD><TD>Gets or sets the resource name</TD></TR>
+	<TR><TD><img src="../../images/prop.gif"></TD><TD>short NumChunks</TD><TD>Gets the number of Chunks within the Block</TD></TR>
+    <TR><TD><img src="../../images/prop.gif"></TD><TD>string Type</TD><TD>Gets or sets the resource type</TD></TR>
+	<TR><TD><img src="../../images/prop.gif"></TD><TD>short TypeNum</TD><TD>Gets the numerical code for Type</TD></TR>
+  </TABLE>
+  <hr>
+  <h2>Remarks</h2>
+  <i>Chunks</i> cannot be resized, nor can <i>NumChunks</i> be modified.<BR><BR>
+  The other properties identify the LFD resource that the commands apply to, typically images and sound effects.
+  <hr>
+  Copyright (C) 2010 Michael Gaisser (mjgaisser@gmail.com)<BR><BR>
+  This library is free software, distributed under the <a href="http://www.gnu.org/licenses/gpl.html" target=_blank>GNU General Public License</a>.
+  <HR>
+</BODY>
+</HTML>

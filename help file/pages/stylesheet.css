@@ -1,0 +1,34 @@
+a {
+	color:#ccc;
+}
+
+body {
+	color:#666;
+	background-color:#000;
+}
+
+span {
+	color:#088;
+}
+
+table {
+	padding-left: 10px;
+}
+
+td {
+	background-color:#777;
+	color:#000;
+}
+
+th {
+	text-align: left;
+	background-color:#333
+}
+
+.namecol{
+	width: 350px;
+}
+
+.iconcol{
+	width: 48px;
+}

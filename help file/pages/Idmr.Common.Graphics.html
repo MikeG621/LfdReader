@@ -1,0 +1,37 @@
+<HTML>
+<HEAD>
+  <TITLE>Graphics Class (Idmr.Common)</TITLE>
+  <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+</HEAD>
+<BODY>
+<Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<param name="Keyword" value="support">
+	<param name="Keyword" value="Graphics">
+	<param name="Keyword" value="Classes">
+</OBJECT>
+  <h1>Graphics Class</h1>
+  Provides support functions use in graphical elements across all IDMR programs<BR><BR>
+  <B>Namespace:</B> Idmr.Common<BR>
+  <B>Assembly:</B> Idmr.Common.Graphics.dll<BR>
+  <B>Version:</B> 1.0<BR>
+  <B>Syntax:</B> <span>public class</span> Graphics<BR><BR>
+  <hr><h2>Members</h2><hr>
+  <h3>Methods</h3>
+  <TABLE>
+	<TR><TH class=iconcol></TH><TH class=namecol>Name</TH><TH>Description</TH></TR>
+	<TR><TD><img src="../images/static.gif"><img src="../images/meth.gif"></TD><TD><a href="Graphics/1bpp.html">ConvertTo1bpp( )</a></TD><TD>Overloaded. Takes any Bitmap and converts it to monochrome</TD></TR>
+	<TR><TD><img src="../images/static.gif"><img src="../images/meth.gif"></TD><TD><a href="Graphics/8bpp.html">ConvertTo8bpp(System.Drawing.Bitmap, System.Drawing.Imaging.ColorPalette )</a></TD><TD>Takes any Bitmap and converts to 256-colors with the provided palette as best as possible</TD></TR>
+	<TR><TD><img src="../images/static.gif"><img src="../images/meth.gif"></TD><TD><a href="Graphics/bti.html">CopyBytesToImage(byte[], System.Drawing.BitmapData)</a></TD><TD>Wrapper for the appropriate Marshal.Copy overload. Takes raw pixel data and imports into a Bitmap</TD></TR>
+	<TR><TD><img src="../images/static.gif"><img src="../images/meth.gif"></TD><TD><a href="Graphics/itb.html">CopyImageToBytes(System.Drawing.BitmapData, byte[])</a></TD><TD>Wrapper for the appropriate Marshal.Copy overload. Extracts raw data from a Bitmap and copies into a byte array</TD></TR>
+	<TR><TD><img src="../images/static.gif"><img src="../images/meth.gif"></TD><TD><a href="Graphics/pali.html">PaletteIndex( )</a></TD><TD>Overloaded. Returns the index of a given Color value</TD></TR>
+  </TABLE>
+  <hr>
+  <h2>Remarks</h2>
+  DELTs are the primary image format seen in the game. All static images (and certain moving ones) are Delt resources, and the remaining moving ones are in the form of <a href="Idmr.LfdReader.Anim.html">ANIMs</a>.<br>
+  Effectively compressed 8-bit bitmaps, they are limited to 255 colors plus transparency.
+  <hr>
+  Copyright (C) 2010 Michael Gaisser (mjgaisser@gmail.com)<BR><BR>
+  This library is free software, distributed under the <a href="http://www.gnu.org/licenses/gpl.html" target=_blank>GNU General Public License</a>.
+  <HR>
+</BODY>
+</HTML>

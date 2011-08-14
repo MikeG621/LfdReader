@@ -1,0 +1,32 @@
+<HTML>
+<HEAD>
+  <TITLE>Font.GetGlyph(int) (Idmr.LfdReader)</TITLE>
+  <link rel="stylesheet" type="text/css" href="../stylesheet.css" />
+</HEAD>
+<BODY>
+<Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<param name="Keyword" value="GetGlyph">
+	<param name="Keyword" value="Methods">
+	<param name="Keyword" value="Accessors">
+</OBJECT>
+  <h1>Font.GetGlyph(int)</h1>
+  <B>Namespace:</B> <a href="../Idmr.LfdReader.html">Idmr.LfdReader</a><BR>
+  <B>Assembly:</B> Idmr.LfdReader.dll<BR>
+  <B>Syntax:</B> <span>public</span> System.Drawing.<span>Bitmap</span> GetGlyph(<span>int</span> index)<BR>
+  <hr>
+  <h3>Parameters</h3>
+  <TABLE>
+	<TR><TH class=namecol>Name</TH><TH>Description</TH></TR>
+	<TR><TD>index</TD><TD>Zero-indexed glyph number within the resource</TD></TR>
+  </TABLE>
+  <h3>Returns</h3>
+  1bppIndexed (black and white) image of glyph.
+  <hr>
+  <h2>Remarks</h2>
+  The glyphs are simple monochrome bitmaps. <i>index</i> is the index within the array, not the ASCII code. However, the ASCII code can be determined by adding <a href="start.html">StartingChar</a>.
+  <hr>
+  Copyright (C) 2010 Michael Gaisser (mjgaisser@gmail.com)<BR><BR>
+  This library is free software, distributed under the <a href="http://www.gnu.org/licenses/gpl.html" target=_blank>GNU General Public License</a>.
+  <HR>
+</BODY>
+</HTML>

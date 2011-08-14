@@ -1,0 +1,41 @@
+<HTML>
+<HEAD>
+  <TITLE>Delt.EncodeImage( ) (Idmr.LfdReader)</TITLE>
+  <link rel="stylesheet" type="text/css" href="../stylesheet.css" />
+</HEAD>
+<BODY>
+<Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<param name="Keyword" value="EncodeImage">
+	<param name="Keyword" value="Methods">
+</OBJECT>
+  <h1>Delt.DecodeImage( )</h1>
+  <B>Namespace:</B> <a href="../Idmr.LfdReader.html">Idmr.LfdReader</a><BR>
+  <B>Assembly:</B> Idmr.LfdReader.dll<BR>
+  <B>Syntax:</B><BR>
+  &nbsp;&nbsp;*<span>public static byte</span>[] EncodeImage(System.Drawing.<span>Bitmap</span> image, <span>short</span> left, <span>short</span> top)<BR>
+  &nbsp;&nbsp;<span>public static byte</span>[] EncodeImage(System.Drawing.<span>Bitmap</span> image, <span>short</span> left, <span>short</span> top, System.Drawing.<span>ColorPalette</span> palette)<BR>
+  <hr>
+  <h3>Parameters</h3>
+  <TABLE>
+	<TR><TH class=namecol>Name</TH><TH>Description</TH></TR>
+    <TR><TD>image</TD><TD>Bitmap to be encoded</TD></TR>
+	<TR><TD>left</TD><TD>Delt or Anim.Frame Left value</TD></TR>
+	<TR><TD>palette</TD><TD>ColorPalette to be used</TD></TR>
+	<TR><TD>top</TD><TD>Delt or Anim.Frame Top value</TD></TR>
+  </TABLE>
+  <h3>Exceptions</h3>
+  <TABLE>
+    <TR><TH class=namecol>Name</TH><TH>Description</TH></TR>
+	<TR><TD>System.ArgumentException</TD><TD>Thrown when <i>image</i> is not PixelFormat.Format8bppIndexed (EncodeImage(Bitmap) overload only)</TD></TR>
+  </TABLE>
+  <hr>
+  <h2>Remarks</h2>
+  The bulk of the Write operations for Delt and Anim, this takes <i>image</i> and converts it to the prepared raw byte data to be written to file.<BR>
+  If <i>palette</i> is used, <i>image</i> is converted via <a href="../Graphics/8bpp.html">Idmr.Common.Graphics.ConvertTo8bpp( )</a> before encoding.<BR><BR>
+  <small><i>* indicates primary overload</i></small>
+  <hr>
+  Copyright (C) 2010 Michael Gaisser (mjgaisser@gmail.com)<BR><BR>
+  This library is free software, distributed under the <a href="http://www.gnu.org/licenses/gpl.html" target=_blank>GNU General Public License</a>.
+  <HR>
+</BODY>
+</HTML>

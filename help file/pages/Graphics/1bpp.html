@@ -1,0 +1,35 @@
+<HTML>
+<HEAD>
+  <TITLE>Graphics.ConvertTo1bpp( ) (Idmr.Common)</TITLE>
+  <link rel="stylesheet" type="text/css" href="../stylesheet.css" />
+</HEAD>
+<BODY>
+<Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<param name="Keyword" value="ConvertTo1bpp">
+	<param name="Keyword" value="Methods">
+</OBJECT>
+  <h1>Graphics.ConvertTo1bpp( )</h1>
+  <B>Namespace:</B> Idmr.Common<BR>
+  <B>Assembly:</B> Idmr.Common.Graphics.dll<BR>
+  <B>Syntax:</B><br>
+  &nbsp;&nbsp;<span>public static</span> System.Drawing.<span>Bitmap</span> ConvertTo1bpp(System.Drawing.<span>Bitmap</span> image)<BR>
+  &nbsp;&nbsp;*<span>public static</span> System.Drawing.<span>Bitmap</span> ConvertTo1bpp(System.Drawing.<span>Bitmap</span> image, System.Drawing.<span>Color</span> transparent)<BR>
+  <hr>
+  <h3>Parameters</h3>
+  <TABLE>
+	<TR><TH class=namecol>Name</TH><TH>Description</TH></TR>
+    <TR><TD>image</TD><TD>Image to be converted</TD></TR>
+	<TR><TD>transparent</TD><TD>Palette to be used</TD></TR>
+  </TABLE>
+  <h3>Returns</h3>
+  1bppIndexed Bitmap of the <i>image</i> using <i>transparent</i> if available, black (#000000) otherwise.
+  <hr>
+  <h2>Remarks</h2>
+  Any color not matching the transparency color will return as solid (white).<BR><BR>
+  <small><i>* indicates primary overload</i></small>
+  <hr>
+  Copyright (C) 2010 Michael Gaisser (mjgaisser@gmail.com)<BR><BR>
+  This library is free software, distributed under the <a href="http://www.gnu.org/licenses/gpl.html" target=_blank>GNU General Public License</a>.
+  <HR>
+</BODY>
+</HTML>

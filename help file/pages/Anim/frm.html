@@ -1,0 +1,33 @@
+<HTML>
+<HEAD>
+  <TITLE>Anim.Frame (Idmr.LfdReader)</TITLE>
+  <link rel="stylesheet" type="text/css" href="../stylesheet.css" />
+</HEAD>
+<BODY>
+<Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<param name="Keyword" value="Structures">
+	<param name="Keyword" value="Frame">
+</OBJECT>
+  <h1>Anim.Frame</h1>
+  <B>Namespace:</B> <a href="../Idmr.LfdReader.html">Idmr.LfdReader</a><BR>
+  <B>Assembly:</B> Idmr.LfdReader.dll<BR>
+  <B>Syntax:</B> <span>public struct</span> Frame<BR><BR>
+  Represents the individual images that make up the animation
+  <hr><h2>Members</h2><hr>
+  <h3>Properties</h3>
+  <TABLE>
+	<TR><TH class=iconcol></TH><TH>Name</TH><TH>Description</TH></TR>
+    <TR><TD><img src="../../images/prop.gif"></TD><TD>short Left</TD><TD>The global X position of the frame</TD></TR>
+	<TR><TD><img src="../../images/prop.gif"></TD><TD>short Top</TD><TD>The global Y position of the frame</TD></TR>
+	<TR><TD><img src="../../images/prop.gif"></TD><TD>System.Drawing.Bitmap Image</TD><TD>The 256-color image</TD></TR>
+  </TABLE>
+  <hr>
+  <h2>Remarks</h2>
+  Within the Anim class, no direct access is given to the Frame array, this keeps validation external to the struct.<BR><BR>
+  <i>Left</i> and <i>Top</i> should be set so that the edges of <i>Image</i> do not fall outside the extent of the parent animation. </i>Image</i> should be 256-colors and no larger than the parent animation in either dimension.
+  <hr>
+  Copyright (C) 2010 Michael Gaisser (mjgaisser@gmail.com)<BR><BR>
+  This library is free software, distributed under the <a href="http://www.gnu.org/licenses/gpl.html" target=_blank>GNU General Public License</a>.
+  <HR>
+</BODY>
+</HTML>

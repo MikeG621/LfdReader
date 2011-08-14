@@ -1,0 +1,55 @@
+<HTML>
+<HEAD>
+  <TITLE>Blas Class (Idmr.LfdReader)</TITLE>
+  <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+</HEAD>
+<BODY>
+<Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<param name="Keyword" value="sfx">
+	<param name="Keyword" value="sound">
+	<param name="Keyword" value="wav">
+	<param name="Keyword" value="Blas">
+	<param name="Keyword" value="Voic">
+	<param name="Keyword" value="Classes">
+</OBJECT>
+  <h1>Blas Class</h1>
+  Reads LFD files and interprets BLAS and VOIC audio resources<BR><BR>
+  <B>Namespace:</B> <a href="Idmr.LfdReader.html">Idmr.LfdReader</a><BR>
+  <B>Assembly:</B> Idmr.LfdReader.dll<BR>
+  <B>Version:</B> 1.0<BR>
+  <B>Syntax:</B> <span>public class</span> Blas : Resource<BR><BR>
+  <hr><h2>Members</h2><hr>
+  <h3>Constructors</h3>
+  <TABLE>
+	<TR><TH class=iconcol></TH><TH class=namecol>Name</TH><TH>Description</TH></TR>
+	<TR><TD><img src="../images/meth.gif"></TD><TD><a href="Blas/cons.html">Blas(string, long)</a></TD><TD>Intializes a new Blas instance from file</TD></TR>
+	<TR><TD><img src="../images/meth.gif"></TD><TD><a href="Blas/cons.html">Blas(System.IO.FileStream, long)</a></TD><TD>Intializes a new Blas instance from an opened FileStream</TD></TR>
+  </TABLE>
+  <h3>Methods</h3>
+  <TABLE>
+	<TR><TH class=iconcol></TH><TH class=namecol>Name</TH><TH>Description</TH></TR>
+	<TR><TD><img src="../images/meth.gif"></TD><TD><a href="Blas/write.html">Write( )</a></TD><TD>Saves Blas object, returns <i>True</i> if successful</TD></TR>
+  </TABLE>
+  <h3>Properties</h3>
+  <TABLE>
+	<TR><TH class=iconcol></TH><TH class=namecol>Name</TH><TH>Description</TH></TR>
+    <TR><TD><img src="../images/prop.gif"></TD><TD><a href="Blas/data.html">Data</a></TD><TD>Gets or sets raw audio data</TD></TR>
+	<TR><TD><img src="../images/prop.gif"></TD><TD>FileName</TD><TD>Full path to the LFD file. (Inherited from <a href="Idmr.LfdReader.Resource.html">Resource</a>)</TD></TR>
+	<TR><TD><img src="../images/prop.gif"></TD><TD><a href="Blas/freq.html">Frequency</a></TD><TD>Gets or sets frequency in Hertz of audio data. Must be between 10-12 kHz</TD></TR>
+	<TR><TD><img src="../images/prop.gif"></TD><TD>Length</TD><TD>Length of Resource, not including header. (Inherited from <a href="Idmr.LfdReader.Resource.html">Resource</a>)</TD></TR>
+	<TR><TD><img src="../images/prop.gif"></TD><TD>Name</TD><TD>8-char name of Resource. (Inherited from <a href="Idmr.LfdReader.Resource.html">Resource</a>)</TD></TR>
+	<TR><TD><img src="../images/prop.gif"></TD><TD>Offset</TD><TD>File position of the beginning of the Resource. (Inherited from <a href="Idmr.LfdReader.Resource.html">Resource</a>)</TD></TR>
+	<TR><TD><img src="../images/prop.gif"></TD><TD><a href="Blas/type.html">Type</a></TD><TD>Gets resource type, either "BLAS" or "VOIC"</TD></TR>
+  </TABLE>
+  <hr>
+  <h2>Remarks</h2>
+  This is something I've come to expect from the old Lucasarts/Totally Games partnership, but here we have two resource types that are exactly the same. Maybe they're handeled by different processes within TIE's source code, but they are structurally the same, hence a single class to take care of BLAS and VOIC.  Typically, BLAS is sound effects, and VOIC is used for voices.  The resource itself is just a container for a VOC audio file, and for our purposes composes of uncompressed 8-bit audio which is very easy to convert to WAVE.  Currently the BLAS-WAVE conversion is handeled by the TIE Sound Editor, but at a later date I may wrap that functionality into LfdReader.
+  <h3>See Also</h3>
+  <a href="Idmr.LfdReader.html">Idmr.LfdReader Namespace</a><BR>
+  <a href="Idmr.LfdReader.Resource.html">Idmr.LfdReader.Resource</a><BR>
+  <hr>
+  Copyright (C) 2010 Michael Gaisser (mjgaisser@gmail.com)<BR><BR>
+  This library is free software, distributed under the <a href="http://www.gnu.org/licenses/gpl.html" target=_blank>GNU General Public License</a>.
+  <HR>
+</BODY>
+</HTML>

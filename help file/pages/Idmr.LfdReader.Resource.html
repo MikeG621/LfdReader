@@ -1,0 +1,54 @@
+<HTML>
+<HEAD>
+  <TITLE>Resource Class (Idmr.LfdReader)</TITLE>
+  <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+</HEAD>
+<BODY>
+<Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<param name="Keyword" value="base">
+	<param name="Keyword" value="parent">
+	<param name="Keyword" value="Resource">
+	<param name="Keyword" value="Classes">
+</OBJECT>
+  <h1>Resource Class</h1>
+  Base class for LFD resources, also provides ability to retrieve raw data from unknown resources<BR><BR>
+  <B>Namespace:</B> <a href="Idmr.LfdReader.html">Idmr.LfdReader</a><BR>
+  <B>Assembly:</B> Idmr.LfdReader.dll<BR>
+  <B>Version:</B> 1.0<BR>
+  <B>Syntax:</B> <span>public abstract class</span> Resource<BR><BR>
+  <hr><h2>Resource Members</h2><hr>
+  <h3>Methods</h3>
+  <TABLE>
+	<TR><TH class=iconcol></TH><TH class=namecol>Name</TH><TH>Description</TH></TR>
+	<TR><TD><img src="../images/static.gif"><img src="../images/meth.gif"></TD><TD><a href="Resource/getl.html">GetLength()</a></TD><TD>Overloaded. Returns length of Resource, does not include header</TD></TR>
+    <TR><TD><img src="../images/static.gif"><img src="../images/meth.gif"></TD><TD><a href="Resource/getn.html">GetName()</a></TD><TD>Overloaded. Returns 8-char name of Resource</TD></TR>
+    <TR><TD><img src="../images/static.gif"><img src="../images/meth.gif"></TD><TD><a href="Resource/getr.html">GetRawData()</a></TD><TD>Overloaded. Returns byte array of information beyond header</TD></TR>
+	<TR><TD><img src="../images/static.gif"><img src="../images/meth.gif"></TD><TD><a href="Resource/gett.html">GetType()</a></TD><TD>Overloaded. Returns 4-char indentity string of Resource</TD></TR>
+  </TABLE>
+  <h3>Properties</h3>
+  <TABLE>
+	<TR><TH class=iconcol></TH><TH class=namecol>Name</TH><TH>Description</TH></TR>
+    <TR><TD><img src="../images/prop.gif"></TD><TD><a href="Resource/file.html">FileName</a></TD><TD>Full path to the LFD file</TD></TR>
+	<TR><TD><img src="../images/prop.gif"></TD><TD><a href="Resource/len.html">Length</a></TD><TD>Length of Resource, not including header</TD></TR>
+    <TR><TD><img src="../images/prop.gif"></TD><TD><a href="Resource/name.html">Name</a></TD><TD>8-char name of Resource</TD></TR>
+	<TR><TD><img src="../images/prop.gif"></TD><TD><a href="Resource/off.html">Offset</a></TD><TD>File position of the beginning of the Resource</TD></TR>
+  </TABLE>
+  <h3>Constants</h3>
+  <TABLE>
+	<TR><TH class=iconcol></TH><TH class=namecol>Name</TH><TH>Description</TH></TR>
+    <TR><TD><img src="../images/const.gif"></TD><TD>HeaderLength</TD><TD>Total length of header information</TD></TR>
+	<TR><TD><img src="../images/const.gif"></TD><TD>LengthOffset</TD><TD>Location of Length within header</TD></TR>
+    <TR><TD><img src="../images/const.gif"></TD><TD>NameOffset</TD><TD>Location of Name within header</TD></TR>
+	<TR><TD><img src="../images/const.gif"></TD><TD>TypeOffset</TD><TD>Location of Type within header</TD></TR>
+  </TABLE>
+  <hr>
+  <h2>Remarks</h2>
+  All LFD resource classes are derived from this class.  Unknown resource types can also be handelled using the static methods, although I don't have a container class for them, so they will have to be maanged by the program using them.
+  <h3>See Also</h3>
+  <a href="Idmr.LfdReader.html">Idmr.LfdReader Namespace</a><BR>
+  <hr>
+  Copyright (C) 2010 Michael Gaisser (mjgaisser@gmail.com)<BR><BR>
+  This library is free software, distributed under the <a href="http://www.gnu.org/licenses/gpl.html" target=_blank>GNU General Public License</a>.
+  <HR>
+</BODY>
+</HTML>

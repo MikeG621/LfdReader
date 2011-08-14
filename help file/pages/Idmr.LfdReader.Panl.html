@@ -1,0 +1,56 @@
+<HTML>
+<HEAD>
+  <TITLE>Panl Class (Idmr.LfdReader)</TITLE>
+  <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+</HEAD>
+<BODY>
+<Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<param name="Keyword" value="cockpit">
+	<param name="Keyword" value="image">
+	<param name="Keyword" value="Panl">
+	<param name="Keyword" value="Classes">
+</OBJECT>
+  <h1>Panl Class</h1>
+  Reads LFD files and interprets PANL cockpit image resources<BR><BR>
+  <B>Namespace:</B> <a href="Idmr.LfdReader.html">Idmr.LfdReader</a><BR>
+  <B>Assembly:</B> Idmr.LfdReader.dll<BR>
+  <B>Additional References:</B><BR>
+  &nbsp;&nbsp;&nbsp;<a href="Idmr.Common.Graphics.html">Idmr.Common.Graphics</a><br>
+  &nbsp;&nbsp;&nbsp;System.Drawing<br>
+  <B>Version:</B> 0.9<BR>
+  <B>Syntax:</B> <span>public class</span> Panl : Resource<BR><BR>
+  <hr><h2>Members</h2><hr>
+  <h3>Constructors</h3>
+  <TABLE>
+	<TR><TH class=iconcol></TH><TH class=namecol>Name</TH><TH>Description</TH></TR>
+	<TR><TD><img src="../images/meth.gif"></TD><TD><a href="Panl/cons.html">Panl(string, long, System.Drawing.Imaging.ColorPalette)</a></TD><TD>Intializes a new Panl instance from file</TD></TR>
+	<TR><TD><img src="../images/meth.gif"></TD><TD><a href="Panl/cons.html">Panl(System.IO.FileStream, long, System.Drawing.Imaging.ColorPalette)</a></TD><TD>Intializes a new Panl instance from an opened FileStream</TD></TR>
+  </TABLE>
+  <h3>Methods</h3>
+  <TABLE>
+	<TR><TH class=iconcol></TH><TH class=namecol>Name</TH><TH>Description</TH></TR>
+	<TR><TD><img src="../images/meth.gif"></TD><TD><a href="Panl/geti.html">GetImage( )</a></TD><TD>Overloaded. Returns an 8bbp Indexed Bitmap</TD></TR>
+	<TR><TD><img src="../images/meth.gif"></TD><TD><a href="Panl/seti.html">SetImage( )</a></TD><TD>Overloaded. Replace a resource image</TD></TR>
+	<TR><TD><img src="../images/meth.gif"></TD><TD><a href="Panl/write.html">Write( )</a></TD><TD>Saves Panl object, returns <i>true</i> if successful</TD></TR>
+  </TABLE>
+  <h3>Properties</h3>
+  <TABLE>
+	<TR><TH class=iconcol></TH><TH class=namecol>Name</TH><TH>Description</TH></TR>
+	<TR><TD><img src="../images/prop.gif"></TD><TD>FileName</TD><TD>Full path to the LFD file. (Inherited from <a href="Idmr.LfdReader.Resource.html">Resource</a>)</TD></TR>
+	<TR><TD><img src="../images/prop.gif"></TD><TD>Length</TD><TD>Length of Resource, not including header. (Inherited from <a href="Idmr.LfdReader.Resource.html">Resource</a>)</TD></TR>
+	<TR><TD><img src="../images/prop.gif"></TD><TD>Name</TD><TD>8-char name of Resource. (Inherited from <a href="Idmr.LfdReader.Resource.html">Resource</a>)</TD></TR>
+	<TR><TD><img src="../images/prop.gif"></TD><TD><a href="Panl/numi.html">NumberOfImages</a></TD><TD>Gets number of images contained in the resource</TD></TR>
+	<TR><TD><img src="../images/prop.gif"></TD><TD>Offset</TD><TD>File position of the beginning of the Resource. (Inherited from <a href="Idmr.LfdReader.Resource.html">Resource</a>)</TD></TR>
+  </TABLE>
+  <hr>
+  <h2>Remarks</h2>
+  The PANL resource is another type of image format that is processed as an overlay to the in-flight engine. This format contains all cockpit images aside from the main view.
+  <h3>See Also</h3>
+  <a href="Idmr.LfdReader.html">Idmr.LfdReader Namespace</a><BR>
+  <a href="Idmr.LfdReader.Resource.html">Idmr.LfdReader.Resource</a><BR>
+  <hr>
+  Copyright (C) 2010 Michael Gaisser (mjgaisser@gmail.com)<BR><BR>
+  This library is free software, distributed under the <a href="http://www.gnu.org/licenses/gpl.html" target=_blank>GNU General Public License</a>.
+  <HR>
+</BODY>
+</HTML>
