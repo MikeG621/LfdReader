@@ -7,7 +7,7 @@ Copyright (C) Michael Gaisser 2008-2011
 Instructions:
 -Add all *.cs files to your project
 -Add System.Drawing to your references
--Add Idmr.Common and Idmr.Exceptions to your references
+-Add Idmr.Common to your references
 
 Detailed information on the members can be found in 'help file/pages/Idmr.LfdReader.html'
 

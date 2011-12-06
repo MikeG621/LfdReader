@@ -1,8 +1,15 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2010 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2010-2011 Michael Gaisser (mjgaisser@gmail.com)
+ * Licensed under the GPL v3.0 or later
  * 
  * Full notice in Resource.cs
+ * Version: 1.0
+ */
+
+/* CHANGELOG
+ * 110922 - housekeeping, added added LoadFileException and SaveFileException throws, Write() return void
+ * 110926 - implemented DecodeResource()
  */
 
 using System;
@@ -12,72 +19,76 @@ using System.IO;
 
 namespace Idmr.LfdReader
 {
-	/// <remarks>
-	/// Reads LFD files and interprets PLTT color palette resources
-	/// </remarks>
+	/// <summary>Reads LFD files and interprets PLTT color palette resources</summary>
 	public class Pltt : Resource
 	{
-		private byte _startIndex;
-		private byte _endIndex;
-		private PlttColor[] _entries;
+		byte _startIndex;
+		byte _endIndex;
+		PlttColor[] _entries;
 
+		public Pltt()
+		{
+		}
 		/// <param name="stream">This is the FileStream of the opened LFD file</param>
 		/// <param name="filePosition">The File.Position of the beginning of the resource</param>
 		public Pltt(FileStream stream, long filePosition)
 		{
-			Read(stream, filePosition);
+			_read(stream, filePosition);
 		}
 		/// <param name="path">This is the full path of the unopened LFD file</param>
 		/// <param name="filePosition">The File.Position of the beginning of the resource</param>
 		public Pltt(string path, long filePosition)
 		{
 			FileStream fsLFD = File.OpenRead(path);
-			Read(fsLFD, filePosition);
+			_read(fsLFD, filePosition);
 			fsLFD.Close();
 		}
 		
-		private void Read(FileStream stream, long filePosition)
+		void _read(FileStream stream, long filePosition)
 		{
-			BinaryReader br = new BinaryReader(stream);
-			_fileName = stream.Name;	// Resource.filename
-			_offset = filePosition;	// Resource.offset
-			stream.Position = _offset + NameOffset;
-			_name = new string(br.ReadChars(8)).Trim('\0');	// Resource.name
-			_length = br.ReadInt32();	// Resource.length
-			_startIndex = br.ReadByte();
-			_endIndex = br.ReadByte();
-			_entries = new PlttColor[_endIndex-_startIndex+1];
-			for (int i=0;i<_entries.Length;i++) _entries[i] = new PlttColor(br.ReadByte(), br.ReadByte(), br.ReadByte());
+			try { _process(stream, filePosition); }
+			catch (Exception x) { throw new Common.LoadFileException(x); }
 		}
 
-		/// <returns>True if successfull, False if failure</returns>
-		public bool Write()
+		//===================
+		/// <summary>Processes raw data to create Pltt information</summary>
+		/// <param name="raw">Raw byte data</param>
+		/// <param name="containsHeader">Determines if <i>raw</i> contains the Header</param>
+		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
-			try
+			int offset = 0;
+			_decodeResource(raw, containsHeader);
+			_startIndex = _rawData[offset++];
+			_endIndex = _rawData[offset++];
+			_entries = new PlttColor[_endIndex - _startIndex + 1];
+			for (int i = 0; i < _entries.Length; i++, offset += 3) _entries[i] = new PlttColor(_rawData[offset], _rawData[offset + 1], _rawData[offset + 2]);
+		}
+		
+		/// <summary>Prepare Pltt information for writing</summary>
+		/// <returns>Raw data ready to write to file</returns>
+		public override void EncodeResource()
+		{
+			byte[] raw = new byte[_entries.Length * 3 + 3];
+			raw[0] = _startIndex;
+			raw[1] = _endIndex;
+			int offset = 2;
+			for (int i = 0; i < _entries.Length; i++, offset += 3)
 			{
-				// header information does not change, neither does start/end values, skip directly to color info
-				FileStream fs = File.OpenWrite(_fileName);
-				BinaryWriter bw = new BinaryWriter(fs);
-				fs.Position = _offset + HeaderLength + 2;
-				for(int i=0;i<_entries.Length;i++)
-				{
-					bw.Write(_entries[i].R);
-					bw.Write(_entries[i].G);
-					bw.Write(_entries[i].B);
-				}
-				fs.Close();	// no need to re-write final '\0' as size isn't changing
-				return true;
+				raw[offset] = _entries[i].R;
+				raw[offset + 1] = _entries[i].G;
+				raw[offset + 2] = _entries[i].B;
 			}
-			catch { return false; }
+			_rawData = raw;
 		}
 
-		/// <value>Gets the starting index of the color definitions</value>
+		/// <summary>Gets the starting index of the color definitions</summary>
 		public byte StartIndex { get { return _startIndex; } }
-		/// <value>Gets the ending index of the color definitions</value>
+		/// <summary>Gets the ending index of the color definitions</summary>
 		public byte EndIndex { get { return _endIndex; } }
-		/// <value>The Colors defined for the PLTT</value>
-		public PlttColor[] Entries { get { return _entries; } set { if (value.Length == _entries.Length) _entries = value; } }
-		/// <value>Quick ColorPalette access for application to images</value>
+		/// <summary>Gets the colors defined for the Pltt</summary>
+		public PlttColor[] Entries { get { return _entries; } }
+		/// <summary>Gets the ColorPalette reprenstation of the Pltt</summary>
+		/// <remarks>Colors not used by the Pltt are default 8bpp Indexed colors</remarks>
 		public ColorPalette Palette
 		{
 			get
@@ -88,23 +99,28 @@ namespace Idmr.LfdReader
 			}
 		}
 
-		/// <remarks>The RGB container for the color definitions</remarks>
+		/// <summary>The RGB container for the color definitions</summary>
 		public struct PlttColor
 		{
+			/// <summary>Gets or sets the red value</summary>
 			public byte R;
+			/// <summary>Gets or sets the green value</summary>
 			public byte G;
+			/// <summary>Gets or sets the blue value</summary>
 			public byte B;
 
-			/// <param name="rValue">The R index, 0x00-0xFF</param>
-			/// <param name="gValue">The G index, 0x00-0xFF</param>
-			/// <param name="bValue">The B index, 0x00-0xFF</param>
-			public PlttColor(byte rValue, byte gValue, byte bValue)
+			/// <summary>Initialize the PlttColor with the starting color values</summary>
+			/// <param name="red">The Red index</param>
+			/// <param name="green">The Green index</param>
+			/// <param name="blue">The Blue index</param>
+			public PlttColor(byte red, byte green, byte blue)
 			{
-				R = rValue;
-				G = gValue;
-				B = bValue;
+				R = red;
+				G = green;
+				B = blue;
 			}
 
+			/// <summary>Gets or sets the color</summary>
 			public Color Color
 			{
 				get { return Color.FromArgb(R, G, B); }

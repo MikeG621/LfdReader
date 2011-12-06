@@ -1,6 +1,7 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2010 Michael Gaisser (jaggedfel621@gmail.com)
+ * Copyright (C) 2010 Michael Gaisser (mjgaisser@gmail.com)
+ * Licensed under the GPL v3.0 or later
  * 
  * Full notice in Resource.cs
  */
@@ -17,7 +18,7 @@ using System.Reflection;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Imperial Department of Military Research")]
 [assembly: AssemblyProduct("Idmr.LfdReader.dll")]
-[assembly: AssemblyCopyright("The Galactic Empire: Empire Reborn 2010")]
+[assembly: AssemblyCopyright("Copyright © Michael Gaisser 2010-2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

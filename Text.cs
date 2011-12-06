@@ -1,117 +1,116 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2010 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2010-2011 Michael Gaisser (mjgaisser@gmail.com)
+ * Licensed under the GPL v3.0 or later
  * 
  * Full notice in Resource.cs
+ * Version: 1.0
+ */
+
+/* CHANGELOG
+ * 110922 - housekeeping, added added LoadFileException and SaveFileException throws, Write() return void
+ * 110924 - implemented Decode/EncodeResource(), NumStrings to NumberOfStrings
+ * 111108 - added ArrayFunctions calls
  */
 
 using System;
 using System.IO;
+using Idmr.Common;
 
 namespace Idmr.LfdReader
 {
-	/// <remarks>
-	/// Reads LFD files and interprets TEXT resources
-	/// </remarks>
+	/// <summary>Reads LFD files and interprets TEXT resources</summary>
 	public class Text : Resource
 	{
-		private short _numStrings;
-		private string[] _strings;
+		short _numberOfStrings;
+		string[] _strings;
 
+		#region constructors
+		public Text()
+		{
+			_type = ResourceType.Text;
+		}
 		/// <param name="stream">This is the FileStream of the opened LFD file</param>
 		/// <param name="filePosition">The File.Position of the beginning of the resource</param>
 		public Text(FileStream stream, long filePosition)
 		{
-			Read(stream, filePosition);
+			_read(stream, filePosition);
 		}
 		/// <param name="path">The full path to the unopened LFD file</param>
 		/// <param name="filePosition">The File.Position of the beginning of the resource</param>
 		public Text(string path, long filePosition)
 		{
 			FileStream stream = File.OpenRead(path);
-			Read(stream, filePosition);
+			_read(stream, filePosition);
 			stream.Close();
 		}
+		#endregion
 
-		private void Read(FileStream stream, long filePosition)
+		void _read(FileStream stream, long filePosition)
 		{
-			BinaryReader br = new BinaryReader(stream);
-			_fileName = stream.Name;	// Resource._fileName
-			_offset = filePosition;	// Resource._offset
-			stream.Position = _offset + NameOffset;
-			_name = new string(br.ReadChars(8)).Trim('\0');	// Resource._name
-			_length = br.ReadInt32();	// Resource._length
-			_numStrings = br.ReadInt16();
-			_strings = new string[_numStrings];
-			for (int i=0;i<_numStrings;i++)
+			try { _process(stream, filePosition); }
+			catch (Exception x) { throw new LoadFileException(x); }
+		}
+
+		//===================
+		/// <summary>Processes raw data to create Text information</summary>
+		/// <param name="raw">Raw byte data</param>
+		/// <param name="containsHeader">Determines if <i>raw</i> contains the Header</param>
+		public override void DecodeResource(byte[] raw, bool containsHeader)
+		{
+			int offset = 2;
+			_decodeResource(raw, containsHeader);
+			_numberOfStrings = BitConverter.ToInt16(_rawData, 0);
+			_strings = new string[_numberOfStrings];
+			for (int i = 0; i < _numberOfStrings; i++)
 			{
-				short l = br.ReadInt16();
-				_strings[i] = new string(br.ReadChars(l)).Trim('\0');
+				short len = BitConverter.ToInt16(_rawData, offset);
+				_strings[i] = ArrayFunctions.ReadStringFromArray(_rawData, offset + 2, len);
+				offset += len + 2;
 			}
 		}
 
-		/// <returns>True if successfull, False if failure</returns>
-		public bool Write()
+		/// <summary>Prepare Text information for writing</summary>
+		/// <returns>Raw data ready to write to file</returns>
+		public override void EncodeResource()
 		{
-			try
+			int len = 2;
+			for (int i = 0; i < _numberOfStrings; i++)
 			{
-				FileStream stream = File.Open(_fileName,FileMode.Open,FileAccess.ReadWrite);
-				BinaryWriter bw = new BinaryWriter(stream);
-				int len = 2;
-				for(int i=0;i<_numStrings;i++)
-				{
-					len += 2;
-					_strings[i] = _strings[i].Trim('\0') + "\0\0";
-					len += _strings[i].Length;
-				}
-				stream.Position = _offset + LengthOffset;
-				bw.Write(len);
-				bw.Write(_numStrings);
-				byte[] big = null;
-				if (len != _length)	// if needed, read rest of file...
-				{
-					stream.Position = _offset + HeaderLength + _length;
-					big = new byte[stream.Length-stream.Position];
-					for(int i=0;i<big.Length;i++) big[i] = (byte)stream.ReadByte();
-					stream.Position = _offset + HeaderLength;
-				}
-				bw.Write(_numStrings);
-				for(int i=0;i<_numStrings;i++)
-				{
-					bw.Write((short)_strings[i].Length);	// yes, this assumes the string is <= 0xFFFF. hell, TIE might think that's -1 anyway :P
-					bw.Write(_strings[i].ToCharArray());
-				}
-				if (len != _length)
-				{
-					bw.Write(big);	// ...and then write it in afterward
-					stream.SetLength(stream.Position);
-				}
-				_length = len;
-				UpdateRmap(stream, "TEXT", _name, _length);
-				stream.Close();
-				return true;
+				len += 2;
+				_strings[i] = _strings[i].Trim('\0') + "\0\0";
+				len += _strings[i].Length;
 			}
-			catch { return false;  }
+			byte[] raw = new byte[len];
+			ArrayFunctions.WriteToArray(_numberOfStrings, raw, 0);
+			int position = 2;
+			foreach (string s in _strings)
+			{
+				ArrayFunctions.WriteToArray((short)s.Length, raw, ref position);
+				ArrayFunctions.WriteToArray(s, raw, ref position);
+			}
+			_rawData = raw;
 		}
 
-		/// <value>Gets or Sets the number of strings in the TEXT. Strings[] expands and contracts as needed</value>
-		public short NumStrings 
+		/// <summary>Gets or sets the number of strings in the Text</summary>
+		/// <remarks><i>Strings</i> expands and contracts as needed. If new value is less than original, <i>Strings</i> will truncate with data loss.</remarks>
+		public short NumberOfStrings 
 		{ 
-			get { return _numStrings; } 
+			get { return _numberOfStrings; } 
 			set 
 			{ 
 				string[] temp = _strings;
 				_strings = new string[value];
-				if (value > _numStrings) for(int i=0;i<_numStrings;i++) _strings[i] = temp[i];
+				if (value > _numberOfStrings) for(int i=0;i<_numberOfStrings;i++) _strings[i] = temp[i];
 				else for(int i=0;i<value;i++) _strings[i] = temp[i];
-				_numStrings = value;
+				_numberOfStrings = value;
 			} 
 		}
-		/// <value>The strings contained within the TEXT. NumStrings is updated</value>
+		/// <summary>The strings contained within the Text</summary>
 		public string[] Strings 
 		{ 
 			get { return _strings; }
-			set { _numStrings = (short)value.Length; _strings = value; }
+			set { _numberOfStrings = (short)value.Length; _strings = value; }
 		}
 	}
 }

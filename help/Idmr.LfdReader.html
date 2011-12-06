@@ -1,0 +1,1022 @@
+<HTML>
+<HEAD>
+<TITLE>LfdReader Namespace (Idmr)</TITLE>
+<style type="text/css">a{color:#ccc} body{color:#666; background-color:#000} span{color:#088} h2,h3,h4{color:#aaa} .anchor{color:#666}</style>
+</HEAD>
+
+<BODY>
+<h1>LfdReader Namespace</h1>
+<u>Provides the classes required to work with LucasArts *.LFD resource files</u><BR><BR>
+<B>Namespace:</B> Idmr<BR>
+<B>Assembly:</B> Idmr.LfdReader.dll<BR>
+<B>Additional References:</B><BR>
+&nbsp;&nbsp;&nbsp;System.Drawing<br>
+&nbsp;&nbsp;&nbsp;Idmr.Common<br>
+<B>Version:</B> 1.0<BR>
+
+<h3>Classes</h3>
+
+<p><a href="#LfdFile">LfdFile</a><br>
+<a href="#Resource">Resource</a><br>
+<a href="#ResourceCollection">ResourceCollection</a><br>
+<a href="#Anim">Anim</a><br>
+<a href="#Blas">Blas</a><br>
+<a href="#Delt">Delt</a><br>
+<a href="#Film">Film</a><br>
+<a href="#Font">Font</a><br>
+<a href="#Mask">Mask</a><br>
+<a href="#Panl">Panl</a><br>
+<a href="#Pltt">Pltt</a><br>
+<a href="#Rmap">Rmap</a><br>
+<a href="#Text">Text</a></p>
+
+<hr>
+
+<div>
+<h2><a name="LfdFile" class="anchor">LfdFile Class</a></h2>
+<img src="images/class.gif"> <span><b>public</b> class</span> LfdFile<br>
+<u>Object to manage LFD resource files</u>
+
+<h3>Constructors</h3>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> LfdFile(System.IO.<span>FileStream</span> stream)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> LfdFile(<span>string</span> filePath)<br>
+<u>Populates with an existing *.lfd file</u><br>
+<i>stream</i> - Opened *.lfd<br>
+<i>filePath</i> - Full path to the unopened *.lfd</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> LfdFile(<span>LfdCategory</span> category)<br>
+<u>Creates an empty file with the appropriate file structure</u>. <i>Rmap</i> and <i>Resources</i> are initialized accordingly.<br>
+<i>category</i> - Preset type</p>
+
+<h3>Methods</h3>
+
+<p><img src="images/meth.gif"> <span><b>public</b> void</span> CreateRmap( )<br>
+<u>Initializes Rmap using the contents of the LfdFile. If Rmap exists, it is updated$</u>. Processes individual EncodeResource( ) functions, thus updating all RawData properties</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b> void</span> Write( )<br>
+<u>Write the Lfd to disk</u><br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.SaveFileException</i> - An error occured, file remains unchanged</p>
+
+
+<h3>Properties</h3>
+
+<p><img src="images/prop.gif"> <span><b>public</b> string</span> FileName<br>
+<u>Gets the file name and extension of the file</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> string</span> FilePath<br>
+<u>Gets the full path to the file</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> bool</span> HasRmap<br>
+<u>Gets <i>true</i> if <i>Rmap</i> is defined</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> ResourceCollection</span> Resources<br>
+<u>Resources contained within the file</u>. Does <u>not</u> contain the RMAP if applicable</p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> Rmap</span> Rmap<br>
+<u>Gets or sets the Rmap resource for the file</u><br>
+<b>Exceptions</b><br>
+<i>System.ArgumentException</i> - Cannot set if file is defined by the <i>Cockpit</i> preset</p>
+
+
+<h3>Enumerations</h3>
+
+<p><img src="images/enum.gif"> <span><b>public</b> enum</span> LfdCategory : <span>byte</span> { Normal, Cockpit, Battle }<br>
+<u>Preset Lfd structures</u></p>
+</div>
+<hr>
+
+<div>
+<h2><a name="Resource" class="anchor">Resource Class</a></h2>
+<img src="images/class.gif"> <span><b>public</b> class</span> Resource<br>
+<u>Base class for LFD resources, also provides ability to retrieve raw data from unknown resources</u>
+
+<h3>Constructors</h3>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> Resource( )<br>
+<u>Blank constructor</u></p>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> Resource(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Resource(<span>string</span> filePath, <span>long</span> filePosition)<br>
+<u>Create a new generic resource from an existing file</u><br>
+<i>stream</i> - The FileStream of the opened LFD file<br>
+<i>filePath</i> - The full path to the unopened LFD file<br>
+<i>filePosition</i> - The File.Position of the beginning of the resource</p>
+
+<h3>Methods</h3>
+
+<p><img src="images/meth.gif"> <span><b>public virtual</b> void</span> DecodeResource(<span>byte</span>[] raw, <span>bool</span> containsHeader)<br>
+<u>Processes raw data to create Resource information</u><br>
+<i>raw</i> - Raw byte data<br>
+<i>containsHeader</i> - Determines if <i>raw</i> contains the Header</p>
+
+<p><img src="images/meth.gif"> <span><b>public virtual</b> void</span> EncodeResource( )<br>
+<u>Prepares Resource information for writing by updating <i>RawData</i></u>. For generic Resources, does nothing as <i>RawData</i> is the only property</p>
+
+<p><img src="images/static.gif"><img src="images/meth.gif"> <span><b>public</b> static int</span> GetLength(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition)<br>
+<img src="images/static.gif"><img src="images/meth.gif"> <span><b>public</b> static int</span> GetLength(<span>string</span> filePath, <span>long</span> filePosition)<br>
+<u>Gets the 32-bit length of the Resource, not including the header</u><br>
+<i>stream</i> - The FileStream of the opened LFD file<br>
+<i>filePath</i> - The full path to the unopened LFD file<br>
+<i>filePosition</i> - The File.Position of the beginning of the resource</p>
+
+<p><img src="images/static.gif"><img src="images/meth.gif"> <span><b>public</b> static string</span> GetName(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition)<br>
+<img src="images/static.gif"><img src="images/meth.gif"> <span><b>public</b> static string</span> GetName(<span>string</span> filePath, <span>long</span> filePosition)<br>
+<u>Gets the trimmed 8 character name of the Resource</u><br>
+<i>stream</i> - The FileStream of the opened LFD file<br>
+<i>filePath</i> - The full path to the unopened LFD file<br>
+<i>filePosition</i> - The File.Position of the beginning of the resource</p>
+
+<p><img src="images/static.gif"><img src="images/meth.gif"> <span><b>public</b> static byte</span>[] GetRawData(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition)<br>
+<img src="images/static.gif"><img src="images/meth.gif"> <span><b>public</b> static byte</span>[] GetRawData(<span>string</span> filePath, <span>long</span> filePosition)<br>
+<u>Gets the raw byte data of the Resource, not including the header</u><br>
+<i>stream</i> - The FileStream of the opened LFD file<br>
+<i>filePath</i> - The full path to the unopened LFD file<br>
+<i>filePosition</i> - The File.Position of the beginning of the resource</p>
+
+<p><img src="images/static.gif"><img src="images/meth.gif"> <span><b>public</b> static ResourceType</span> GetType(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition)<br>
+<img src="images/static.gif"><img src="images/meth.gif"> <span><b>public</b> static ResourceType</span> GetType(<span>string</span> filePath, <span>long</span> filePosition)<br>
+<u>Gets the Type of the Resource</u><br>
+<i>stream</i> - The FileStream of the opened LFD file<br>
+<i>filePath</i> - The full path to the unopened LFD file<br>
+<i>filePosition</i> - The File.Position of the beginning of the resource</p>
+
+<p><img src="images/static.gif"><img src="images/meth.gif"> <span><b>public</b> static ResourceType</span> ParseResourceType(<span>string</span> type)<br>
+<img src="images/static.gif"><img src="images/meth.gif"> <span><b>public</b> static ResourceType</span> ParseResourceType(<span>int</span> type)<br>
+<u>Gets the ResourceType specified by <i>type</i></u>. Returns ResourceType.Undefined upon parse failure<br>
+<i>type</i> - 32-bit definition of the Type</p>
+
+<p><img src="images/protmeth.gif"> <span><b>protected</b> void</span> _decodeResource(<span>byte</span>[] raw, <span>bool</span> containsHeader)<br>
+<u>Saves raw data and populates header if necessary</u>. To be called from individual DecodeResource( ) functions<br>
+<i>raw</i> - Raw byte data of the resource<br>
+<i>containsHeader</i> - Determines if <i>raw</i> contains the Resource header information</p>
+
+<p><img src="images/protmeth.gif"> <span><b>protected</b> void</span> _process(Systm.IO.<span>FileStream</span> stream, <span>long</span> position)<br>
+<u>Processes the LFD and initializes the object</u>. To be used during individual read functions. Calls DecodeResource( )<br>
+<i>stream</i> - FileStream to the opened Read-enabled LFD<br>
+<i>position</i> - Beginning of the Resource</p>
+
+<p><img src="images/static.gif"><img src="images/protmeth.gif"> <span><b>protected</b> static void</span> _updateRmap(Systm.IO.<span>FileStream</span> stream, <span>ResourceType</span> type, <span>string</span> name, <span>int</span> length)<br>
+<u>Updates the appropriate subheader</u>. To be used during individual Write functions. Looks for <i>type</i> and <i>name</i> within the Rmap if it exists, updates <i>length</i><br>
+<i>stream</i> - FileStream to the opened Read/Write-enabled LFD<br>
+<i>type</i> - Resource Type<br>
+<i>name</i> - Resource Name<br>
+<i>length</i> - Resource Length</p>
+
+<h3>Properties</h3>
+
+<p><img src="images/prop.gif"> <span><b>public</b> string</span> FileName<br>
+<u>Gets the full path to the LFD file</u></p>
+
+<p><img src="images/const.gif"> <span><b>public</b> const int</span> HeaderLength<br>
+<u>Total length of header information</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> int</span> Length<br>
+<u>Gets the Length of the raw byte data, not including header</u></p>
+
+<p><img src="images/const.gif"> <span><b>public</b> const int</span> LengthOffset<br>
+<u>Location of Length within the header</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> string</span> Name<br>
+<u>Gets or sets the name of the Resource</u>. Truncated to 8 characters, null characters trimmed</p>
+
+<p><img src="images/const.gif"> <span><b>public</b> const int</span> NameOffset<br>
+<u>Location of Offset within the header</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> int</span> Offset<br>
+<u>Gets the File.Position of the beginning of the Resource</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> byte</span>[] RawData<br>
+<u>Gets a copy of the raw byte data</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> object</span> Tag<br>
+<u>Gets or sets the object that contains user-defined information</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> ResourceType</span> Type<br>
+<u>Gets the Resource type</u></p>
+
+<p><img src="images/const.gif"> <span><b>public</b> const int</span> TypeOffset<br>
+<u>Location of Type within the header</u></p>
+
+<p><img src="images/protprop.gif"> <span><b>protected</b> string</span> _fileName<br>
+<img src="images/protprop.gif"> <span><b>protected</b> string</span> _name<br>
+<img src="images/protprop.gif"> <span><b>protected</b> int</span> _offset<br>
+<img src="images/protprop.gif"> <span><b>protected</b> byte</span>[] _rawData<br>
+<img src="images/protprop.gif"> <span><b>protected</b> ResourceType</span> _type</p>
+
+<p><img src="images/protprop.gif"> <span><b>protected</b> string</span> _tempFile<br>
+<u>Gets <i>FileName</i> with the ".tmp" extension</u>. For use as a backup file during Write functions</p>
+
+<h3>Enumerations</h3>
+
+<p><img src="images/enum.gif"> <span><b>public</b> enum</span> ResourceType : <span>int</span> { Undefined, Anim = 0x4D494E41, Blas = 0x53414C42, Bmap = 0x50414D42,
+	Cust = 0x54535543, Delt = 0x544c4544, Film = 0x4D4C4946, Font = 0x544E4F46, Gmid = 0x44494D47, Mask = 0x4B53414D, Mtrx = 0x5852544D,
+	Panl = 0x4C4E4150, Pltt = 0x54544C50, Rmap = 0x50414D52, Ship = 0x50494853, Text = 0x54584554, Voic = 0x43494F56, Xact = 0x54434158 }<br>
+<u>Enumeration of all known LFD Resource Types</u>. Values are simply taken from the raw data (<span>int</span> or 4-byte ASCII <span>string</span>)</p>
+</div>
+<hr>
+
+<div>
+<h2><a name="ResourceCollection" class="anchor">ResourceCollection Class</a></h2>
+<img src="images/class.gif"> <span><b>public</b> class</span> ResourceCollection<br>
+<u>Collection class for the resources in an LfdFile</u>
+
+<h3>Constructors</h3>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> ResourceCollection( )<br>
+<u>Creates a new empty Collection</u>. Structure is unlocked, Add( ), Insert( ) and Remove( ) can be used</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> ResourceCollection(<span>int</span> quantity)<br>
+<u>Creates a new Collection with multiple initial Resource placeholders</u>. Structure is locked<br>
+<i>quantity</i> - Number of Resources to start with</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> ResourceCollection(LfdFile.<span>LfdCategory</span> category)<br>
+<u>Creates a new Collection with the specified structure</u>. Structure is locked. Using LfdCategory.Normal is the same as using the blank constructor<br>
+<i>category</i> - Type of LFD to be created</p>
+
+<h3>Methods</h3>
+
+<p><img src="images/meth.gif"> <span><b>public</b> int</span> Add( )<br>
+<img src="images/meth.gif"> <span><b>public</b> int</span> Add(<span>Resource</span> resource)<br>
+<u>Adds a Resource to the end of the Collection. Returns the index of the added Resource if successfull, otherwise -1</u>. If <i>resource</i> is omitted, adds a generic Resource<br>
+<i>resource</i> - The Resource to be added<br>
+<b>Exceptions</b><br>
+<i>System.InvalidOperationException</i> - Attempted to call when structure is locked</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b> void</span> Clear( )<br>
+<u>Empties the Collection of entries</u>. All existing resources are lost, <i>Count</i> is set to zero<br>
+<b>Exceptions</b><br>
+<i>System.InvalidOperationException</i> - Attempted to call when structure is locked</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b> int</span> GetIndexByTag(<span>object</span> tag)<br>
+<u>Returns the index of the resource with the specified Tag value, otherwise -1</u><br>
+<i>tag</i> - User-defined data</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b> Resource</span> GetResourceByTag(<span>object</span> tag)<br>
+<u>Returns the resource with the specified Tag value, otherwise <i>null</i></u><br>
+<i>tag</i> - User-defined data</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b> int</span> Insert(<span>int</span> index)<br>
+<img src="images/meth.gif"> <span><b>public</b> int</span> Insert(<span>int</span> index, <span>Resource</span> resource)<br>
+<u>Inserts a new Resource at the specified index. Returns the index of the added Resource if successfull, otherwise -1</u>. If <i>resource</i> is omitted, adds a generic Resource<br>
+<i>index</i> - Location of the Resource within the Collection<br>
+<i>resource</i> - The Resource to be added<br>
+<b>Exceptions</b><br>
+<i>System.IndexOutOfRangeException</i> - Invalid <i>index</i> value<br>
+<i>System.InvalidOperationException</i> - Attempted to call when structure is locked</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b> int</span> RemoveAt(<span>int</span> index)<br>
+<u>Deletes the Resource at the specified index. Returns the index of the next available Resource if successfull, otherwise -1</u>. If first and only Resource is specified, executes Clear( )<br>
+<i>index</i> - The index of the Resource to be deleted<br>
+<b>Exceptions</b><br>
+<i>System.IndexOutOfRangeException</i> - Invalid <i>index</i> value<br>
+<i>System.InvalidOperationException</i> - Attempted to call when structure is locked</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b> void</span> SetByTag(<span>object</span> tag, <span>Resource</span> resource)<br>
+<u>Finds the resource with the specified Tag value and replaces it with <i>resource</i></u>. If <i>tag</i> is not found, no action is taken<br>
+<i>tag</i> - User-defined data<br>
+<i>resource</i> - The Resource to be added<br>
+<b>Exceptions</b><br>
+<i>System.InvalidOperationException</i> - Attempted to call when structure is locked</p>
+
+<h3>Properties</h3>
+
+<p><img src="images/prop.gif"> <span><b>public</b> Resource <b>this</b></span>[<span>int</span> index]<br>
+<u>A single Resource within the collection</u><br>
+<b>Exceptions</b><br>
+<i>System.IndexOutOfRangeException</i> - Invalid <i>index</i> value<br>
+<i>System.InvalidOperationException</i> - Attempted to set when structure is locked and Resource Type or Name have been changed</p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> int</span> Count<br>
+<u>Gets the number of objects in the Collection</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> bool</span> CanEditStructure<br>
+<u>Gets or sets whether or not the structure is unlocked</u>. Default is <i>false</i>, set to <i>true</i> when using blank constructor or LfdCategory.Normal. When locked, Resource Names and Types and fixed, Collection cannot be resized</p>
+</div>
+<hr>
+
+<div>
+<h2><a name="Anim" class="anchor">Anim Class</a></h2>
+<img src="images/class.gif"> <span><b>public</b> class</span> Anim : <span>Resource</span><br>
+<u>Reads LFD files and interprets ANIM resource types</u>
+
+<h3>Constructors</h3>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> Anim(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Anim(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition, System.Drawing.<span>ColorPalette</span> palette)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Anim(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition, <span>Pltt</span>[] palettes)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Anim(<span>string</span> path, <span>long</span> filePosition)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Anim(<span>string</span> path, <span>long</span> filePosition, System.Drawing.<span>ColorPalette</span> palette)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Anim(<span>string</span> path, <span>long</span> filePosition, <span>Pltt</span>[] palettes)<br>
+<u>Create a new Anim instance from an existing file</u>. If <i>palette(s)</i> is omitted, uses default 8bpp ColorPalette<br>
+<i>stream</i> - The FileStream of the opened LFD file<br>
+<i>path</i> - The full path to the unopened LFD file<br>
+<i>filePosition</i> - The File.Position of the beginning of the resource<br>
+<i>palette(s)</i> - The colors used for the ANIM resource<br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.LoadFileException</i> - Load failure, typically due to file corruption</p>
+
+<h3>Methods</h3>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> DecodeResource(<span>byte</span>[] raw, <span>bool</span> containsHeader)</p>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> EncodeResource( )</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> System.Drawing.<span>Bitmap</span> GetFrame(<span>int</span> index)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> System.Drawing.<span>Bitmap</span> GetFrame(<span>int</span> index, <span>bool</span> relativePosition)<br>
+<u>Gets the specified frame image. Returns a bitmap of the defined frame index, <i>Delt.ErrorImage</i> on error</u><br>
+<i>index</i> - Zero-indexed frame number<br>
+<i>relativePosition</i> - Determines if the image returned should be relative to Anim.Location. Defaults to <i>false</i> if omitted</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> System.Drawing.<span>Point</span> GetFramePosition(<span>int</span> index)<br>
+<u>Gets the location of the frame relative to screen origin. Returns global X/Y location of the frame</u><br>
+<i>index</i> - Zero-indexed frame number<br>
+<b>Exceptions</b><br>
+<i>System.IndexOutOfRangeException</i> - <i>index</i> is not a valid frame index</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b> void</span> SetFrame(<span>int</span> index, System.Drawing.<span>Bitmap</span> image)<br>
+<u>Sets the indicated frame number to a new image</u>. If AutoSize is <i>true</i>, frame will shift to prevent off-screen content and Anim dimensions will enlarge as necessary.<br>
+If AutoSize and AutoLocate are <i>true</i>, Anim location will also shift to prevent off-screen content.<br>
+If AutoLocate is <i>true</i> and AutoSize is <i>false</i>, frame will shift to prevent content outside of Anim boundaries.<br>
+All other scenarios result in a BoundaryException.<br>
+<i>image</i> is converted to 8bpp using the current Anim palette.<br>
+<i>index</i> - Zero-indexed frame number<br>
+<i>image</i> - Image to replace the indicated frame<br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.BoundaryException</i> - <i>image</i>.Size results in portions of the image being outside the acceptable boundaries<br>
+<i>System.IndexOutOfRangeException</i> - <i>index</i> is not a valid frame index</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b> void</span> SetFramePosition(<span>int</span> index, <span>short</span> left, <span>short</span> top)<br>
+<img src="images/meth.gif"> <span><b>public</b> void</span> SetFramePosition(<span>int</span> index, System.Drawing.<span>Point</span> position)<br>
+<u>Sets the indicated frame's global position</u>. If AutoSize is <i>true</i>, Anim will englarge as necessary.<br>
+If AutoSize and AutoLocate are <i>true</i>, Anim location will also shift as necessary.<br>
+All other scenarios, including positional values that result in off-screen content results in a BoundaryException<br>
+<i>index</i> - Zero-indexed frame to be updated<br>
+<i>left</i> - Left position<br>
+<i>top</i> - Top position<br>
+<i>position</i> - Frame position<br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.BoundaryException</i> - <i>left</i>, <i>top</i> or <i>position</i> result in portions of the image being outside the acceptable boundaries<br>
+<i>System.IndexOutOfRangeException</i> - <i>index</i> is not a valid frame index</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b> void</span> SetPalette(System.Drawing.<span>ColorPalette</span> palette)<br>
+<img src="images/meth.gif"> <span><b>public</b> void</span> SetPalette(<span>Pltt</span>[] palettes)<br>
+<u>Sets the colors used for the Anim</u><br>
+<i>palette(s)</i> - The colors to be used</p>
+
+<h3>Properties</h3>
+
+<p><img src="images/prop.gif"> <span><b>public</b> bool</span> AutoLocate<br>
+<u>Redefine Anim or Frame Positions if larger image is imported to prevent off-screen content</u>. Defaults to <i>false</i></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> bool</span> AutoSize<br>
+<u>Redefine maximum allowable size if larger image is imported</u>. Defaults to <i>false</i></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> bool</span> HasDefinedPalette<br>
+<u>Returns <i>true</i> if the Anim palette has been defined</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> Height<br>
+<u>Gets maximum height occupied by the image</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> Left<br>
+<u>Gets or sets Left screen location of Anim</u><br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.BoundaryException</i> - <i>value</i> causes portion of image to be off-screen</p>
+
+<p><img src="images/prop.gif"> <span><b>public</b></span> System.Drawing.<span>Point</span> Location<br>
+<u>Gets or sets Anim screen location</u><br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.BoundaryException</i> - <i>value</i> causes portion of image to be off-screen</p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> NumberOfFrames<br>
+<u>Gets total number of frames within the ANIM resource</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b></span> System.Drawing.<span>Size</span> Size<br>
+<u>Gets the maximum size occupied by the image</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> Top<br>
+<u>Gets or sets Top screen location of Anim</u><br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.BoundaryException</i> - <i>value</i> causes portion of image to be off-screen</p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> Width<br>
+<u>Gets maximum width occupied by the image</u></p>
+
+<h3>Structures</h3>
+
+<p><img src="images/struct.gif"> <span><b>public</b> struct</span> Frame<br>
+<u>Represents the individual images contained in the resource</u><br>
+<div style="margin-left: 25px">
+	<h3>Properties</h3>
+
+	<p><img src="images/prop.gif"> <span><b>public</b></span> System.Drawing.<span>Bitmap</span> Image<br>
+	<u>Gets or set the frame image</u></p>
+	
+	<p><img src="images/prop.gif"> <span><b>public</b> short</span> Left<br>
+	<u>Gets or set the global left position of the frame</u></p>
+
+	<p><img src="images/prop.gif"> <span><b>public</b></span> System.Drawing.<span>Point</span> Position<br>
+	<u>Gets or set the global position of the frame</u></p>
+
+	<p><img src="images/prop.gif"> <span><b>public</b> short</span> Top<br>
+	<u>Gets or set the global top position of the frame</u></p>
+</div></p>
+</div>
+<hr>
+
+<div>
+<h2><a name="Blas" class="anchor">Blas Class</a></h2>
+<img src="images/class.gif"> <span><b>public</b> class</span> Blas : <span>Resource</span><br>
+<u>Reads LFD files and interprets BLAS and VOIC resource types</u>. This is under the assumption that BLAS/VOIC data is always uncompressed 8-bit PCM
+
+<h3>Constructors</h3>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> Blas(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Blas(<span>string</span> path, <span>long</span> filePosition)<br>
+<u>Create a new Blas instance from an existing file</u><br>
+<i>stream</i> - The FileStream of the opened LFD file<br>
+<i>path</i> - The full path to the unopened LFD file<br>
+<i>filePosition</i> - The File.Position of the beginning of the resource<br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.LoadFileException</i> - Load failure, typically due to file corruption</p>
+
+<h3>Methods</h3>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> DecodeResource(<span>byte</span>[] raw, <span>bool</span> containsHeader)</p>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> EncodeResource( )</p>
+
+<h3>Properties</h3>
+
+<p><img src="images/prop.gif"> <span><b>public</b> int</span> Frequency<br>
+<u>Frequency in Hertz of audio data</u>. Value must be 10-12 kHz<br>
+<b>Exceptions</b><br>
+<i>System.ArgumentException</i> - Value is outside the required range</p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> SoundDataBlock</span>[] SoundBlocks<br>
+<u>Gets the audio data array</u>. Array length is always 2 as that's the maximum seen in TIE, although more should be possible</p>
+
+<h3>Structures</h3>
+
+<p><img src="images/struct.gif"> <span><b>public</b> struct</span> SoundDataBlock<br>
+<u>Container for audio data and repeat information</u><br>
+<div style="margin-left: 25px">
+	<h3>Properties</h3>
+
+	<p><img src="images/prop.gif"> <span><b>public</b> byte</span>[] Data<br>
+	<u>Raw 8-bit PCM audio data</u>. Array is restricted to 0xFFFFFD maximum length<br>
+	<b>Exceptions</b><br>
+	<i>System.ArgumentException</i> - Array length exceeds limits</p>
+
+	<p><img src="images/prop.gif"> <span><b>public</b> bool</span> DoesRepeat<br>
+	<u>Gets or sets the repeat flag</u><br>
+	<b>Exceptions</b></p>
+
+	<p><img src="images/prop.gif"> <span><b>public</b> short</span> NumberOfRepeats<br>
+	<u>Gets or sets the number of repeats</u>. Values -1 (infinite repeat) and higher activate repeat flag, -2 and lower deactivate</p>
+</div></p>
+</div>
+<hr>
+
+<div>
+<h2><a name="Delt" class="anchor">Delt Class</a></h2>
+<img src="images/class.gif"> <span><b>public</b> class</span> Delt : <span>Resource</span><br>
+<u>Reads LFD files and interprets DELT resource types</u>
+
+<h3>Constructors</h3>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> Delt( )<br>
+<u>Creates a blank Delt</u></p>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> Delt(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Delt(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition, System.Drawing.<span>ColorPalette</span> palette)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Delt(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition, <span>Pltt</span>[] palettes)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Delt(<span>string</span> path, <span>long</span> filePosition)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Delt(<span>string</span> path, <span>long</span> filePosition, System.Drawing.<span>ColorPalette</span> palette)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Delt(<span>string</span> path, <span>long</span> filePosition, <span>Pltt</span>[] palettes)<br>
+<u>Create a new Delt instance from an existing file</u><br>
+<i>stream</i> - The FileStream of the opened LFD file<br>
+<i>path</i> - The full path to the unopened LFD file<br>
+<i>filePosition</i> - The File.Position of the beginning of the resource<br>
+<i>palette(s)</i> - The colors used for the Delt resource<br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.LoadFileException</i> - Load failure, typically due to file corruption</p>
+
+<h3>Methods</h3>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> DecodeResource(<span>byte</span>[] raw, <span>bool</span> containsHeader)</p>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> EncodeResource( )</p>
+
+<p><img src="images/static.gif"><img src="images/meth.gif"> <span><b>public</b> static</span> System.Drawing.<span>Bitmap</span> DecodeImage(<span>short</span> left, <span>short</span> top, <span>short</span> width, <span>short</span> height, <span>byte</span>[] rawData)<br>
+<u>Reads raw Delt-encoded image data and converts to a 256-color Bitmap. Returns a 256-color indexed Bitmap with default palette</u>. Returns <i>ErrorImage</i> upon failure<br>
+<i>left</i> - The Delt or Anim.Frame Left value<br>
+<i>top</i> - The Delt or Anim.Frame Top value<br>
+<i>width</i> - The Delt or Anim.Frame Width value<br>
+<i>height</i> - The Delt or Anim.Frame Height value<br>
+<i>rawData</i> - Delt pixel data from the LFD</p>
+
+<p><img src="images/static.gif"><img src="images/meth.gif"> <span><b>public</b> static byte</span>[] EncodeImage(System.Drawing.<span>Bitmap</span> image, <span>short</span> left, <span>short</span> top)<br>
+<img src="images/static.gif"><img src="images/meth.gif"> <span><b>public</b> static byte</span>[] EncodeImage(System.Drawing.<span>Bitmap</span> image, <span>short</span> left, <span>short</span> top, System.Drawing.<span>ColorPalette</span>)<br>
+<u>Converts image to compressed DELT data. Returns the byte array of raw data ready to be written to file</u>. If <i>palette</i> is omitted, <i>image</i> must be 8bpp Idexed<br>
+<i>image</i> - Bitmap to be encoded<br>
+<i>left</i> - The Delt or Anim.Frame Left value<br>
+<i>top</i> - The Delt or Anim.Frame Top value<br>
+<i>palette</i> - ColorPalette to be used<br>
+<b>Exceptions</b><br>
+<i>System.ArgumentException</i> - <i>palette</i> is omitted and <i>image</i> is not 8bppIndexed</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b> void</span> SetImage(System.Drawing.<span>Bitmap</span> image)<br>
+<u>Replaces the current image</u><br>
+<i>image</i> - Must be 640x480 or smaller<br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.BoundaryException</i> - <i>image</i> does not meet size requirements<br>
+<i>System.ArgumentException</i> - <i>image</i> could not be converted to 8bpp Indexed</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b> void</span> SetPalette(System.Drawing.<span>ColorPalette</span> palette)<br>
+<img src="images/meth.gif"> <span><b>public</b> void</span> SetPalette(<span>Pltt</span>[] palettes)<br>
+<u>Sets the image Palette</u><br>
+<i>palette(s)</i> - The colors to be used</p>
+
+<h3>Properties</h3>
+
+<p><img src="images/prop.gif"> <span><b>public</b> bool</span> EnforceImageSize<br>
+<u>Fixes <i>Image.Size</i></u>. Defaults to <i>false</i></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> bool</span> EnforceLocation<br>
+<u>Sets <i>Left</i> and <i>Top</i> to read-only</u>. Defaults to <i>false</i></p>
+
+<p><img src="images/static.gif"><img src="images/prop.gif"> <span><b>public</b> static</span> System.Drawing.<span>Bitmap</span> ErrorImage<br>
+<u>Gets the standard error image placeholder</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> bool</span> HasDefinedPalette<br>
+<u>Gets if the Delt palette has been defined</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> Height<br>
+<u>Gets the image height</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b></span> System.Drawing.<span>Bitmap</span> Image<br>
+<u>Gets the Format8bppIndexed image</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> Left<br>
+<u>Gets or sets the Left location</u><br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.BoundaryException</i> - Value results in portions of the image being located off-screen<br>
+<i>ArgumentException</i> - <i>EnforceLocation</i> is <i>true</i>, making value read-only</p>
+
+<p><img src="images/const.gif"> <span><b>public</b> const short</span> MaximumHeight<br>
+<u>Maximum allowable height of the image</u></p>
+
+<p><img src="images/const.gif"> <span><b>public</b> const short</span> MaximumWidth<br>
+<u>Maximum allowable width of the image</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> Top<br>
+<u>Gets or sets the Top location</u><br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.BoundaryException</i> - Value results in portions of the image being located off-screen<br>
+<i>ArgumentException</i> - <i>EnforceLocation</i> is <i>true</i>, making value read-only</p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> Width<br>
+<u>Gets the image width</u></p>
+</div>
+<hr>
+
+<div>
+<h2><a name="Film" class="anchor">Film Class</a></h2>
+<img src="images/class.gif"> <span><b>public</b> class</span> Film : <span>Resource</span><br>
+<u>Reads LFD files and interprets FILM resource types</u>
+
+<h3>Constructors</h3>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> Film(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Film(<span>string</span> path, <span>long</span> filePosition)<br>
+<u>Create a new Film instance from an existing file</u><br>
+<i>stream</i> - The FileStream of the opened LFD file<br>
+<i>path</i> - The full path to the unopened LFD file<br>
+<i>filePosition</i> - The File.Position of the beginning of the resource<br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.LoadFileException</i> - Load failure, typically due to file corruption</p>
+
+<h3>Methods</h3>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> DecodeResource(<span>byte</span>[] raw, <span>bool</span> containsHeader)</p>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> EncodeResource( )</p>
+
+<h3>Properties</h3>
+
+<p><img src="images/prop.gif"> <span><b>public</b> Block</span>[] Blocks<br>
+<u>Gets the raw Block data from the FILM</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> NumberOfBlocks<br>
+<u>Gets the number of Blocks contained in the FILM</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> NumberOfFrames<br>
+<u>Gets number of frames required for FILM animation</u></p>
+
+<h3>Structures</h3>
+
+<p><img src="images/struct.gif"> <span><b>public</b> struct</span> Block<br>
+<u>Represents the primary mechanism that controls FILM behaviour</u><br>
+<div style="margin-left: 25px">
+	<h3>Constructors</h3>
+	
+	<p><img src="images/meth.gif"> <span><b>public</b></span> Block(<span>BlockType</span> type, <span>string</span> name, <span>int</span> length, <span>short</span>[] rawData)<br>
+	<u>Initialize a new Block</u><br>
+	<i>type</i> - Resource type Block pertains to<br>
+	<i>name</i> - Identifying name of Block<br>
+	<i>length</i> - Size of Block data<br>
+	<i>rawData</i> - Raw Block data</p>
+
+	<h3>Properties</h3>
+
+	<p><img src="images/prop.gif"> <span><b>public</b> Chunk</span>[] Chunk<br>
+	<u>Gets Chunk data of the Block</u></p>
+
+	<p><img src="images/prop.gif"> <span><b>public</b> int</span> Length<br>
+	<u>Gets the Block length</u></p>
+
+	<p><img src="images/prop.gif"> <span><b>public</b> string</span> Name<br>
+	<u>Gets or sets the 8 char Block name</u></p>
+
+	<p><img src="images/prop.gif"> <span><b>public</b> short</span> NumberOfChunks<br>
+	<u>Gets the number of Chunks contained in the Block</u></p>
+
+	<p><img src="images/prop.gif"> <span><b>public</b> BlockType</span> Type<br>
+	<u>Gets or sets the Block type</u></p>
+
+	<p><img src="images/prop.gif"> <span><b>public</b> short</span> TypeNum<br>
+	<u>Gets the numerical category for the Block's Type</u></p>
+
+	<h3>Enumerations</h3>
+	
+	<p><img src="images/enum.gif"> <span><b>public</b> enum</span> LfdCategory : <span>int</span> { Undefined, Anim = 0x4D494E41, Cust = 0x54535543, Delt = 0x544C4544,
+		End = 0x00444E45, Pltt = 0x54544C50, View = 0x57454956, Voic = 0x43494F56 }
+	<u>Preset Block types</u></p>
+</div></p>
+
+<p><img src="images/struct.gif"> <span><b>public</b> struct</span> Chunk<br>
+<u>Represents individual commands contained within Blocks</u><br>
+<div style="margin-left: 25px">
+	<h3>Properties</h3>
+	
+	<p><img src="images/prop.gif"> <span><b>public</b> OpCode</span> Code<br>
+	<u>Gets or sets the command instruction for the Chunk</u></p>
+	
+	<p><img src="images/prop.gif"> <span><b>public</b> short</span>[] Vars<br>
+	<u>Gets or sets the arguments for the chunk (when applicable)</u></p>
+
+	<h3>Enumerations</h3>
+	
+	<p><img src="images/enum.gif"> <span><b>public</b> enum</span> OpCode : <span>short</span> { Unknown0, Unknown1, End, Time, Move, Speed, Layer, Frame, Animation, Event, Region,
+		Window, UnknownC, Display, Orientation, Use, Unknown10, Unknown11, Transition, Unknown13, Loop, Unknown15, Unknown16, Unknown17, Preload, Sound, Unknown1A, Unknown1B, Stereo }
+	<u>Preset Block types</u></p>
+</div></p>
+</div>
+<hr>
+
+<div>
+<h2><a name="Font" class="anchor">Font Class</a></h2>
+<img src="images/class.gif"> <span><b>public</b> class</span> Font : <span>Resource</span><br>
+<u>Reads LFD files and interprets FONT resource types</u>
+
+<h3>Constructors</h3>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> Font(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Font(<span>string</span> path, <span>long</span> filePosition)<br>
+<u>Create a new Font instance from an existing file</u><br>
+<i>stream</i> - The FileStream of the opened LFD file<br>
+<i>path</i> - The full path to the unopened LFD file<br>
+<i>filePosition</i> - The File.Position of the beginning of the resource<br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.LoadFileException</i> - Load failure, typically due to file corruption</p>
+
+<h3>Methods</h3>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> DecodeResource(<span>byte</span>[] raw, <span>bool</span> containsHeader)</p>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> EncodeResource( )</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> System.Drawing.<span>Bitmap</span> GetGlyph(<span>int</span> index)<br>
+<u>Returns the selected glyph</u><br>
+<i>index</i> - The selected glyph<br>
+<b>Exceptions</b><br>
+<i>System.IndexOutOfRangeException</i> - <i>index</i> is not a valid glyph</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b> void</span> ReplaceGlyph(<span>int</span> index, System.Drawing.<span>Bitmap</span> image)<br>
+<u>Overwrites selected glyph with given image</u><br>
+<i>index</i> - The selected glyph<br>
+<i>image</i> - The image to use. Will be converted to 1bpp Indexed<br>
+<b>Exceptions</b><br>
+<i>System.ArgumentException</i> - <i>image.Height</i> does not equal Height or <i>image.Width</i> exceeds BitsPerScanLine<br>
+<i>System.IndexOutOfRangeException</i> - <i>index</i> is not a valid glyph</p>
+
+<h3>Properties</h3>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> BaseLine<br>
+<u>Gets or sets the zero-indexed ScanLine that is used as the "bottom" for the font</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> BitsPerScanLine<br>
+<u>Gets or sets the length of values required per scanline</u><br>
+<b>Exception</b>
+<i>System.ArgumentException</i> - <i>value</i> is not a positive multiple of eight</p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> Height<br>
+<u>Gets the total height of the font, also number of ScanLines</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> StartingChar<br>
+<u>Gets the ASCII value of the first character within the resource</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> TotalChars<br>
+<u>Gets the number of characters contained within the resource</u></p>
+</div>
+<hr>
+
+<div>
+<h2><a name="Mask" class="anchor">Mask Class</a></h2>
+<img src="images/class.gif"> <span><b>public</b> class</span> Mask : <span>Resource</span><br>
+<u>Reads LFD files and interprets cockpit transparency MASK resource types</u>
+
+<h3>Constructors</h3>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> Mask(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Mask(<span>string</span> path, <span>long</span> filePosition)<br>
+<u>Create a new Mask instance from an existing file</u><br>
+<i>stream</i> - The FileStream of the opened LFD file<br>
+<i>path</i> - The full path to the unopened LFD file<br>
+<i>filePosition</i> - The File.Position of the beginning of the resource<br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.LoadFileException</i> - Load failure, typically due to file corruption</p>
+
+<h3>Methods</h3>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> DecodeResource(<span>byte</span>[] raw, <span>bool</span> containsHeader)</p>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> EncodeResource( )</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b> void</span> SetMask(System.Drawing.<span>Bitmap</i> image)<br>
+<img src="images/meth.gif"> <span><b>public</b> void</span> SetMask(System.Drawing.<span>Bitmap</i> image, System.Drawing.<span>Color</span> transparentColor)<br>
+<u>Sets the transparency image</u>. The MASK format cannot handle the 256 or 512px lengths in the middle of the image. It can however do that at the end of the image, via "throw away" pixels<br>
+<i>image</i> - New image mask. Coverts to 1bppIndexed, must be 740x480 or smaller<br>
+<i>transparentColor</i> - The Color to be used as transparent, defaults to black (#000) if omitted<br>
+<b>Exception</b><br>
+<i>System.ArgumentException</i> - <i>image</i> contains a consecutive length of 256 or 512 pixels not located at the end of the image<br>
+<i>Idmr.Common.BoundaryException</i> - <i>image</i> exceeds maximum allowable dimensions</p>
+
+<h3>Properties</h3>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> Height<br>
+<u>Gets the height of the Mask image</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b></span> System.Drawing.<span>Bitmap</span> Image<br>
+<u>Gets the monochrome mask image</u></p>
+
+<p><img src="images/const.gif"> <span><b>public</b> const short</span> MaximumHeight<br>
+<u>The maximum allowable height</u></p>
+
+<p><img src="images/const.gif"> <span><b>public</b> const short</span> MaximumWidth<br>
+<u>The amximum allowable width</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> short</span> Width<br>
+<u>Gets the width of the Mask image</u></p>
+</div>
+<hr>
+
+<div>
+<h2><a name="Panl" class="anchor">Panl Class</a></h2>
+<img src="images/class.gif"> <span><b>public</b> class</span> Panl : <span>Resource</span><br>
+<u>Reads LFD files and interprets cockpit PANL resource types</u>. This resource is capable of reading *.PNL files in addition to those contained in LFD files
+
+<h3>Constructors</h3>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> Panl( )<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Panl(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Panl(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition, System.Drawing.<span>ColorPalette</span> palette)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Panl(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition, <span>Pltt</span>[] palettes)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Panl(<span>string</span> path, <span>long</span> filePosition)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Panl(<span>string</span> path, <span>long</span> filePosition, System.Drawing.<span>ColorPalette</span> palette)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Panl(<span>string</span> path, <span>long</span> filePosition, <span>Pltt</span>[] palettes)<br>
+<u>Create a new Panl instance from an existing file</u><br>
+<i>stream</i> - The FileStream of the opened LFD file<br>
+<i>path</i> - The full path to the unopened LFD file<br>
+<i>filePosition</i> - The File.Position of the beginning of the resource<br>
+<i>palette(s)</i> - The colors used for the PANL resource<br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.LoadFileException</i> - Load failure, typically due to file corruption</p>
+
+<h3>Methods</h3>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> DecodeResource(<span>byte</span>[] raw, <span>bool</span> containsHeader)</p>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> EncodeResource( )</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> System.Drawing.<span>Bitmap</span> GetImage( )<br>
+<img src="images/meth.gif"> <span><b>public</b></span> System.Drawing.<span>Bitmap</span> GetImage(<span>int</span> index)<br>
+<u>Gets the 8bpp Indexed Bitmap of the specified image</u><br>
+<i>index</i> - Panl image index. Defaults to 0 if omitted<br>
+<b>Exceptions</b><br>
+<i>System.IndexOutOfRangeException</i> - Invalid <i>index</i> value</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b> void</span> SetImage(System.Drawing.<span>Bitmap</span> image)<br>
+<img src="images/meth.gif"> <span><b>public</b> void</span> SetImage(System.Drawing.<span>Bitmap</span> image, <span>int</span> index)<br>
+<u>Sets the 8bpp Indexed Bitmap of the specified image</u><br>
+<i>image</i> - Image must be 640x480 or smaller, converted to 8bpp Indexed<br>
+<i>index</i> - Panl image index. Defaults to 0 if omitted<br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.BoundaryException</i> - <i>image</i> exceeds allowable dimensions<br>
+<i>System.IndexOutOfRangeException</i> - Invalid <i>index</i> value</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b> void</span> SetPalette(System.Drawing.<span>ColorPalette</span> palette)<br>
+<img src="images/meth.gif"> <span><b>public</b> void</span> SetPalette(<span>Pltt</span>[] palettes)<br>
+<u>Sets the image palette</u><br>
+<i>palette(s)</i> - The colors to be used</p>
+
+<h3>Properties</h3>
+
+<p><img src="images/const.gif"> <span><b>public</b> const short</span> MaximumHeight<br>
+<u>Maximum allowable image height</u></p>
+
+<p><img src="images/const.gif"> <span><b>public</b> const short</span> MaximumWidth<br>
+<u>Maximum allowable image widht</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> int</span> NumberOfImages<br>
+<u>Number of images contained within the resource</u></p>
+</div>
+<hr>
+
+<div>
+<h2><a name="Pltt" class="anchor">Pltt Class</a></h2>
+<img src="images/class.gif"> <span><b>public</b> class</span> Pltt : <span>Resource</span><br>
+<u>Reads LFD files and interprets PLTT color palette resource types</u>
+
+<h3>Constructors</h3>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> Pltt( )<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Pltt(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Pltt(<span>string</span> path, <span>long</span> filePosition)<br>
+<u>Create a new Pltt instance from an existing file</u><br>
+<i>stream</i> - The FileStream of the opened LFD file<br>
+<i>path</i> - The full path to the unopened LFD file<br>
+<i>filePosition</i> - The File.Position of the beginning of the resource<br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.LoadFileException</i> - Load failure, typically due to file corruption</p>
+
+<h3>Methods</h3>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> DecodeResource(<span>byte</span>[] raw, <span>bool</span> containsHeader)</p>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> EncodeResource( )</p>
+
+<h3>Properties</h3>
+
+<p><img src="images/prop.gif"> <span><b>public</b> byte</span> EndIndex<br>
+<u>Gets the ending index of the color definitions</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> PlttColor</span>[] Entries<br>
+<u>Gets the colors defined for the PLTT</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b></span> System.Drawing.<span>ColorPalette</span> Palette<br>
+<u>Gets the ColorPalette reprenstation of the Pltt</u>. Colors not used by the Pltt are default 8bpp Indexed colors</p>
+
+<h3>Structures</h3>
+
+<p><img src="images/struct.gif"> <span><b>public</b> struct</span> PlttColor<br>
+<u>The RGB container for the color definitions</u><br>
+<div style="margin-left: 25px">
+	<h3>Constructors</h3>
+	
+	<p><img src="images/meth.gif"> <span><b>public</b></span> PlttColor(<span>byte</span> red, <span>byte</span> green, <span>byte</span> blue)<br>
+	<u>Initialize the PlttColor with the starting color values</u><br>
+	<i>red</i> - The Red index<br>
+	<i>green</i> - The Green index<br>
+	<i>blue</i> - The Blue index</p>
+
+	<h3>Properties</h3>
+
+	<p><img src="images/prop.gif"> <span><b>public</b> byte</span> B<br>
+	<u>Gets or sets the blue value</u></p>
+	
+	<p><img src="images/prop.gif"> <span><b>public</b></span> System.Drawing.<span>Color</span> Color<br>
+	<u>Gets or sets the color</u></p>
+
+	<p><img src="images/prop.gif"> <span><b>public</b> byte</span> G<br>
+	<u>Gets or sets the green value</u></p>
+
+	<p><img src="images/prop.gif"> <span><b>public</b> byte</span> R<br>
+	<u>Gets or sets the red value</u></p>
+</div></p>
+</div>
+<hr>
+
+<div>
+<h2><a name="Rmap" class="anchor">Rmap Class</a></h2>
+<img src="images/class.gif"> <span><b>public</b> class</span> Rmap : <span>Resource</span><br>
+<u>Reads LFD files and interprets RMAP resource types</u>
+
+<h3>Constructors</h3>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> Rmap(System.IO.<span>FileStream</span> stream)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Rmap(<span>string</span> path)<br>
+<u>Create a new Rmap instance from an existing file</u><br>
+<i>stream</i> - The FileStream of the opened LFD file<br>
+<i>path</i> - The full path to the unopened LFD file<br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.LoadFileException</i> - Load failure, typically due to file corruption</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> Rmap(<span>int</span> numberOfHeaders)<br>
+<u>Create a new Rmap instance with the specified number of SubHeaders</u><br>
+<i>numberOfHeaders</i> - The number of entries in the Rmap<br>
+<b>Exceptions</b><br>
+<i>System.ArgumentException</i> - <i>numberOfHeaders</i> must be positive</p>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> Rmap(LfdFile.<span>LfdCategory</span> category)<br>
+<u>Create a new Rmap instance with the specified LFD template</u>. Currently only effective for Battle categories<br>
+<i>category</i> - The type of LFD file<br>
+<b>Exceptions</b><br>
+<i>System.ArgumentException</i> - Cockpit LFDs do not contain Rmaps</p>
+
+<h3>Methods</h3>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> DecodeResource(<span>byte</span>[] raw, <span>bool</span> containsHeader)</p>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> EncodeResource( )</p>
+
+<h3>Properties</h3>
+
+<p><img src="images/prop.gif"> <span><b>public</b> int</span> NumberOfHeaders<br>
+<u>Gets the number of headers contained within the Rmap</u></p>
+
+<p><img src="images/prop.gif"> <span><b>public</b> SubHeader</span>[] SubHeaders<br>
+<u>ets the SubHeader information within the Rmap</u></p>
+
+<h3>Structures</h3>
+
+<p><img src="images/struct.gif"> <span><b>public</b> struct</span> SubHeader<br>
+<u>Represents the information for a single SubHeader</u><br>
+<div style="margin-left: 25px">
+	<h3>Constructors</h3>
+
+	<p><img src="images/meth.gif"> <span><b>public</b></span> Rmap(<span>ResourceType</span> type, <span>string</span> name, <span>int</span> length)<br>
+	<u>Initialize the SubHeader with the provided details</u>. <i>Offset</i> initialized to 0, <i>name</i>truncated to 8 characters<<br>
+	<i>type</i> - Resource type<br>
+	<i>name</i> - Resource name<br>
+	<i>length</i> - Resource length</p>
+	
+	<h3>Properties</h3>
+
+	<p><img src="images/prop.gif"> <span><b>public</b> int</span> Length<br>
+	<u>Gets or sets the Length of the resource</u></p>
+	
+	<p><img src="images/prop.gif"> <span><b>public</b> string</span> Name<br>
+	<u>Gets or sets the Name of the resource</u>. Value is trimmed to 8 characters</p>
+
+	<p><img src="images/prop.gif"> <span><b>public</b> int</span> Offset<br>
+	<u>Gets or sets the File.Position of the resource</u></p>
+
+	<p><img src="images/prop.gif"> <span><b>public</b> ResourceType</span> Type<br>
+	<u>Gets or sets the Type of the resource</u></p>
+</div></p>
+</div>
+<hr>
+
+<div>
+<h2><a name="Text" class="anchor">Text Class</a></h2>
+<img src="images/class.gif"> <span><b>public</b> class</span> Text : <span>Resource</span><br>
+<u>Reads LFD files and interprets TEXT resource types</u>
+
+<h3>Constructors</h3>
+
+<p><img src="images/meth.gif"> <span><b>public</b></span> Text( )<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Text(System.IO.<span>FileStream</span> stream, <span>long</span> filePosition)<br>
+<img src="images/meth.gif"> <span><b>public</b></span> Text(<span>string</span> path, <span>long</span> filePosition)<br>
+<u>Create a new Text instance from an existing file</u><br>
+<i>stream</i> - The FileStream of the opened LFD file<br>
+<i>path</i> - The full path to the unopened LFD file<br>
+<i>filePosition</i> - The File.Position of the beginning of the resource<br>
+<b>Exceptions</b><br>
+<i>Idmr.Common.LoadFileException</i> - Load failure, typically due to file corruption</p>
+
+<h3>Methods</h3>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> DecodeResource(<span>byte</span>[] raw, <span>bool</span> containsHeader)</p>
+
+<p><img src="images/meth.gif"> <span><b>public override</b> void</span> EncodeResource( )</p>
+
+<h3>Properties</h3>
+
+<p><img src="image/prop.gif"> <span><b>public</b> short</span> NumberOfStrings<br>
+<u>Gets or sets the number of strings in the Text</u>. <i>Strings</i> expands and contracts as needed. If new value is less than original, <i>Strings</i> will truncate with data loss.</p>
+
+<p><img src="image/prop.gif"> <span><b>public</b> string</span>[] Strings<br>
+<u>The strings contained within the Text</u></p>
+</div>
+<hr>
+
+Copyright (C) 2010-2011 Michael Gaisser (mjgaisser@gmail.com)<BR><BR>
+This library is free software, distributed under the <a href="http://www.gnu.org/licenses/gpl.html" target=_blank>GNU General Public License</a>.<br>
+This documentation and items contained herein are distributed under the <a href="http://www.gnu.org/licenses/fdl.html" target=_blank>GNU Free Documentation License</a>.<br>
+Publish date: 05 Dec 2011
+<HR>
+</BODY>
+</HTML>
