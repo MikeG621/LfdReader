@@ -1,15 +1,17 @@
 Idmr.LfdReader.dll
 
 Library for editing LucasArts *.LFD resource files
+v1.0, 05 Dec 2011
 
-Copyright (C) Michael Gaisser 2008-2011
+Copyright (C) Michael Gaisser 2008-2012
 
 Instructions:
 -Add all *.cs files to your project
 -Add System.Drawing to your references
 -Add Idmr.Common to your references
+-To use LfdReader.Xact, add Idmr.ImageFormat.Act to your references
 
-Detailed information on the members can be found in 'help file/pages/Idmr.LfdReader.html'
+Programmer's reference can be found in help/Idmr.LfdReader.html
 
 Code is licensed under the GNU General Public License (GPL) v3.0 or later
-Documentation is license under the GNU Free Documentation License (FDL) v1.3 or later
+Documentation is licensed under the GNU Free Documentation License (FDL) v1.3 or later

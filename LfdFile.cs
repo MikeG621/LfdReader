@@ -1,14 +1,15 @@
 /*
  * Idmr.LfdFile.cs, Class file to read and write LFD resource files
- * Copyright (C) 2010-2011 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2010-2012 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the GPL v3.0 or later
  * 
- * Full notice in Resource.cs
+ * Full notice in help/Idmr.LfdReader.chm
  * Version: 1.0
  */
 
 /* CHANGE LOG
  * 111129 - error message to static
+ * 120522 - enabled Xact
  */
 
 using System;
@@ -27,7 +28,13 @@ namespace Idmr.LfdReader
 		LfdCategory _lfdCategory = LfdCategory.Normal;
 
 		/// <summary>Preset Lfd structures</summary>
-		public enum LfdCategory : byte { Normal, Cockpit, Battle }
+		public enum LfdCategory : byte {
+			/// <summary>Typical LFD file, unlocked structure, no restrictions</summary>
+			Normal,
+			/// <summary>Cockpit view LFDs, locked structure, does not contain an RMAP</summary>
+			Cockpit,
+			/// <summary>Battle#.LFD files, locked structure</summary>
+			Battle }
 		
 		#region constructors
 		/// <summary>Populates with an existing *.lfd file</summary>
@@ -46,7 +53,7 @@ namespace Idmr.LfdReader
 		}
 		/// <summary>Creates an empty file with the appropriate file structure</summary>
 		/// <param name="category">Preset type</param>
-		/// <remarks><i>Rmap</i> and <i>Resources</i> are initialized accordingly.</remarks>
+		/// <remarks><see cref="Rmap"/> and <see cref="Resources"/> are initialized accordingly.</remarks>
 		public LfdFile(LfdCategory category)
 		{
 			_resources = new ResourceCollection(category);
@@ -56,8 +63,8 @@ namespace Idmr.LfdReader
 		#endregion constructors
 
 		#region public methods
-		/// <summary>Initializes Rmap using the contents of the LfdFile. If Rmap exists, it is updated</summary>
-		/// <remarks>Processes individual EncodeResource() functions, thus updating all RawData properties</remarks>
+		/// <summary>Initializes <see cref="Rmap"/> using the contents of the LfdFile. If Rmap is already defined, it is updated</summary>
+		/// <remarks>Processes individual <see cref="Resource.EncodeResource"/> functions, thus updating all <see cref="Resource.RawData"/> properties</remarks>
 		public void CreateRmap()
 		{
 			if (_lfdCategory == LfdCategory.Cockpit) throw new ArgumentException(_cockpitRmapErrorMessage);
@@ -78,7 +85,7 @@ namespace Idmr.LfdReader
 			_rmp.EncodeResource();
 		}
 
-		/// <summary>Write the Lfd to disk</summary>
+		/// <summary>Writes the file to disk</summary>
 		/// <exception cref="Idmr.Common.SaveFileException">An error occured, file remains unchanged</exception>
 		public void Write()
 		{
@@ -89,7 +96,7 @@ namespace Idmr.LfdReader
 			try
 			{
 				if (File.Exists(_filePath)) File.Copy(_filePath, _tempPath);	// create backup
-				stream = File.Open(_filePath, FileMode.Open, FileAccess.ReadWrite);
+				stream = File.OpenWrite(_filePath);
 				BinaryWriter bw = new BinaryWriter(stream);
 				//System.Diagnostics.Debug.WriteLine("Writing...");
 				if (_rmp != null)
@@ -127,17 +134,17 @@ namespace Idmr.LfdReader
 
 		#region public properties
 		/// <summary>Resources contained within the file</summary>
-		/// <remarks>Does <u>not</u> contain the RMAP if applicable</remarks>
+		/// <remarks>Does <u>not</u> contain <see cref="Rmap"/> if applicable</remarks>
 		public ResourceCollection Resources { get { return _resources; } set { _resources = value; } }
 		
 		/// <summary>Gets the full path to the file</summary>
 		public string FilePath { get { return _filePath; } }
 		/// <summary>Gets the file name and extension of the file</summary>
 		public string FileName { get { return Common.StringFunctions.GetFileName(_filePath); } }
-		/// <summary>Gets <i>true</i> if <i>Rmap</i> is defined</summary>
+		/// <summary>Gets if <see cref="Rmap"/> is defined</summary>
 		public bool HasRmap { get { return (_rmp != null); } }
 		/// <summary>Gets or sets the Rmap resource for the file</summary>
-		/// <exception cref="System.ArgumentException">Cannot set if file is defined by the <i>Cockpit</i> preset</exception>
+		/// <exception cref="System.ArgumentException">Cannot set if file is defined by the <see cref="LfdCategory.Cockpit"/> preset</exception>
 		public Rmap Rmap
 		{
 			get { return _rmp; }
@@ -175,7 +182,7 @@ namespace Idmr.LfdReader
 			}
 			else if (Resource.GetType(stream, 0) == Resource.ResourceType.Panl)
 			{
-				//System.Diagnostics.Debug.WriteLine("cockpit LFD");
+				System.Diagnostics.Debug.WriteLine("cockpit LFD");
 				_lfdCategory = LfdCategory.Cockpit;
 				_resources = new ResourceCollection(3);
 				_resources[0] = new Panl(stream, 0);
@@ -186,7 +193,7 @@ namespace Idmr.LfdReader
 			{
 				_resources = new ResourceCollection(1);
 				_assignResource(0, Resource.GetType(stream, 0), stream, 0);
-				//System.Diagnostics.Debug.WriteLine("Solo resource " + _resources[0].Type + " " + _resources[0].Name);
+				System.Diagnostics.Debug.WriteLine("Solo resource " + _resources[0].Type + " " + _resources[0].Name);
 			}
 		}
 
@@ -208,7 +215,7 @@ namespace Idmr.LfdReader
 			// skip Rmap
 			//TODO: else if (type == Resource.ResourceType.Ship) _resources[index] = new Ship(stream, offset);
 			else if (type == Resource.ResourceType.Text) _resources[index] = new Text(stream, offset);
-			//TODO: else if (type == Resource.ResourceType.Xact) _resources[index] = new Xact(stream, offset);
+			else if (type == Resource.ResourceType.Xact) _resources[index] = new Xact(stream, offset);
 			else _resources[index] = new Resource(stream, offset);
 		}
 		#endregion private methods

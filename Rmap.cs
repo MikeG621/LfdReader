@@ -1,9 +1,9 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2010-2011 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2010-2012 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the GPL v3.0 or later
  * 
- * Full notice in Resource.cs
+ * Full notice in help/Idmr.LfdReader.chm
  * Version: 1.0
  */
 
@@ -12,6 +12,7 @@
  * 110924 - implemented Decode/EncodeResource()
  * 110927 - NumHeaders to NumberOfHeaders
  * 111108 - added ArrayFunctions calls
+ * 120425 - ResourceType check
  */
 
 using System;
@@ -20,14 +21,31 @@ using Idmr.Common;
 
 namespace Idmr.LfdReader
 {
-	/// <summary>Reads LFD files and interprets RMAP resources</summary>
+	/// <summary>Object for "RMAP" header resources</summary>
+	/// <remarks>The Rmap resource is the Resource Map for the file. This contains the <see cref="Resource.Type"/>, <see cref="Resource.Name"/> and <see cref="Resource.Length"/> of every Resource in the file. Reading through the Rmap can produce a jump table for the file.<hr/>
+	/// <h4>Raw Data definition</h4>
+	/// <code>// Pseudo-code resource structure
+	/// struct RawData
+	/// {
+	///   /* 0x00 */ SubHeader[Rmap.Length / 16] SubHeaders;
+	/// }
+	/// 
+	/// struct SubHeader
+	/// {
+	///   /* 0x00 */ char[4] Type;
+	///   /* 0x04 */ char[8] Name;
+	///   /* 0x0C */ int Length;
+	/// }</code>
+	/// The Rmap's RawData block contains no unique information, as it is merely a listing of the Headers from the other resources in the file.<br/>
+	/// The Rmap's <see cref="Resource.Name"/> is typically "<b>resource</b>" and <see cref="Resource.Length"/> is <c>(NumberOfHeaders * 16)</c>.</remarks>
 	public class Rmap : Resource
 	{
 		string _defaultName = "resource";
 		SubHeader[] _headers;	// only thing RMAP needs
 
-		/// <summary>Create a new Rmap instance with the specified number of SubHeaders</summary>
-		/// <param name="numberOfHeaders">The number of entries in the Rmap</param>
+		#region constructors
+		/// <summary>Creates a new instance with the specified number of SubHeaders</summary>
+		/// <param name="numberOfHeaders">The number of entries</param>
 		/// <exception cref="ArgumentException"><i>numberOfHeaders</i> must be positive</exception>
 		public Rmap(int numberOfHeaders)
 		{
@@ -36,14 +54,16 @@ namespace Idmr.LfdReader
 			_headers = new SubHeader[numberOfHeaders];
 			_type = ResourceType.Rmap;
 		}
-		/// <summary>Create a new Rmap instance from an existing opened file</summary>
-		/// <param name="stream">The FileStream of the opened LFD file</param>
+		/// <summary>Creates a new instance from an existing opened file</summary>
+		/// <param name="stream">The opened LFD file</param>
+		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
 		public Rmap(FileStream stream)
 		{
 			_read(stream);
 		}
-		/// <summary>Create a new Rmap instance from an existing file</summary>
+		/// <summary>Creates a new instance from an exsiting file</summary>
 		/// <param name="path">The full path to the unopened LFD file</param>
+		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
 		public Rmap(string path)
 		{
 			FileStream stream = File.OpenRead(path);
@@ -52,8 +72,8 @@ namespace Idmr.LfdReader
 		}
 		/// <summary>Create a new Rmap instance with the specific LFD template</summary>
 		/// <param name="category">The type of LFD file</param>
-		/// <exception cref="System.ArgumentException">Cockpit LFDs do not contain Rmaps</exception>
-		/// <remarks>Currently only effective for Battle categories</remarks>
+		/// <exception cref="System.ArgumentException">Cockpit LFDs do not contain Rmaps<br/><b>-or-</b><br/>Normal LFDs must be initialized with <see cref="Rmap(int)"/></exception>
+		/// <remarks>Only usable with <see cref="LfdFile.LfdCategory.Battle"/> files, initializes for a <see cref="Text"/> and <see cref="Delt"/> resources.</remarks>
 		public Rmap(LfdFile.LfdCategory category)
 		{
 			if (category == LfdFile.LfdCategory.Battle)
@@ -70,8 +90,10 @@ namespace Idmr.LfdReader
 				_headers[1].Length = -1;
 			}
 			else if (category == LfdFile.LfdCategory.Cockpit) throw new ArgumentException("Cockpit LFDs do not use RMAP", "category");
+			else throw new ArgumentException("Normal LFDs must be initialized with Rmap(int)", "category");
 			_type = ResourceType.Rmap;
 		}
+		#endregion constructors
 
 		void _read(FileStream stream)
 		{
@@ -79,14 +101,16 @@ namespace Idmr.LfdReader
 			catch (Exception x) { throw new LoadFileException(x); }
 		}
 
-		//===================
-		/// <summary>Processes raw data to create Rmap information</summary>
+		#region public methods
+		/// <summary>Processes raw data to populate the resource</summary>
 		/// <param name="raw">Raw byte data</param>
-		/// <param name="containsHeader">Determines if <i>raw</i> contains the Header</param>
+		/// <param name="containsHeader">Whether or not <i>raw</i> contains the resource Header information</param>
+		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="ResourceType.Rmap"/></exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
-			int offset = 0;
 			_decodeResource(raw, containsHeader);
+			if (_type != ResourceType.Rmap) throw new ArgumentException("Raw header is not for a Rmap resource");
+			int offset = 0;
 			_headers = new SubHeader[_rawData.Length >> 4];
 			int resourceOffset = _rawData.Length + HeaderLength;
 			for (int i = 0; i < _headers.Length; i++)
@@ -101,8 +125,7 @@ namespace Idmr.LfdReader
 			}
 		}
 
-		/// <summary>Prepare Rmap information for writing</summary>
-		/// <returns>Raw data ready to write to file</returns>
+		/// <summary>Prepares the resource for writing and updates <see cref="RawData"/></summary>
 		public override void EncodeResource()
 		{
 			byte[] raw = new byte[_headers.Length * HeaderLength];
@@ -114,6 +137,7 @@ namespace Idmr.LfdReader
 			}
 			_rawData = raw;
 		}
+		#endregion public methods
 
 		/// <summary>Gets the number of headers contained within the Rmap</summary>
 		public int NumberOfHeaders { get { return _headers.Length; } }
@@ -132,12 +156,11 @@ namespace Idmr.LfdReader
 			/// <param name="type">Resource Type</param>
 			/// <param name="name">Resource Name</param>
 			/// <param name="length">Resource Length</param>
-			/// <remarks><i>Offset</i> initialized to 0, <i>name</i>truncated to 8 characters</remarks>
+			/// <remarks><i>Offset</i> initialized to <b>0</b>, <i>name</i> truncated to 8 characters</remarks>
 			public SubHeader(ResourceType type, string name, int length)
 			{
 				_type = type;
-				string n = name.Trim('\0');
-				_name = (n.Length > 8 ? n.Substring(0,8) : n);
+				_name = StringFunctions.GetTrimmed(name, 8);
 				_length = length;
 				_offset = 0;
 			}
@@ -149,15 +172,11 @@ namespace Idmr.LfdReader
 			public string Name
 			{
 				get { return _name; } 
-				set
-				{
-					string n = value.Trim('\0');
-					_name = (n.Length > 8 ? n.Substring(0,8) : n);
-				}
+				set { _name = StringFunctions.GetTrimmed(value, 8); }
 			}
 			/// <summary>Gets or sets the Length of the resource</summary>
 			public int Length { get { return _length; } set { _length = value; } }
-			/// <summary>Gets or sets the File.Position of the resource</summary>
+			/// <summary>Gets or sets the <see cref="File.Position"/> of the resource</summary>
 			public int Offset { get { return _offset; } set { _offset = value; } }
 		}
 	}
