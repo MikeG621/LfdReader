@@ -150,8 +150,9 @@ namespace Idmr.LfdReader
 			for (int i = 0; i < NumberOfFrames; i++)
 			{
 				frameLength = BitConverter.ToInt32(_rawData, offset);
-				byte[] delt = new byte[frameLength - 4];
+				byte[] delt = new byte[frameLength];
 				ArrayFunctions.TrimArray(_rawData, offset + 4, delt);
+				//System.Diagnostics.Debug.WriteLine("Frame offset: " + offset);
 				_frames[i]._delt.DecodeResource(delt, false);
 				/*_frames[i]._left = BitConverter.ToInt16(_rawData, offset + 4);
 				_frames[i]._top = BitConverter.ToInt16(_rawData, offset + 6);

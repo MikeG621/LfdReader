@@ -9,9 +9,9 @@ Instructions:
 -Add all *.cs files to your project
 -Add System.Drawing to your references
 -Add Idmr.Common to your references
--To use LfdReader.Xact, add Idmr.ImageFormat.Act to your references
+-To use LfdReader.Xact, add Idmr.ImageFormat.Act (v2.0 or later) to your references
 
-Programmer's reference can be found in help/Idmr.LfdReader.html
+Programmer's reference can be found in help/Idmr.LfdReader.chm
 
 Code is licensed under the GNU General Public License (GPL) v3.0 or later
 Documentation is licensed under the GNU Free Documentation License (FDL) v1.3 or later

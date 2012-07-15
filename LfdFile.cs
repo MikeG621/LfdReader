@@ -166,7 +166,7 @@ namespace Idmr.LfdReader
 		void _read(FileStream stream)
 		{
 			_filePath = stream.Name;
-			System.Diagnostics.Debug.WriteLine("Creating " + FileName);
+			//System.Diagnostics.Debug.WriteLine("Creating " + FileName);
 			if (Resource.GetType(stream, 0) == Resource.ResourceType.Rmap)
 			{
 				_rmp = new Rmap(stream);
@@ -182,7 +182,7 @@ namespace Idmr.LfdReader
 			}
 			else if (Resource.GetType(stream, 0) == Resource.ResourceType.Panl)
 			{
-				System.Diagnostics.Debug.WriteLine("cockpit LFD");
+				//System.Diagnostics.Debug.WriteLine("cockpit LFD");
 				_lfdCategory = LfdCategory.Cockpit;
 				_resources = new ResourceCollection(3);
 				_resources[0] = new Panl(stream, 0);
@@ -193,7 +193,7 @@ namespace Idmr.LfdReader
 			{
 				_resources = new ResourceCollection(1);
 				_assignResource(0, Resource.GetType(stream, 0), stream, 0);
-				System.Diagnostics.Debug.WriteLine("Solo resource " + _resources[0].Type + " " + _resources[0].Name);
+				//System.Diagnostics.Debug.WriteLine("Solo resource " + _resources[0].Type + " " + _resources[0].Name);
 			}
 		}
 
