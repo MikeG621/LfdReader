@@ -45,18 +45,18 @@ namespace Idmr.LfdReader
 	///   /* 0x00 */ byte[BitsPerScanLine * Height / 8] Rows;
 	/// }</code>
 	/// In TIE95 there are a total of seven FONT resources, all of which have a <i>StartingChar</i> of <b>0x20</b>, which makes sense since you kinda need a space, and there's nothing really before that anyway. Only "TITLE.LFD:FONThelv-20" has a non-0x60 value for <i>NumberOfGlyphs</i>, which is the scrolling text in the title crawl.<br/><br/>
-	/// <i>BitsPerScanLine</i> tells you how much you have to read before going on to the next line. <u>Must be a multiple of 8</u>. <i>Height</i> is just that, how many rows per glyph. <i>BaseLine</i> is a zero-indexed row that is defined as the bottom of the glyphs. This is so letters such as 'j' and 'g' hang below the line as they should.<br/><br/>
+	/// <i>BitsPerScanLine</i> tells you how much you have to read before going on to the next line. <u>Must be a multiple of 8</u>. <i>Height</i> is just that, how many rows per glyph. <i>BaseLine</i> is a zero-indexed row that is defined as the bottom of the glyphs. This is so letters such as 'j' and 'g' hang below the "bottom" as they should.<br/><br/>
 	/// The <i>GlyphWidth</i> values are in pixels, starting from the left of the glyph.<br/><br/>
 	/// -- Row --<br/><br/>
 	/// The Row values within the actual glyph data are bit fields.  Monochrome bitmaps, so '0' is transparent, '1' is solid.<br/><br/>
-	/// EMPIRE.LFD:FONTfont6 has <i>BitsPerScanLine</i> = 0x08, <i>Height</i> = 0x06 and <i>BaseLine</i> = 4. The letter 'A' in that resource has its <i>Rows</i> array as E0 A0 E0 A0 A0 00.<br/><br/>
+	/// EMPIRE.LFD:FONTfont6 has <i>BitsPerScanLine</i> = <b>0x08</b>, <i>Height</i> = <b>0x06</b> and <i>BaseLine</i> = <b>0x04</b>. The letter 'A' in that resource has its <i>Rows</i> array as <c>E0 A0 E0 A0 A0 00</c>.<br/><br/>
 	/// <c>XXX.....</c>		E0 = b11100000<br/>
 	/// <c>X.X.....</c>		A0 = b10100000<br/>
 	/// <c>XXX.....</c>		b11100000<br/>
 	/// <c>X.X.....</c>		b10100000<br/>
 	/// <c>X.X.....</c>		b10100000<br/>
 	/// <c>........</c>		b00000000<br/><br/>
-	/// If <i>BitsPerScanLine</i> is <b>0x10</b>, then the rows are 16 pixels wide, <b>0x18</b> is 24 pix wide, etc.  The Width value for the letter 'A' in this case is <b>0x03</b>, which as can be seen makes sense.  Spaces between glyphs are automatically counted as 1 pixel.</remarks>
+	/// If <i>BitsPerScanLine</i> is <b>0x10</b>, then the rows are 16 pixels wide, <b>0x18</b> is 24 pix wide, etc.  The Width value for the letter 'A' in this case is <b>0x03</b>, which as shown above is the occupied width of the character.  Spaces between glyphs are automatically counted as 1 pixel.</remarks>
 	public partial class Font : Resource
 	{
 		short _startingChar;

@@ -18,6 +18,7 @@
  * 120425 - ResourceType check
  * 120523 - SetImage() to Image.set
  * 120524 - Left/Top/Image.set update _right/_bottom, InvalidOpX in Image.set
+ * 120909 - fixed EncodeResource bug preventing Row.Length/Left/Top from being written
  */
 
 using System;
@@ -39,7 +40,7 @@ namespace Idmr.LfdReader
 	///   /* 0x04 */ short Right;
 	///   /* 0x06 */ short Bottom;
 	///   /* 0x08 */ short Row[] Rows;
-	///   /* 0x?? */ short Reserved = 0x00;
+	///   /* 0x?? */ short Reserved = 0x0000;
 	/// }
 	/// 
 	/// struct Row
@@ -79,7 +80,7 @@ namespace Idmr.LfdReader
 	/// 0x06	Reads three pixels<br/>
 	/// 0x08	Reads four pixels<br/>
 	/// ...<br/><br/>
-	/// After the final pixel for either operation, the next <c>byte</c> will be another OpCode.</remarks>
+	/// After the final pixel for either operation, the next byte will be another OpCode.</remarks>
 	public class Delt : Resource
 	{
 		ColorPalette _palette = null;
@@ -278,8 +279,11 @@ namespace Idmr.LfdReader
 			{
 				// okay, so BlockCopy lines; explicit short conversions into GetBytes returns byte[2], which BlockCopy uses as src to copy over into tempRaw[]
 				ArrayFunctions.WriteToArray((short)((image.Width << 1) + 1), tempRaw, pos);	// full-width row, compressed data
+				pos += 2;
 				ArrayFunctions.WriteToArray(left, tempRaw, pos);	// row LEFT
+				pos += 2;
 				ArrayFunctions.WriteToArray((short)(y + top), tempRaw, pos);	// row TOP
+				pos += 2;
 				t = y*w;
 				for (int x=0;x<image.Width;)
 				{

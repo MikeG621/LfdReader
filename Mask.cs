@@ -8,10 +8,10 @@
  */
 
 /* CHANGELOG
- * 110919 - housekeeping, added added LoadFileException and SaveFileException throws, Write() return void
+ * 110919 - housekeeping, added LoadFileException and SaveFileException throws, Write() return void
  * 110927 - implemented Decode/EncodeResource()
  * 111108 - added ArrayFunctions calls
- * 120402 - redid W/H, added cons to pre-define them to save processing during Decode
+ * 120402 - redid W/H, added ctor to pre-define them to save processing during Decode
  * 120425 - ResourceType check
  */
 
@@ -41,12 +41,13 @@ namespace Idmr.LfdReader
 	///     /* 0x00 */ byte FirstColor = 0x01;	// transparent
 	///   #endif
 	///   /* 0x01 */ byte[] Lengths;
-	/// }
 	/// }</code>
 	/// If you know the dimensions of the Mask before you start, that's great. If not, it can be determined iteratively, however there is some degree of error.<br/><br/>
-	/// The iterative method currently used by <see cred="DecodeResource"/> when the dimensions are unknown assumes the first two rows start with the same state (solid/transparent) and the top row does not have any Length values that equal <i>FirstColor</i>. It's not perfect, but it seems to work fine with the stock cockpits. Results may vary with custom cockpits.<br/>
-	/// Quickly iterating through <i>Rows</i> using the width value until the end of RawData or until a Row starts with <b>0x00</b> will determine the height. Of course, if you know the dimensions beforehand, that would be for the best.<br/><br/>
-	/// stuff</remarks>
+	/// The iterative method currently used by <see cref="DecodeResource"/> when the dimensions are unknown assumes the first two rows start with the same state (solid/transparent) and the top row does not have any Length values that equal <i>FirstColor</i>. It's not perfect, but it seems to work fine with the stock cockpits. Results may vary with custom cockpits.<br/>
+	/// Quickly iterating through <i>Rows</i> using the width value until the end of RawData or until a Row starts with <b>0x00</b> will determine the height. Of course, if you know the dimensions beforehand, that would be for the best and is almost definitely how the program operates.<br/><br/>
+	/// The <i>FirstColor</i> for the Row is a marker that defines the starting color. After that point, it simple alternates solid/transparent <i>Lengths</i> until it reaches the end of the Row. The <i>Lengths</i> values are one-indexed, so a value of <b>0x01</b> is one pixel. For values larger than <b>0xFF</b>, <b>0x00</b> is used as 256 pixels and must be followed by a "closing" value, as it will not switch pixel states.<br/>
+	/// For example, a row of <c>0xFF 0x00 0x0C 0x0A 0x00 0x6A</c> starts solid with 268 pixels (256 + 12), followed by 10 transparent pixels and 362 solid pixels (256 + 106). To make a row over 512 pixels, simple repeat the <b>0x00</b> value. So a full-length 640-pixel solid row would be <c>0xFF 0x00 0x00 0x80</c>.<br/><br/>
+	/// Because the closing value is required, lengths of 256 or 512 pixels cannot be used in a row. The exception to this rule is at the end of the row, where the closing pixel would be off the screen. In this case there's a "throw-away" pixel, usually <b>0x01</b>, so the <i>Row</i> actually defines 641 pixels instead of 640. One of the Gunbboat views does this and TIEEdit does not account for it properly and displays the view corrupted.</remarks>
 	public class Mask : Resource
 	{
 		Bitmap _image = null;
@@ -164,8 +165,6 @@ namespace Idmr.LfdReader
 				for (Height = 0; pos < _rawData.Length; Height++)	// get mask height
 				{
 					if (_rawData[pos] == 0) break;
-					/*if (pos > 0x710) pos++;
-					else pos++;*/
 					for (x = 0; x < Width; pos++)
 					{
 						if (_rawData[pos] == 0) { x += 0x100; if (x == Width) pos++; }	// won't end on 00, so there's an extra pixel

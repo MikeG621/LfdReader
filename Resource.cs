@@ -38,7 +38,17 @@ using Idmr.Common;
 namespace Idmr.LfdReader
 {
 	/// <summary>Base class for LFD resources, also provides ability to retrieve raw data from unknown resources</summary>
-	/// <remarks>All LFD resources are derived from this class. Resource types without a defined class are left as a generic Resource and read-only.</remarks>
+	/// <remarks>All LFD resources are derived from this class. Resource types without a defined class are left as a generic Resource and read-only.<hr/>
+	/// <h4>Format Definition</h4>
+	/// <code>//Pseudo-code resource structure
+	/// struct Resource
+	/// {
+	///   /* 0x00 */ char[4] Type;
+	///   /* 0x04 */ char[8] Name;
+	///   /* 0x0C */ int Length;
+	///   /* 0x10 */ byte[Length] RawData;
+	/// }</code>
+	/// Every Resource contains a Header of <b>0x10</b> bytes, which is comprised of the identifying <see cref="Type"/>, <see cref="Name"/> and resource <see cref="Length"/>. This Header is what makes up the SubHeader for <see cref="Rmap"/> resources. The <see cref="RawData"/> array is the complete contents of the resource, with its size equal to the Length value.</remarks>
 	public class Resource
 	{
 		/// <summary>Full path to the lfd file</summary>
