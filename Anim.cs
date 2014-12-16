@@ -1,23 +1,16 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2010-2012 Michael Gaisser (mjgaisser@gmail.com)
- * Licensed under the GPL v3.0 or later
+ * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.0
+ * Version: 1.1
  */
 
-/* CHANGELOG
- * 110912 - add AutoSize, AutoLocate, Size
- * 110914 - Left/Top/Position exceptions
- * 110920 - SetFrame()/SetFramePosition() AutoSize/AutoLocate implementation
- * 110922 - Write(), added LoadFileException and SaveFileException throws, relativePosition re-implemented
- * 110925 - implemented Decode/EncodeResource
- * 111108 - added ArrayFunctions calls
- * 120329 - combined Decode into a single loop, instead of separate size and image loops, added Frame.W/H/R/B, Frame.* set{} to internal
- * 120418 - Frame split out to Anim.Frame.cs, add RelativePosition
- * 120425 - ResourceType check
- * 120530 - FrameCollection
+/* CHANGE LOG
+ * v1.1, 141215
+ * [UPD] changed license to MPL
+ * v1.0
  */
 
 using System;

@@ -1,15 +1,16 @@
 /*
- * Idmr.LfdFile.cs, Class file to read and write LFD resource files
- * Copyright (C) 2010-2012 Michael Gaisser (mjgaisser@gmail.com)
- * Licensed under the GPL v3.0 or later
+ * Idmr.LfdReader.dll, Library file to read and write LFD resource files
+ * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.0
+ * Version: 1.1
  */
 
 /* CHANGE LOG
- * 111129 - error message to static
- * 120522 - enabled Xact
+ * v1.1, 141215
+ * [UPD] changed license to MPL
+ * v1.0
  */
 
 using System;

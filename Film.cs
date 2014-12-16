@@ -1,19 +1,16 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2010-2012 Michael Gaisser (mjgaisser@gmail.com)
- * Licensed under the GPL v3.0 or later
+ * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.0
+ * Version: 1.1
  */
- 
-/* CHANGELOG
- * 110922 - housekeeping, added LoadFileException throw
- * 110926 - implemented DecodeResource()
- * 111108 - added ArrayFunctions calls
- * 120411 - added Chunk.Length, Block.Length to dynamic, prelim EncodeResource
- * 120415 - OpCode.UnknownC to Shift
- * 120425 - ResourceType check
+
+/* CHANGE LOG
+ * v1.1, 141215
+ * [UPD] changed license to MPL
+ * v1.0
  */
 
 using System;

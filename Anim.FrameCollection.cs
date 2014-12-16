@@ -1,16 +1,20 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2012 Michael Gaisser (mjgaisser@gmail.com)
- * Licensed under the GPL v3.0 or later
+ * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.0
+ * Version: 1.1
  */
 
 /* CHANGE LOG
- * 120530 - create
+ * v1.1, 141215
+ * [UPD] changed license to MPL
+ * [NEW] implemented SetCount
+ * v1.0
  */
 
+using System;
 using System.Collections.Generic;
 using Idmr.Common;
 
@@ -44,7 +48,59 @@ namespace Idmr.LfdReader
 				if (Count == 1) return false;
 				bool success = (_removeAt(index) != -1);
 				_parent._recalculateDimensions();
+				if (success) _isModified = true;
 				return success;
+			}
+
+			/// <summary>Adds the given item to the end of the Collection</summary>
+			/// <param name="item">The item to be added</param>
+			/// <returns>The index of the added item if successful, otherwise <b>-1</b></returns>
+			new public int Add(Frame item)
+			{
+				int index = _add(item);
+				if (index != -1)
+				{
+					_items[index]._parent = _parent;
+					_parent._recalculateDimensions();
+					if (!_isLoading) _isModified = true;
+				}
+				return index;
+			}
+
+			/// <summary>Inserts the given item at the specified index</summary>
+			/// <param name="index">Location of the item</param>
+			/// <param name="item">The item to be added</param>
+			/// <returns>The index of the added item if successful, otherwise <b>-1</b></returns>
+			new public int Insert(int index, Frame item)
+			{
+				index = _insert(index, item);
+				if (index != -1)
+				{
+					_items[index]._parent = _parent;
+					_parent._recalculateDimensions();
+					_isModified = true;
+				}
+				return index;
+			}
+
+			/// <summary>Expands or contracts the Collection, populating as necessary</summary>
+			/// <param name="value">The new size of the Collection. Must be greater than <b>0</b>.</param>
+			/// <param name="allowTruncate">Controls if the Collection is allowed to get smaller</param>
+			/// <exception cref="InvalidOperationException"><i>value</i> is smaller than <see cref="Count"/> and <i>allowTruncate</i> is <b>false</b>.</exception>
+			/// <exception cref="ArgumentOutOfRangeException"><i>value</i> must be greater than 0.</exception>
+			/// <remarks>If the Collection expands, the new items will be a blank <see cref="Frame"/>. When truncating, items will be removed starting from the last index.</remarks>
+			public override void SetCount(int value, bool allowTruncate)
+			{
+				if (value == Count) return;
+				else if (value < 1) throw new ArgumentOutOfRangeException("value", "value must be greater than 0");
+				else if (value < Count)
+				{
+					if (!allowTruncate) throw new InvalidOperationException("Reducing 'value' will cause data loss");
+					else while (Count > value) _removeAt(Count - 1);
+				}
+				else while (Count < value) Add(new Frame(_parent));
+				_parent._recalculateDimensions();
+				if (!_isLoading) _isModified = true;
 			}
 			#endregion public methods
 			
@@ -65,35 +121,6 @@ namespace Idmr.LfdReader
 						_parent._recalculateDimensions();
 					}
 				}
-			}
-			
-			/// <summary>Adds the given item to the end of the Collection</summary>
-			/// <param name="item">The item to be added</param>
-			/// <returns>The index of the added item if successful, otherwise <b>-1</b></returns>
-			new public int Add(Frame item)
-			{
-				int index = _add(item);
-				if (index != -1)
-				{
-					_items[index]._parent = _parent;
-					_parent._recalculateDimensions();
-				}
-				return index;
-			}
-			
-			/// <summary>Inserts the given item at the specified index</summary>
-			/// <param name="index">Location of the item</param>
-			/// <param name="item">The item to be added</param>
-			/// <returns>The index of the added item if successful, otherwise <b>-1</b></returns>
-			new public int Insert(int index, Frame item)
-			{
-				index = _insert(index, item);
-				if (index != -1)
-				{
-					_items[index]._parent = _parent;
-					_parent._recalculateDimensions();
-				}
-				return index;
 			}
 			#endregion public properties
 		}

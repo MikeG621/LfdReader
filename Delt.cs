@@ -1,24 +1,16 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2010-2012 Michael Gaisser (mjgaisser@gmail.com)
- * Licensed under the GPL v3.0 or later
+ * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.0
+ * Version: 1.1
  */
 
-/* CHANGELOG
- * 110829 - Additional Idmr.Common.Graphics implementations, added EnforceImageSize and EnforceLocation
- * 110908 - Left/Top validations
- * 110922 - added LoadFileException and SaveFileException throws, Write() return void
- * 110924 - implemented Decode/EncodeResource, added max dimensions
- * 111108 - added ArrayFunctions calls
- * 120329 - added ArrayFunctions calls
- * 120412 - add Palette prop, rem SetPalette()
- * 120425 - ResourceType check
- * 120523 - SetImage() to Image.set
- * 120524 - Left/Top/Image.set update _right/_bottom, InvalidOpX in Image.set
- * 120909 - fixed EncodeResource bug preventing Row.Length/Left/Top from being written
+/* CHANGE LOG
+ * v1.1, 141215
+ * [UPD] changed license to MPL
+ * v1.0
  */
 
 using System;

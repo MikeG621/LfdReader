@@ -1,16 +1,18 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2010-2012 Michael Gaisser (mjgaisser@gmail.com)
- * Licensed under the GPL v3.0 or later
+ * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.0
+ * Version: 1.1
  */
 
-/* CHANGELOG
- * 120419 - add this[string], add inherit, _items to List<>, Add/Insert/Remove to void
- * 120524 - Resource[string].get returns null if not found
+/* CHANGE LOG
+ * v1.1, 141215
+ * [UPD] changed license to MPL
+ * v1.0
  */
+
 using System;
 using System.Collections.Generic;
 

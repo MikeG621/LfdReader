@@ -1,16 +1,16 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2010-2012 Michael Gaisser (mjgaisser@gmail.com)
- * Licensed under the GPL v3.0 or later
+ * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.0
+ * Version: 1.1
  */
 
-/* CHANGELOG
- * 120423 - split out from Font.cs, add Boundary/IndexOutOfRange exceptions
- * 120426 - rem _updateWidth(), replaced fields with _parent
- * 120524 - ctor to internal
+/* CHANGE LOG
+ * v1.1, 141215
+ * [UPD] changed license to MPL
+ * v1.0
  */
 
 using System;

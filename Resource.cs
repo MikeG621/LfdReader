@@ -1,34 +1,25 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2010-2012 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2010-2014 Michael Gaisser (mjgaisser@gmail.com)
  * 
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3.0 of the License, or (at your
- * option) any later version.
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the Mozilla Public License; either version 2.0 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * This library is "as is" without warranty of any kind; including that the
+ * library is free of defects, merchantable, fit for a particular purpose or
+ * non-infringing. See the full license text for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to:
- * Free Software Foundation, Inc.
- * 59 Temple Place, Suite 330
- * Boston, MA 02111-1307 USA
+ * If a copy of the MPL (MPL.txt) was not distributed with this file,
+ * you can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Version: 1.0
+ * Version: 1.1
  */
 
-/* CHANGELOG
- * 110924 - housekeeping, added _tempFile, Decode/EncodeResource
- * 110927 - removed abstract, added _rawData
- * 111001 - ResourceType
- * 111130 - _parse to Parse and public
- * 120412 - default _fileName
- * 120416 - add ToString override
- * 120425 - rem _tempFile
+/* CHANGE LOG
+ * v1.1, 141215
+ * [UPD] changed license to MPL
+ * v1.0
  */
 
 using System;

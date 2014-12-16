@@ -1,19 +1,16 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2010-2012 Michael Gaisser (mjgaisser@gmail.com)
- * Licensed under the GPL v3.0 or later
+ * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.0
+ * Version: 1.1
  */
 
-/* CHANGELOG
- * 110914 - housekeeping, ArgEx to Frequency
- * 110922 - housekeeping, added added LoadFileException and SaveFileException throws, Write() return void
- * 110924 - implemented Decode/EncodeResource(), added SoundDataBlock/SoundBlocks, removed Data, added check to audio data length
- * 111108 - added ArrayFunctions calls
- * 120412 - SDB.DoesRepeat dynamic, SBD.NumberOfRepeats simple
- * 120425 - ResourceType check
+/* CHANGE LOG
+ * v1.1, 141215
+ * [UPD] changed license to MPL
+ * v1.0
  */
 
 using System;
