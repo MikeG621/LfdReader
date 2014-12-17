@@ -12,6 +12,7 @@ Version History
 
 v1.1, 14 Dec 2014
  - Changed license to MPL
+ - (ANIM) SetCount and IsModified implementation in FrameCollection
  
 v1.0, 05 Dec 2011
  - Release
@@ -21,7 +22,7 @@ Additional Information
 
 Idmr.Common.dll (v1.1 or later) and System.Drawing are required references
 
-To use LfdReader.Xact, Idmr.ImageFormace.Act.dll (v.20 or later) is a required
+To use LfdReader.Xact, Idmr.ImageFormat.Act.dll (v2.0 or later) is a required
 reference
 
 File structure information per resource is found in the individual class files
