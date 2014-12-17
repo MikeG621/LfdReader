@@ -2,14 +2,17 @@ Idmr.LfdReader.dll
 =================
 
 Author: Michael Gaisser (mjgaisser@gmail.com)
-Version: 1.0
-Date: 2011.12.05
+Version: 1.1
+Date: 2012.12.14
 
 Library for editing LucasArts *.LFD resource files
 
 =========
 Version History
 
+v1.1, 14 Dec 2014
+ - Changed license to MPL
+ 
 v1.0, 05 Dec 2011
  - Release
 
@@ -29,8 +32,8 @@ Programmer's reference can be found in help/Idmr.LfdReader.chm
 Copyright Information
 
 Copyright © 2008-2012 Michael Gaisser
-This library file and related files are licensed under the GNU Public License
-or GNU Free Documentation License.  See GPL.txt or FDL.txt as appropriate.
+This library file and related files are licensed under the Mozilla Public License
+v2.0 or later.  See MPL.txt for further details.
 
 The Galactic Empire: Empire Reborn is Copyright © 2004- Tiberius Fel
 
