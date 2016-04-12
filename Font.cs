@@ -1,13 +1,16 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2016 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.1
+ * Version: 1.2
  */
 
 /* CHANGE LOG
+ * v1.2,
+ * [ADD] _isModified edits
+ * [ADD] _baseLine
  * v1.1, 141215
  * [UPD] changed license to MPL
  * v1.0
@@ -59,6 +62,7 @@ namespace Idmr.LfdReader
 		short _startingChar;
 		short _bitsPerScanLine;
 		short _height;
+        short _baseLine;
 		Bitmap[] _glyphs;
 		GlyphIndexer _glyphIndexer;
 
@@ -223,13 +227,22 @@ namespace Idmr.LfdReader
 			{
 				if ((value % 8) != 0 || value <= 0) throw new ArgumentException("Value must be a positive multiple of 8", "value");
 				_bitsPerScanLine = value;
+                _isModifed = true;
 			}	// this is left as write-enabled to allow wider characters
 		}
 		/// <summary>Gets the total height of the font, also number of ScanLines</summary>
 		public short Height { get { return _height; } }
 		/// <summary>Gets or sets the zero-indexed ScanLine that is used as the "bottom" of the font</summary>
 		/// <remarks>Characters such as 'j' typically drop below this line. Is typically 2/3 to 3/4 the value of <see cref="Height"/>.</remarks>
-		public short BaseLine { get; set; }
+		public short BaseLine
+        {
+            get { return _baseLine; }
+            set
+            {
+                _baseLine = value;
+                _isModifed = true;
+            }
+        }
 		#endregion public properties
 	}
 }

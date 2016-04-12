@@ -1,13 +1,15 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2016 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.1
+ * Version: 1.2
  */
 
 /* CHANGE LOG
+ * v1.2,
+ * [ADD] _isModified edits. Not fully implemented here, as you can mess with the data still
  * v1.1, 141215
  * [UPD] changed license to MPL
  * v1.0
@@ -187,6 +189,7 @@ namespace Idmr.LfdReader
 			{
 				if (value < 10000 || value > 12000) throw new ArgumentOutOfRangeException("value must be 10-12 kHz");
 				_frequency = value;
+                _isModifed = true;
 			}
 		}
 

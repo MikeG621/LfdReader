@@ -1,6 +1,6 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2010-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2010-2016 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in ../help/Idmr.LfdReader.chm
@@ -18,7 +18,7 @@ using System.Reflection;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Imperial Department of Military Research")]
 [assembly: AssemblyProduct("Idmr.LfdReader.dll")]
-[assembly: AssemblyCopyright("Copyright © Michael Gaisser 2010-2012")]
+[assembly: AssemblyCopyright("Copyright © Michael Gaisser 2009-2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -31,4 +31,4 @@ using System.Reflection;
 //      Revision
 //
 
-[assembly: AssemblyVersion("1.1.*")]
+[assembly: AssemblyVersion("1.2.*")]

@@ -1,13 +1,15 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2016 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.1
+ * Version: 1.2
  */
 
 /* CHANGE LOG
+ * v1.2,
+ * [ADD] _isModified edits
  * v1.1, 141215
  * [UPD] changed license to MPL
  * v1.0
@@ -300,6 +302,7 @@ namespace Idmr.LfdReader
 				_image.UnlockBits(bd1);
 				Width = (short)_image.Width;
 				Height = (short)_image.Height;
+                _isModifed = true;
 			}
 			catch (Exception x) { _image = temp; throw x; }
 		}

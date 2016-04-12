@@ -1,13 +1,15 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2016 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.1
+ * Version: 1.2
  */
 
 /* CHANGE LOG
+ * v1.2,
+ * [ADD] _isModified edits
  * v1.1, 141215
  * [UPD] changed license to MPL
  * v1.0
@@ -128,13 +130,19 @@ namespace Idmr.LfdReader
 				_strings = new string[value];
 				for (int i = 0; i < (value > _numberOfStrings ? _numberOfStrings : value); i++) _strings[i] = temp[i];
 				_numberOfStrings = value;
+                _isModifed = true;
 			} 
 		}
 		/// <summary>Gets or sets the strings contained within the resource</summary>
 		public string[] Strings 
 		{ 
 			get { return _strings; }
-			set { _numberOfStrings = (short)value.Length; _strings = value; }
+			set
+            {
+                _numberOfStrings = (short)value.Length;
+                _strings = value;
+                _isModifed = true;
+            }
 		}
 	}
 }

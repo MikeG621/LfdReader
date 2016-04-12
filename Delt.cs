@@ -1,13 +1,15 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2016 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.1
+ * Version: 1.2
  */
 
 /* CHANGE LOG
+ * v1.2,
+ * [ADD] _isModified edits
  * v1.1, 141215
  * [UPD] changed license to MPL
  * v1.0
@@ -171,7 +173,7 @@ namespace Idmr.LfdReader
 			_top = BitConverter.ToInt16(_rawData, 2);
 			_right = BitConverter.ToInt16(_rawData, 4);
 			_bottom = BitConverter.ToInt16(_rawData, 6);
-			//System.Diagnostics.Debug.WriteLine("Image LTWH: " + _left + ", " + _top + ", " + Width + ", " + Height);
+			System.Diagnostics.Debug.WriteLine("Image LTWH: " + _left + ", " + _top + ", " + Width + ", " + Height);
 			byte[] imageData = new byte[_rawData.Length - 8];
 			ArrayFunctions.TrimArray(_rawData, 8, imageData);
 			try
@@ -350,6 +352,7 @@ namespace Idmr.LfdReader
 				if (value < 0 || value >= (MaximumWidth - _image.Width)) throw new BoundaryException("Left", "0-" + (MaximumWidth-_image.Width));
 				_left = value;
 				_right = (short)(Left + _image.Width - 1);
+                _isModifed = true;
 			}
 		}
 
@@ -365,6 +368,7 @@ namespace Idmr.LfdReader
 				if (value < 0 || value >= (MaximumHeight - _image.Width)) throw new BoundaryException("Top", "0-" + (MaximumHeight-_image.Width));
 				_top = value;
 				_bottom = (short)(Top + _image.Height - 1);
+                _isModifed = true;
 			}
 		}
 		
@@ -396,6 +400,7 @@ namespace Idmr.LfdReader
 				catch (Exception x) { _image = temp; throw new ArgumentException("Could not convert image to 8bpp", "Image", x); }
 				_right = (short)(Left + _image.Width - 1);
 				_bottom = (short)(Top + _image.Height - 1);
+                _isModifed = true;
 			}
 		}
 

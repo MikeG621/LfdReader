@@ -1,6 +1,6 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2010-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2010-2016 Michael Gaisser (mjgaisser@gmail.com)
  * 
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the Mozilla Public License; either version 2.0 of the
@@ -13,10 +13,13 @@
  * If a copy of the MPL (MPL.txt) was not distributed with this file,
  * you can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Version: 1.1
+ * Version: 1.2
  */
 
 /* CHANGE LOG
+ * v1.2, 
+ * [ADD] _isModifed
+ * [UPD] various minor tweaks
  * v1.1, 141215
  * [UPD] changed license to MPL
  * v1.0
@@ -52,6 +55,8 @@ namespace Idmr.LfdReader
 		protected ResourceType _type = ResourceType.Undefined;
 		/// <summary>Resource raw byte data</summary>
 		protected byte[] _rawData = null;
+        /// <summary>Flag to denote if resource must be encoded before writing</summary>
+        internal bool _isModifed = false;
 
 		/// <summary>Enumeration of all known LFD Resource Types</summary>
 		/// <remarks>Values are simply taken from the raw data (<b>int</b> or 4-byte ASCII <b>string</b>)</remarks>
@@ -264,7 +269,11 @@ namespace Idmr.LfdReader
 		public string Name
 		{
 			get { return _name; }
-			set { _name = Common.StringFunctions.GetTrimmed(value, 8); }
+			set
+            {
+                _name = StringFunctions.GetTrimmed(value, 8);
+                _isModifed = true;
+            }
 		}
 		/// <summary>Gets the length of the raw byte data, not including header</summary>
 		public int Length { get { return (_rawData != null ? _rawData.Length : 0); } }
@@ -345,10 +354,10 @@ namespace Idmr.LfdReader
 			{
 				try { _type = ParseResourceType(BitConverter.ToInt32(raw, TypeOffset)); }
 				catch { _type = ResourceType.Undefined; }
-				_name = Common.ArrayFunctions.ReadStringFromArray(raw, NameOffset, 8);
+				_name = ArrayFunctions.ReadStringFromArray(raw, NameOffset, 8);
 				int length = BitConverter.ToInt32(raw, LengthOffset);	// should <= raw.Length-HeaderLength
 				_rawData = new byte[length];
-				Common.ArrayFunctions.TrimArray(raw, HeaderLength, _rawData);
+				ArrayFunctions.TrimArray(raw, HeaderLength, _rawData);
 			}
 			else _rawData = raw;
 		}

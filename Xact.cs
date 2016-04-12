@@ -1,13 +1,15 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2016 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.1
+ * Version: 1.2
  */
 
 /* CHANGE LOG
+ * v1.2,
+ * [ADD] _isModified edits
  * v1.1, 141215
  * [UPD] changed license to MPL
  * v1.0
@@ -92,7 +94,11 @@ namespace Idmr.LfdReader
 		public FrameCollection Frames
 		{
 			get { return _act.Frames; }
-			set { _act.Frames = value; }
+			set
+            {
+                _act.Frames = value;
+                _isModifed = true;
+            }
 		}
 		
 		/// <summary>Gets or sets the pixel location used to "pin" the object in-game</summary>
@@ -101,7 +107,11 @@ namespace Idmr.LfdReader
 		public Point Center
 		{
 			get { return _act.Center; }
-			set { _act.Center = value; }
+			set
+            {
+                _act.Center = value;
+                _isModifed = true;
+            }
 		}
 		
 		/// <summary>Gets the overall height of the object</summary>

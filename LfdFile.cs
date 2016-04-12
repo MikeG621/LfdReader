@@ -1,13 +1,15 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2016 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.1
+ * Version: 1.2
  */
 
 /* CHANGE LOG
+ * v1.2, 
+ * [UPD] Only calls _encode on children if they report being modified
  * v1.1, 141215
  * [UPD] changed license to MPL
  * v1.0
@@ -161,7 +163,7 @@ namespace Idmr.LfdReader
 		/// <summary>Loops through Resources and calls the individual EncodeResource() functions</summary>
 		void _encodeResources()
 		{
-			for (int i = 0; i < _resources.Count; i++) _resources[i].EncodeResource();
+			for (int i = 0; i < _resources.Count; i++) if (_resources[i]._isModifed) _resources[i].EncodeResource();
 		}
 
 		void _read(FileStream stream)
@@ -220,5 +222,16 @@ namespace Idmr.LfdReader
 			else _resources[index] = new Resource(stream, offset);
 		}
 		#endregion private methods
+
+        bool _isModified
+        {
+            get
+            {
+                for (int i = 0; i < _resources.Count; i++)
+                    if (_resources[i]._isModifed) return true;
+
+                return false;
+            }
+        }
 	}
 }

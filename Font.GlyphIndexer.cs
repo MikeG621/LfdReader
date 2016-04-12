@@ -13,14 +13,13 @@
  * v1.0
  */
 
+using Idmr.Common;
 using System;
 using System.Drawing;
-using System.Drawing.Imaging;
-using Idmr.Common;
 
 namespace Idmr.LfdReader
 {
-	public partial class Font : Resource
+    public partial class Font : Resource
 	{
 		/// <summary>Object to provide array access to the character glyphs</summary>
 		public class GlyphIndexer : Indexer<Bitmap>

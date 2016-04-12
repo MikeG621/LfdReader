@@ -1,13 +1,16 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2016 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.1
+ * Version: 1.2
  */
 
 /* CHANGE LOG
+ * v1.2,
+ * [ADD] _isModified edits
+ * [DEL] removed old code duplicating DELT data
  * v1.1, 141215
  * [UPD] changed license to MPL
  * v1.0
@@ -142,20 +145,12 @@ namespace Idmr.LfdReader
 			int offset = 2;
 			for (int i = 0; i < NumberOfFrames; i++)
 			{
-				frameLength = BitConverter.ToInt32(_rawData, offset);
+                System.Diagnostics.Debug.WriteLine("frame " + i + ", offset " + offset);
+                frameLength = BitConverter.ToInt32(_rawData, offset);
 				byte[] delt = new byte[frameLength];
 				ArrayFunctions.TrimArray(_rawData, offset + 4, delt);
 				//System.Diagnostics.Debug.WriteLine("Frame offset: " + offset);
 				_frames[i]._delt.DecodeResource(delt, false);
-				/*_frames[i]._left = BitConverter.ToInt16(_rawData, offset + 4);
-				_frames[i]._top = BitConverter.ToInt16(_rawData, offset + 6);
-				_frames[i]._right = BitConverter.ToInt16(_rawData, offset + 8);
-				_frames[i]._bottom = BitConverter.ToInt16(_rawData, offset + 10);
-				byte[] encoded = new byte[frameLength - 8];
-				ArrayFunctions.TrimArray(_rawData, offset + 12, encoded);
-				//System.Diagnostics.Debug.WriteLine("frame offset: " + offset);
-				//System.Diagnostics.Debug.WriteLine("frame length: " + frameLength);
-				_frames[i]._image = Delt.DecodeImage( _frames[i].Left, _frames[i].Top, _frames[i].Width, _frames[i].Height, encoded);*/
 				if (HasDefinedPalette) _frames[i]._delt.Palette = _palette;
 				offset += frameLength + 4;
 			}
@@ -167,14 +162,11 @@ namespace Idmr.LfdReader
 		/// <summary>Prepares the resource for writing and updates <see cref="RawData"/></summary>
 		public override void EncodeResource()
 		{
-			//byte[][] images = new byte[NumberOfFrames][];
 			int len = 2;
 			for (int i = 0; i < NumberOfFrames; i++)
 			{
 				_frames[i]._delt.EncodeResource();
 				len += _frames[i]._delt.Length + 4;
-				//images[i] = Delt.EncodeImage(_frames[i].Image, _frames[i].Left, _frames[i].Top);
-				//len += images[i].Length + 12;
 			}
 			byte[] raw = new byte[len];
 			int offset = 0;
@@ -183,12 +175,6 @@ namespace Idmr.LfdReader
 			{
 				ArrayFunctions.WriteToArray(_frames[i]._delt.Length + 4, raw, ref offset);
 				ArrayFunctions.WriteToArray(_frames[i]._delt.RawData, raw, ref offset);
-				/*ArrayFunctions.WriteToArray(images[i].Length + 8, raw, ref offset);
-				ArrayFunctions.WriteToArray(_frames[i].Left, raw, ref offset);
-				ArrayFunctions.WriteToArray(_frames[i].Top, raw, ref offset);
-				ArrayFunctions.WriteToArray(_frames[i]._delt._right, raw, ref offset);
-				ArrayFunctions.WriteToArray(_frames[i]._delt._bottom, raw, ref offset);
-				ArrayFunctions.WriteToArray(images[i], raw, ref offset);*/
 			}
 			_rawData = raw;
 
@@ -228,6 +214,7 @@ namespace Idmr.LfdReader
 				short diff = (short)(value - _left);
 				for (int f = 0; f < NumberOfFrames; f++) _frames[f].Left += diff;
 				_left = value;
+                _isModifed = true;
 			}
 		}
 		/// <summary>Gets or sets the Top screen location of the resource</summary>
@@ -243,6 +230,7 @@ namespace Idmr.LfdReader
 				short diff = (short)(value - _top);
 				for (int f = 0; f < NumberOfFrames; f++) _frames[f].Top += diff;
 				_top = value;
+                _isModifed = true;
 			}
 		}
 		/// <summary>Gets the maximum width occupied by the resource</summary>
