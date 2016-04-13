@@ -147,7 +147,7 @@ namespace Idmr.LfdReader
 			_glyphs = new Bitmap[BitConverter.ToInt16(_rawData, offset + 2)];
 			_bitsPerScanLine = BitConverter.ToInt16(_rawData, offset + 4);
 			_height = BitConverter.ToInt16(_rawData, offset + 6);
-			BaseLine = BitConverter.ToInt16(_rawData, offset + 8);
+			_baseLine = BitConverter.ToInt16(_rawData, offset + 8);
 			offset += 12;
 			for (int i = 0; i < _glyphs.Length; i++)
 				_glyphs[i] = new Bitmap(_rawData[offset++], _height, PixelFormat.Format1bppIndexed);

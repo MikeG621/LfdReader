@@ -173,7 +173,7 @@ namespace Idmr.LfdReader
 			_top = BitConverter.ToInt16(_rawData, 2);
 			_right = BitConverter.ToInt16(_rawData, 4);
 			_bottom = BitConverter.ToInt16(_rawData, 6);
-			System.Diagnostics.Debug.WriteLine("Image LTWH: " + _left + ", " + _top + ", " + Width + ", " + Height);
+			System.Diagnostics.Debug.WriteLine("Image LTRBWH: " + _left + ", " + _top + ", " + _right + ", " + _bottom + ", " + Width + ", " + Height);
 			byte[] imageData = new byte[_rawData.Length - 8];
 			ArrayFunctions.TrimArray(_rawData, 8, imageData);
 			try
