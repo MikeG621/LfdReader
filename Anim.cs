@@ -145,7 +145,7 @@ namespace Idmr.LfdReader
 			int offset = 2;
 			for (int i = 0; i < NumberOfFrames; i++)
 			{
-                System.Diagnostics.Debug.WriteLine("frame " + i + ", offset " + offset);
+                //System.Diagnostics.Debug.WriteLine("frame " + i + ", offset " + offset);
                 frameLength = BitConverter.ToInt32(_rawData, offset);
 				byte[] delt = new byte[frameLength];
 				ArrayFunctions.TrimArray(_rawData, offset + 4, delt);

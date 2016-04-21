@@ -9,6 +9,7 @@
 
 /* CHANGE LOG
  * v1.2,
+ * [FIX] Fixed EncodeResource writing to array due to large Stride
  * [ADD] _isModified edits
  * [ADD] _baseLine
  * v1.1, 141215
@@ -167,6 +168,7 @@ namespace Idmr.LfdReader
 		/// <summary>Prepares the resource for writing and updates <see cref="RawData"/></summary>
 		public override void EncodeResource()
 		{
+			System.Diagnostics.Debug.WriteLine("bit width: " + _bitsPerScanLine + ", height: " + _height + "num glyphs: " + _glyphs.Length);
 			byte[] raw = new byte[12 + (_bitsPerScanLine / 8 * _height + 1) * _glyphs.Length];
 			ArrayFunctions.WriteToArray(_startingChar, raw, 0);
 			ArrayFunctions.WriteToArray((short)_glyphs.Length, raw, 2);
@@ -179,7 +181,13 @@ namespace Idmr.LfdReader
 				BitmapData bd1 = GraphicsFunctions.GetBitmapData(_glyphs[i]);
 				byte[] pix1 = new byte[bd1.Stride * bd1.Height];
 				GraphicsFunctions.CopyImageToBytes(bd1, pix1);
-				ArrayFunctions.WriteToArray(pix1, raw, ref offset);
+				// BitmapData.Stride rounds up to 4, so we have to trim off the excess bytes
+				byte[] trimmed = new byte[_height * _bitsPerScanLine / 8];
+				for (int y = 0; y < _height; y++)
+					for (int x = 0; x < (_bitsPerScanLine / 8); x++)
+						trimmed[x + y * (_bitsPerScanLine / 8)] = pix1[x + y * bd1.Stride];
+				System.Diagnostics.Debug.WriteLine("pix1.Length: " + pix1.Length + ", trimmed.Length: " + trimmed.Length + ", offset: " + offset);
+				ArrayFunctions.WriteToArray(trimmed, raw, ref offset);
 				_glyphs[i].UnlockBits(bd1);
 			}
 			_rawData = raw;
@@ -244,5 +252,15 @@ namespace Idmr.LfdReader
             }
         }
 		#endregion public properties
+
+		/* // This only exists for brute forcing new glyphs for now
+		public void DebugAdd()
+		{
+			Bitmap[] newArray = new Bitmap[_glyphs.Length + 1];
+			for (int i = 0; i < _glyphs.Length; i++) newArray[i] = _glyphs[i];
+			Bitmap blank = new Bitmap(1, _height, PixelFormat.Format1bppIndexed);
+			newArray[newArray.Length - 1] = new Bitmap(1, _height, PixelFormat.Format1bppIndexed);
+			_glyphs = newArray;
+		}*/
 	}
 }
