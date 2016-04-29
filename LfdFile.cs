@@ -9,6 +9,7 @@
 
 /* CHANGE LOG
  * v1.2, 
+ * [UPD] Always zeroes out name before writing
  * [UPD] Only calls _encode on children if they report being modified
  * v1.1, 141215
  * [UPD] changed license to MPL
@@ -114,6 +115,8 @@ namespace Idmr.LfdReader
 				{
 					long pos = stream.Position;
 					bw.Write((int)_resources[i].Type);
+					bw.Write((long)0);
+					stream.Position = pos + Resource.NameOffset;
 					bw.Write(_resources[i].Name.ToCharArray());
 					stream.Position = pos + Resource.LengthOffset;
 					bw.Write(_resources[i].Length);
