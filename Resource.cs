@@ -1,6 +1,6 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2010-2016 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2016 Michael Gaisser (mjgaisser@gmail.com)
  * 
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the Mozilla Public License; either version 2.0 of the
@@ -17,7 +17,7 @@
  */
 
 /* CHANGE LOG
- * v1.2, 
+ * v1.2, 160712
  * [ADD] _isModifed
  * [UPD] various minor tweaks
  * v1.1, 141215

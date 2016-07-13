@@ -8,7 +8,7 @@
  */
 
 /* CHANGE LOG
- * v1.2, 
+ * v1.2, 160712
  * [UPD] Always zeroes out name before writing
  * [UPD] Only calls _encode on children if they report being modified
  * v1.1, 141215

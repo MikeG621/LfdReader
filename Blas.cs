@@ -8,7 +8,7 @@
  */
 
 /* CHANGE LOG
- * v1.2,
+ * v1.2, 160712
  * [ADD] _isModified edits. Not fully implemented here, as you can mess with the data still
  * v1.1, 141215
  * [UPD] changed license to MPL

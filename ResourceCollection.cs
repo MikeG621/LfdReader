@@ -162,7 +162,7 @@ namespace Idmr.LfdReader
 		}
 		
 		/// <summary>A single Resource within the collection</summary>
-		/// <param name="label">The identifying string of the Resource in the form of "<see cref="Type">TYPE</see><see cref="Name"/></b>"</param>
+		/// <param name="label">The identifying string of the Resource in the form of "<see cref="Type">TYPE</see><see cref="Name"/>"</param>
 		/// <exception cref="ArgumentException">Resource not found</exception>
 		/// <exception cref="InvalidOperationException">Attempted to set when structure is locked and <see cref="Resource.Type"/> or <see cref="Resource.Name"/> have been changed</exception>
 		/// <returns>The Resource matching <i>label</i>, otherwise <b>null</b></returns>

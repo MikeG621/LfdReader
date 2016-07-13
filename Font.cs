@@ -8,7 +8,7 @@
  */
 
 /* CHANGE LOG
- * v1.2,
+ * v1.2, 160712
  * [FIX] Fixed EncodeResource writing to array due to large Stride
  * [ADD] _isModified edits
  * [ADD] _baseLine
