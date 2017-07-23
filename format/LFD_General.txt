@@ -1,0 +1,86 @@
+
+LFD Format Overview
+
+The LFD format is the standard multi-purpose data storage file type used by
+LucasArts Entertainment LLC. Storage types vary from text to animations, and
+all files end in the .LFD extension.
+
+=====
+LFD Structure
+
+The following values are used through this and all of my file definitions
+unless otherwise specified:
+NAME	LENGTH	DESC
+----	------	----
+CHAR	1	ASCII character
+INT	4	signed Int32
+
+The LFD file has two main sections; the file header, and data block (which may 
+include a sub-header).  Header blocks are 16-bytes with the following 
+structure:
+
+CHAR[4]	Type;
+CHAR[8]	Name;
+INT	Length;
+
+=====
+-- Type --
+
+Multiple resource types exist that can be used in a given LFD file, and the use
+of certain kinds allow for multiple types and multiple data blocks to be
+contained in a single file.  Known resource types follow:
+
+Type	Type (hex)	Data block contents
+----	-----------	-----------------------------------------------------
+ANIM	41 4E 49 4D	2D Animations
+BLAS	42 4C 41 53	Creative .VOC sound data (mostly weapons)
+BMAP	42 4D 41 50	Bitmap data?
+CUST	43 55 53 54	??? Image data?
+DELT	44 45 4C 54	Image data
+FILM	46 49 4C 4D	View layout
+FONT	46 4F 4E 54	Font glyph definition
+GMID	47 4D 49 44	MIDI data
+MASK	4D 41 53 4B	Cockpit transparency mask
+MTRX	4D 54 52 58	???
+PANL	50 41 4E 4C	Cockpit panel image data
+PLTT	50 4C 54 54	Palette data
+RMAP	52 4D 41 50	Subheader information for additional data blocks,
+					will only appear as first header
+SHIP	53 48 49 50	Craft External View vector data?
+TEXT	54 45 58 54	Plain text data
+VOIC	56 4F 49 43	Creative .VOC sound data (mostly sound fx/voice)
+XACT	58 41 43 54	Backdrops, explosion graphics, etc
+
+The RMAP type is always accompanied by a TITLE of "resource", and the LENGTH
+will always be a multiple of 0x10, due to the data block containing only
+additional headers.  When editing data within a RMAP-using LFD, care must be
+taken to ensure that the LENGTHs defined in a given sub-header defined in the
+RMAP matches the LENGTH for the corresponding data block.
+
+The TEXT type can contain an unlimited number of seperate strings, but the
+numbers of strings within a given TEXT section must remain constant to prevent
+application failure.  If strings are being removed, the zero bytes on either
+side must be kept.  A safe practice is to replace a string with 0x20 if you
+truly wish for it to be removed.  LENGTH must be adjusted as well, unless care
+is taken to adjust multiple strings such that the overall length does not
+change. All TEXT data blocks begin with a WORD value I'll define as
+TEXT_STRINGS. This is the number of STRINGs contained in the data block that
+have STRING_LENGTH values, not the sub-strings within them.
+
+Other TYPEs will be dealt with on an individual basis or within specific
+LFD variants.
+
+-- Name --
+
+This value seems to have little bearing on function, other than to make a hex
+dump slightly more readable.  Abbreviated descriptions are the norm.  Note that
+certain resource types (FILM, for example) use the TITLE to define properties
+in the layout.
+
+-- Length --
+
+This is the length of the data block in bytes that immediate follows the
+header.  This value is little-endian, such that 0x0001224D is stored as
+4D 22 01 00.
+
+=====

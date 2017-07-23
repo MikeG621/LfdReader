@@ -1,0 +1,92 @@
+LFD Battle Files
+Author: Michael Gaisser (mjgaisser@gmail.com)
+Site: http://idmr.empirereborn.net
+Updated: 2009.10.05
+=====
+Battle LFD Overview
+
+The Battle LFD is used by TIE Fighter to define the mission files used in a
+given battle, as well as the descriptions and system image see in the Battle
+Selection screen.  There is one LFD file for each battle and can be found in
+the RESOURCE/ directory
+
+=====
+Battle LFD Structure
+
+The following values are used through this and all of my file definitions
+unless otherwise specified:
+NAME	LENGTH	DESC
+----	------	----
+SHORT	2	signed Int16
+
+The Battle LFD variant contains three resources; RMAP, TEXT, and DELT.
+
+--
+0x00	Rmap
+0x30	BattleText
+	Delt
+--
+
+struct BattleText
+{
+	0x00	Header
+	0x10	SHORT	NumberOfStrings
+	0x12	String	Names
+			SubString[0]	Battle
+			Substring[1]	Cutscene
+		String	Titles
+			SubString[0]	Battle1
+			SubString[1]	Battle2
+			SubString[2]	Cutscene1
+			SubgString[3]	CutScene2
+		String	Image
+			SubString[0]	Delt.Name
+			SubString[1]	System Name
+			SubString[2]	Frame
+		String	Missions
+			SubString[]	Mission Filenames
+		String[]	Mission Descriptions
+}
+
+=====
+Structure Details
+
+-- Rmap --
+
+The file begins with the RMAP resource type with a Length of 0x20 for the
+two sub-sections, followed by the two subsequent headers.  SubHeader[0] is
+for the TEXT, SubHeader[1] is the DELT. Refer to Resource_RMAP.txt for more
+detailed RMAP information.
+
+-- Text --
+
+Text.Header.Name in this resource is the filename, minus extension.
+Text.NumberOfStrings in this resource evaluates to NumberOfMissions + 4.
+
+The Name and Title Strings are those shown in the Battle Selection screen.
+There are effectively six lines of text that can be used here.
+
+Image text is part text, part data stored in text form. The purpose of
+having Delt.Name here is unknown, since there's only one DELT data block
+to get the image from. It may be feasible to load a DELT resource defined in
+another file loaded in memory. SystemName is the string that displays when
+the system image has zoomed in on the galaxy map. The Frame value controls the
+frame that appears on the galaxy map before zooming and is of the form:
+Top + " " + Height + " " + Left + " " + Width, where the values are stored as
+strings, not numerals (so a 120x90 frame at (20,30) SubString is
+"30 90 20 120/0").
+
+The next string is the list of filenames without extensions for all missions
+involved in the battle.  The Descriptions follow, which are shown in the
+Combat Chamber when playing historical battles after completion in the
+campaign. There is only one SubString for each Description.
+
+-- Delt --
+
+The image data located in the DELT resource is the system image that is shown
+on the galaxy map after being zoomed in. The first row (0) itself is hidden
+and is not seen in-game, due to the enlarged image TOP being set to just within
+the frame of the galaxy map. That value is controlled within a seperate file.
+For the purposes of this file, simply treat the first row as dead space. 
+
+For information regarding the DELT structure, refer to Resource_DELT.txt.

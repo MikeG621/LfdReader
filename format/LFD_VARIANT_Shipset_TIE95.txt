@@ -1,0 +1,62 @@
+Shipset LFD File
+Author: Michael Gaisser (mjagisser@gmail.com)
+Site: http://idmr.empirereborn.net
+Updated: 2009.10.05
+=====
+
+The Shipset#.LFD file used by TIE95 holds the data used by the Tech Room. Many
+craft that are in the game are not shown in Tech Room, and it is simple to add
+them to the list. The file holds the OPT model name and the strings displayed.
+
+Note: The Shipset files do not include the seven player craft (TIE through MIS)
+as these strings are defined in their respective SHIP#.LFD files.
+
+=====
+Shipset LFD Structure
+
+The following values are used through this and all of my file definitions
+unless otherwise specified:
+NAME	LENGTH	DESC
+----	------	----
+SHORT	2	signed Int16
+
+The Shipset LFD only has two data blocks; a completely unneccessary RMAP block,
+and the TEXT block.  It may be possible that more than one section was intended
+for these files at one point, hence the use of RMAP.
+
+--
+0x00	Rmap
+0x20	ShipsetText
+--
+
+struct ShipsetText
+{
+	0x00	Header
+	0x10	SHORT	NumberOfShips
+	0x12	String[NumberOfShips]
+			SubString[0]	Name
+			SubString[1]	OptFilename
+			SubString[2]	Line1
+			SubString[3]	Line2
+			SubString[4]	Line3
+			SubString[5]	Line4
+}
+
+=====
+Structure Detail
+
+Just the Text is of real importance, the Rmap could've been excluded entirely.
+
+Text.Header.Name is the filename minus extension.
+
+There are six SubStrings used in the file, but only three types. The first one
+is the craft name and abbreviation that is displayed when the craft is selected
+in the Tech Room. The second SubString tells the application which OPT model to
+display. The last four SubStrings are the text that are displayed below the
+model. Typical values for these substrings are top speed, armaments, followed
+by shields and hull strengths. The Line# substrings can be whatever you desire,
+only the OptFilename has any sort of importance to it.
+
+Refer to Resource_TEXT.txt for more detailed TEXT information.
+
+=====
