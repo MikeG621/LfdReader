@@ -138,7 +138,7 @@ namespace Idmr.LfdReader
 		/// <summary>Processes raw data to populate the resource</summary>
 		/// <param name="raw">Raw byte data</param>
 		/// <param name="containsHeader">Whether or not <i>raw</i> contains the resource Header information</param>
-		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="ResourceType.Font"/></exception>
+		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Font"/></exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
 			_decodeResource(raw, containsHeader);
@@ -165,7 +165,7 @@ namespace Idmr.LfdReader
 			_glyphIndexer = new GlyphIndexer(this);
 		}
 
-		/// <summary>Prepares the resource for writing and updates <see cref="RawData"/></summary>
+		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/></summary>
 		public override void EncodeResource()
 		{
 			System.Diagnostics.Debug.WriteLine("bit width: " + _bitsPerScanLine + ", height: " + _height + "num glyphs: " + _glyphs.Length);

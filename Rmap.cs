@@ -103,7 +103,7 @@ namespace Idmr.LfdReader
 		/// <summary>Processes raw data to populate the resource</summary>
 		/// <param name="raw">Raw byte data</param>
 		/// <param name="containsHeader">Whether or not <i>raw</i> contains the resource Header information</param>
-		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="ResourceType.Rmap"/></exception>
+		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Rmap"/></exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
 			_decodeResource(raw, containsHeader);
@@ -123,7 +123,7 @@ namespace Idmr.LfdReader
 			}
 		}
 
-		/// <summary>Prepares the resource for writing and updates <see cref="RawData"/></summary>
+		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/></summary>
 		public override void EncodeResource()
 		{
 			byte[] raw = new byte[_headers.Length * HeaderLength];
@@ -174,7 +174,7 @@ namespace Idmr.LfdReader
 			}
 			/// <summary>Gets or sets the Length of the resource</summary>
 			public int Length { get { return _length; } set { _length = value; } }
-			/// <summary>Gets or sets the <see cref="File.Position"/> of the resource</summary>
+			/// <summary>Gets or sets the File.Position of the resource</summary>
 			public int Offset { get { return _offset; } set { _offset = value; } }
 		}
 	}

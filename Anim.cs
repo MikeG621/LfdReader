@@ -132,7 +132,7 @@ namespace Idmr.LfdReader
 		/// <summary>Processes raw data to populate the resource</summary>
 		/// <param name="raw">Raw byte data</param>
 		/// <param name="containsHeader">Whether or not <i>raw</i> contains the resource Header information</param>
-		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="ResourceType.Anim"/></exception>
+		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Anim"/></exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
 			_decodeResource(raw, containsHeader);
@@ -159,7 +159,7 @@ namespace Idmr.LfdReader
 			//System.Diagnostics.Debug.WriteLine("... complete");
 		}
 
-		/// <summary>Prepares the resource for writing and updates <see cref="RawData"/></summary>
+		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/></summary>
 		public override void EncodeResource()
 		{
 			int len = 2;
@@ -261,7 +261,7 @@ namespace Idmr.LfdReader
 		public bool HasDefinedPalette { get { return _palette != null; } }
 		
 		/// <summary>When <b>true</b>, locks the overall Anim boundaries</summary>
-		/// <remarks>When fixed, <see cref="Frame.Image"/> and <see cref="Frame.Location"/> cannot be edited in a manner that would result in portions of the <see cref="Frame"/> residing outside the original boundaries of the Anim.<br/>
+		/// <remarks>When fixed, <see cref="Frame.Image"/> and <see cref="Frame.Position"/> cannot be edited in a manner that would result in portions of the <see cref="Frame"/> residing outside the original boundaries of the Anim.<br/>
 		/// Defaults to <b>false</b>.</remarks>
 		public bool HasFixedDimensions { get; set; }
 

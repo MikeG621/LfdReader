@@ -234,7 +234,7 @@ namespace Idmr.LfdReader
 		/// <summary>Processes raw data to populate the resource</summary>
 		/// <param name="raw">Raw byte data</param>
 		/// <param name="containsHeader">Whether or not <i>raw</i> contains the resource Header information</param>
-		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> from the LFD is not <see cref="ResourceType.Panl"/></exception>
+		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> from the LFD is not <see cref="Resource.ResourceType.Panl"/></exception>
 		/// <remarks>If resource was created from a *.PNL file, <i>containsHeader</i> is ignored.</remarks>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
@@ -263,7 +263,7 @@ namespace Idmr.LfdReader
 			}
 		}
 
-		/// <summary>Preparess the resource for writing and updates <see cref="RawData"/></summary>
+		/// <summary>Preparess the resource for writing and updates <see cref="Resource.RawData"/></summary>
 		public override void EncodeResource()
 		{
 			//TODO: test Panl.Write()

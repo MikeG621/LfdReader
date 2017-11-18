@@ -67,7 +67,7 @@ namespace Idmr.LfdReader
 		/// <summary>Processes raw data to populate the resource</summary>
 		/// <param name="raw">Raw byte data</param>
 		/// <param name="containsHeader">Whether or not <i>raw</i> contains the resource Header information</param>
-		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="ResourceType.Xact"/></exception>
+		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Xact"/></exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
 			_decodeResource(raw, containsHeader);
@@ -75,7 +75,7 @@ namespace Idmr.LfdReader
 			_act = new ActImage(_rawData);
 		}
 
-		/// <summary>Prepares the resource for writing and updates <see cref="RawData"/></summary>
+		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/></summary>
 		public override void EncodeResource()
 		{
 			string tempActFile = _fileName + ".act";

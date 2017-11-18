@@ -164,7 +164,7 @@ namespace Idmr.LfdReader
 		/// <summary>Processes raw data to populate the resource</summary>
 		/// <param name="raw">Raw byte data</param>
 		/// <param name="containsHeader">Whether or not <i>raw</i> contains the resource Header information</param>
-		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="ResourceType.Delt"/></exception>
+		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Delt"/></exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
 			_decodeResource(raw, containsHeader);
@@ -184,7 +184,7 @@ namespace Idmr.LfdReader
 			catch { _image = ErrorImage; throw; }
 		}
 
-		/// <summary>Prepares the resource for writing and updates <see cref="RawData"/></summary>
+		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/></summary>
 		public override void EncodeResource()
 		{
 			byte[] image = EncodeImage(_image, _left, _top);

@@ -86,7 +86,7 @@ namespace Idmr.LfdReader
 			/// <summary>Expands or contracts the Collection, populating as necessary</summary>
 			/// <param name="value">The new size of the Collection. Must be greater than <b>0</b>.</param>
 			/// <param name="allowTruncate">Controls if the Collection is allowed to get smaller</param>
-			/// <exception cref="InvalidOperationException"><i>value</i> is smaller than <see cref="Count"/> and <i>allowTruncate</i> is <b>false</b>.</exception>
+			/// <exception cref="InvalidOperationException"><i>value</i> is smaller than <see cref="FixedSizeCollection{T}.Count"/> and <i>allowTruncate</i> is <b>false</b>.</exception>
 			/// <exception cref="ArgumentOutOfRangeException"><i>value</i> must be greater than 0.</exception>
 			/// <remarks>If the Collection expands, the new items will be a blank <see cref="Frame"/>. When truncating, items will be removed starting from the last index.</remarks>
 			public override void SetCount(int value, bool allowTruncate)

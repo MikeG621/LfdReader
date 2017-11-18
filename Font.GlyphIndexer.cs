@@ -38,10 +38,10 @@ namespace Idmr.LfdReader
 			
 			/// <summary>Gets or sets the individual images</summary>
 			/// <param name="index">Array index</param>
-			/// <returns><see cref="PixelFormat.Format1bppIndexed"/> Bitmap</returns>
+			/// <returns><see cref="System.Drawing.Imaging.PixelFormat.Format1bppIndexed"/> Bitmap</returns>
 			/// <exception cref="ArgumentException">Image Height is incorrect</exception>
-			/// <exception cref="Idmr.Common.BoundaryException">Maximum character width is exceeded</exception>
-			/// <exception cref="IndexOutOfRangeExecption">Invalid <i>index</i> value</exception>
+			/// <exception cref="BoundaryException">Maximum character width is exceeded</exception>
+			/// <exception cref="IndexOutOfRangeException">Invalid <i>index</i> value</exception>
 			public override Bitmap this[int index]
 			{
 				get { return _items[index]; }

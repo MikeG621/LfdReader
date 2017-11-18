@@ -90,7 +90,7 @@ namespace Idmr.LfdReader
 		/// <summary>Processes raw data to populate the resource</summary>
 		/// <param name="raw">Raw byte data</param>
 		/// <param name="containsHeader">Whether or not <i>raw</i> contains the resource Header information</param>
-		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="ResourceType.Pltt"/></exception>
+		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Pltt"/></exception>
 		/// <remarks>Unused entries are initialized to <see cref="Color.Transparent"/>.</remarks>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
@@ -104,8 +104,8 @@ namespace Idmr.LfdReader
 			for (int i = _endIndex + 1; i < 256; i++) _entries[i] = Color.Transparent;
 			_colorIndexer = new ColorIndexer(this);
 		}
-		
-		/// <summary>Prepares the resource for writing and updates <see cref="RawData"/></summary>
+
+		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/></summary>
 		public override void EncodeResource()
 		{
 			byte[] raw = new byte[_entries.Length * 3 + 3];

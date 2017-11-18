@@ -39,7 +39,7 @@ namespace Idmr.LfdReader
 			}
 			
 			/// <summary>Gets or sets the global left position of the frame</summary>
-			/// <exception cref="Idmr.Common.BoundaryException"><i>Left</i> results in portions of the image being outside the acceptable boundaries</exception>
+			/// <exception cref="BoundaryException"><i>Left</i> results in portions of the image being outside the acceptable boundaries</exception>
 			/// <remarks>If <see cref="HasFixedDimensions"/> is <b>false</b>, the parent dimensions will adjust as necessary.<br/>
 			/// Otherwise, out-of-bounds content results in an exception</remarks>
 			public short Left
@@ -56,7 +56,7 @@ namespace Idmr.LfdReader
 			}
 			
 			/// <summary>Gets or sets the global top position of the frame</summary>
-			/// <exception cref="Idmr.Common.BoundaryException"><i>Top</i> results in portions of the image being outside the acceptable boundaries</exception>
+			/// <exception cref="BoundaryException"><i>Top</i> results in portions of the image being outside the acceptable boundaries</exception>
 			/// <remarks>If <see cref="HasFixedDimensions"/> is <b>false</b>, the parent dimensions will adjust as necessary.<br/>
 			/// Otherwise, out-of-bounds content results in an exception</remarks>
 			public short Top
@@ -83,7 +83,7 @@ namespace Idmr.LfdReader
 			/// When setting the image, if <see cref="HasFixedDimensions"/> is <b>false</b>, the parent dimensions will adjust as necessary. Otherwise, out-of-bounds content results in an exception.<br/><br/>
 			/// <i>Image</i> is converted to <see cref="PixelFormat.Format8bppIndexed"/> using the current <see cref="Anim"/> palette if it exists. If the palette is undefined, loading a <see cref="PixelFormat.Format8bppIndexed"/> image will set the palette for the <see cref="Anim"/>.</remarks>
 			/// <exception cref="InvalidOperationException"><i>Image</i> is not <see cref="PixelFormat.Format8bppIndexed"/> and the parent <see cref="Anim"/> does not have a defined palette</exception>
-			/// <exception cref="Idmr.Common.BoundaryException"><i>Image.Size</i> results in portions of the image being outside the acceptable boundaries</exception>
+			/// <exception cref="BoundaryException"><i>Image.Size</i> results in portions of the image being outside the acceptable boundaries</exception>
 			public Bitmap Image
 			{
 				get
@@ -123,7 +123,7 @@ namespace Idmr.LfdReader
 			}
 			
 			/// <summary>Gets or sets the global position of the frame</summary>
-			/// <exception cref="Idmr.Common.BoundaryException"><i>Position</i> results in portions of the image being outside the acceptable boundaries</exception>
+			/// <exception cref="BoundaryException"><i>Position</i> results in portions of the image being outside the acceptable boundaries</exception>
 			/// <remarks>If <see cref="HasFixedDimensions"/> is <b>false</b>, the parent dimensions will adjust as necessary.<br/>
 			/// Otherwise, out-of-bounds content results in an exception.</remarks>
 			public Point Position

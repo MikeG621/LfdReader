@@ -103,7 +103,7 @@ namespace Idmr.LfdReader
 		/// <summary>Processes raw data to populate the resource</summary>
 		/// <param name="raw">Raw byte data</param>
 		/// <param name="containsHeader">Whether or not <i>raw</i> contains the resource Header information</param>
-		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="ResourceType.Blas"/> or <see cref="ResourceType.Voic"/></exception>
+		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Blas"/> or <see cref="Resource.ResourceType.Voic"/>.</exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
 			int offset = _vocHeaderLength;
@@ -144,7 +144,7 @@ namespace Idmr.LfdReader
 			//System.Diagnostics.Debug.WriteLine("blocks complete");
 		}
 
-		/// <summary>Prepares the resource for writing and updates <see cref="RawData"/></summary>
+		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/></summary>
 		public override void EncodeResource()
 		{
 			int len = _vocHeaderLength + 1;	// VocHeader + EofBlock

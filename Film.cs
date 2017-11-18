@@ -92,7 +92,7 @@ namespace Idmr.LfdReader
 		/// <summary>Processes raw data to populate the resource</summary>
 		/// <param name="raw">Raw byte data</param>
 		/// <param name="containsHeader">Whether or not <i>raw</i> contains the resource Header information</param>
-		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="ResourceType.Film"/></exception>
+		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Film"/></exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
 			//System.Diagnostics.Debug.WriteLine("Decode FILM");
@@ -118,7 +118,7 @@ namespace Idmr.LfdReader
 				offset += len;
 			}
 		}
-		/// <summary>Prepares the resource for writing and updates <see cref="RawData"/></summary>
+		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/></summary>
 		public override void EncodeResource()
 		{
 			int length = 4;
@@ -260,45 +260,45 @@ namespace Idmr.LfdReader
 				End = 2,
 				/// <summary>Sets the time to execute the following commands</summary>
 				Time,
-				/// <summary>(<see cref="BlockType.Anim"/>, <see cref="BlockType.Delt"/>) Move the resource to a new location for animation purposes</summary>
+				/// <summary>(<see cref="Block.BlockType.Anim"/>, <see cref="Block.BlockType.Delt"/>) Move the resource to a new location for animation purposes</summary>
 				Move,
-				/// <summary>(<see cref="BlockType.Anim"/>, <see cref="BlockType.Delt"/>) The speed at which the <see cref="OpCode.Move"/> command is executed</summary>
+				/// <summary>(<see cref="Block.BlockType.Anim"/>, <see cref="Block.BlockType.Delt"/>) The speed at which the <see cref="OpCode.Move"/> command is executed</summary>
 				Speed,
-				/// <summary>(<see cref="BlockType.Anim"/>, <see cref="BlockType.Delt"/>) Establishes the drawing order for the resource</summary>
+				/// <summary>(<see cref="Block.BlockType.Anim"/>, <see cref="Block.BlockType.Delt"/>) Establishes the drawing order for the resource</summary>
 				Layer,
-				/// <summary>(<see cref="BlockType.Anim"/>, <see cref="BlockType.Delt"/>) Display the resource beginning from a specific frame</summary>
+				/// <summary>(<see cref="Block.BlockType.Anim"/>, <see cref="Block.BlockType.Delt"/>) Display the resource beginning from a specific frame</summary>
 				Frame,
-				/// <summary>(<see cref="BlockType.Anim"/>) The direction and rate of display for an animation resource</summary>
+				/// <summary>(<see cref="Block.BlockType.Anim"/>) The direction and rate of display for an animation resource</summary>
 				Animation,
-				/// <summary>(<see cref="BlockType.Anim"/>, <see cref="BlockType.Delt"/>, <see cref="BlockType.Cust"/>) Executable command</summary>
+				/// <summary>(<see cref="Block.BlockType.Anim"/>, <see cref="Block.BlockType.Delt"/>, <see cref="Block.BlockType.Cust"/>) Executable command</summary>
 				Event,
-				/// <summary>(<see cref="BlockType.Anim"/>) Executable-defined screen location for Click events</summary>
+				/// <summary>(<see cref="Block.BlockType.Anim"/>) Executable-defined screen location for Click events</summary>
 				Region,
-				/// <summary>(<see cref="BlockType.Anim"/>, <see cref="BlockType.Delt"/>) Displays a portion of the resource</summary>
+				/// <summary>(<see cref="Block.BlockType.Anim"/>, <see cref="Block.BlockType.Delt"/>) Displays a portion of the resource</summary>
 				Window,
-				/// <summary>(<see cref="BlockType.Delt"/>) Offset the image location</summary>
+				/// <summary>(<see cref="Block.BlockType.Delt"/>) Offset the image location</summary>
 				Shift,
-				/// <summary>(<see cref="BlockType.Anim"/>, <see cref="BlockType.Delt"/>, <see cref="BlockType.Cuat"/>) Show or hide the resource</summary>
+				/// <summary>(<see cref="Block.BlockType.Anim"/>, <see cref="Block.BlockType.Delt"/>, <see cref="Block.BlockType.Cust"/>) Show or hide the resource</summary>
 				Display,
-				/// <summary>(<see cref="BlockType.Anim"/>, <see cref="BlockType.Delt"/>) Flip the X/Y display of the resource</summary>
+				/// <summary>(<see cref="Block.BlockType.Anim"/>, <see cref="Block.BlockType.Delt"/>) Flip the X/Y display of the resource</summary>
 				Orientation,
-				/// <summary>(<see cref="BlockType.Pltt"/>) Marker to activate the palette</summary>
+				/// <summary>(<see cref="Block.BlockType.Pltt"/>) Marker to activate the palette</summary>
 				Use,
-				/// <summary>(<see cref="BlockType.View"/>) Unknown</summary>
+				/// <summary>(<see cref="Block.BlockType.View"/>) Unknown</summary>
 				Unknown11 = 0x11,
-				/// <summary>(<see cref="BlockType.View"/>) Method of clearing the screen and loading the new View</summary>
+				/// <summary>(<see cref="Block.BlockType.View"/>) Method of clearing the screen and loading the new View</summary>
 				Transition,
-				/// <summary>(<see cref="BlockType.Voic"/>) Unknown</summary>
+				/// <summary>(<see cref="Block.BlockType.Voic"/>) Unknown</summary>
 				Unknown13,
-				/// <summary>(<see cref="BlockType.Voic"/>) Appears to stop sounds interally set to repeat</summary>
+				/// <summary>(<see cref="Block.BlockType.Voic"/>) Appears to stop sounds interally set to repeat</summary>
 				Loop,
-				/// <summary>(<see cref="BlockType.Voic"/>) Unknown</summary>
+				/// <summary>(<see cref="Block.BlockType.Voic"/>) Unknown</summary>
 				Unknown17 = 0x17,
-				/// <summary>(<see cref="BlockType.Voic"/>) Possibly defines file the sound is located in</summary>
+				/// <summary>(<see cref="Block.BlockType.Voic"/>) Possibly defines file the sound is located in</summary>
 				Preload,
-				/// <summary>(<see cref="BlockType.Voic"/>) Determines playback controls</summary>
+				/// <summary>(<see cref="Block.BlockType.Voic"/>) Determines playback controls</summary>
 				Sound,
-				/// <summary>(<see cref="BlockType.Voic"/>) Determines stereo playback controls</summary>
+				/// <summary>(<see cref="Block.BlockType.Voic"/>) Determines stereo playback controls</summary>
 				Stereo = 0x1C }
 
 			/// <summary>Gets or sets the command instruction for the Chunk</summary>

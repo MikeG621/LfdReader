@@ -26,7 +26,7 @@ namespace Idmr.LfdReader
 
 		#region constructors
 		/// <summary>Creates a new empty Collection</summary>
-		/// <remarks>Structure is unlocked, <see cref="Add"/>, <see cref="Insert"/> and <see cref="RemoveAt"/> can be used</remarks>
+		/// <remarks>Structure is unlocked, <see cref="ResourceCollection.Add"/>, <see cref="ResourceCollection.Insert"/> and <see cref="RemoveAt"/> can be used</remarks>
 		public ResourceCollection()
 		{
 			CanEditStructure = true;
@@ -45,7 +45,7 @@ namespace Idmr.LfdReader
 		
 		/// <summary>Creates a new Collection with the specified structure</summary>
 		/// <param name="category">Structure of file to initialize</param>
-		/// <remarks>Using <see cref="LfdCategory.Normal"/> is the same as using the blank constructor, otherwise structure is locked.<br/>
+		/// <remarks>Using <see cref="LfdFile.LfdCategory.Normal"/> is the same as using the blank constructor, otherwise structure is locked.<br/>
 		/// Battle Delt palette is defined by EMPIRE.PLTTstandard and TOURDESK.PLTTtoddesk.</remarks>
 		public ResourceCollection(LfdFile.LfdCategory category)
 		{
@@ -162,7 +162,7 @@ namespace Idmr.LfdReader
 		}
 		
 		/// <summary>A single Resource within the collection</summary>
-		/// <param name="label">The identifying string of the Resource in the form of "<see cref="Type">TYPE</see><see cref="Name"/>"</param>
+		/// <param name="label">The identifying string of the Resource in the form of "<see cref="Type">TYPE</see><see cref="Resource.Name"/>"</param>
 		/// <exception cref="ArgumentException">Resource not found</exception>
 		/// <exception cref="InvalidOperationException">Attempted to set when structure is locked and <see cref="Resource.Type"/> or <see cref="Resource.Name"/> have been changed</exception>
 		/// <returns>The Resource matching <i>label</i>, otherwise <b>null</b></returns>
@@ -192,7 +192,7 @@ namespace Idmr.LfdReader
 		public int Count { get { return (_items == null ? -1 : _items.Count); } }
 		
 		/// <summary>Gets or sets whether or not the structure is unlocked</summary>
-		/// <remarks>Default is <b>false</b>, set to <b>true</b> when initialized with <see cref="ResourceCollection()"/> or <see cref="LfdCategory.Normal"/>.<br/>
+		/// <remarks>Default is <b>false</b>, set to <b>true</b> when initialized with <see cref="ResourceCollection()"/> or <see cref="LfdFile.LfdCategory.Normal"/>.<br/>
 		///	When locked, <see cref="Resource.Type"/> and <see cref="Resource.Name"/> are read-only, Collection cannot be resized</remarks>
 		public bool CanEditStructure { get; set; }
 		#endregion public properties
