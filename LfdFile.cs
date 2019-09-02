@@ -93,7 +93,7 @@ namespace Idmr.LfdReader
 		/// <exception cref="Idmr.Common.SaveFileException">An error occured, file remains unchanged</exception>
 		public void Write()
 		{
-			//System.Diagnostics.Debug.WriteLine("Encoding Lfd...");
+			System.Diagnostics.Debug.WriteLine("Encoding Lfd...");
 			if (_rmp != null) CreateRmap();
 			else _encodeResources();
 			FileStream stream = null;
@@ -102,7 +102,7 @@ namespace Idmr.LfdReader
 				if (File.Exists(_filePath)) File.Copy(_filePath, _tempPath);	// create backup
 				stream = File.OpenWrite(_filePath);
 				BinaryWriter bw = new BinaryWriter(stream);
-				//System.Diagnostics.Debug.WriteLine("Writing...");
+				System.Diagnostics.Debug.WriteLine("Writing...");
 				if (_rmp != null)
 				{
 					bw.Write((int)_rmp.Type);
@@ -125,11 +125,11 @@ namespace Idmr.LfdReader
 				stream.SetLength(stream.Position);
 				stream.Close();
 				File.Delete(_tempPath);	// delete backup if it exists
-				//System.Diagnostics.Debug.WriteLine("Completed");
+				System.Diagnostics.Debug.WriteLine("Completed");
 			}
 			catch (Exception x)
 			{
-				//System.Diagnostics.Debug.WriteLine("Write failure");
+				System.Diagnostics.Debug.WriteLine("Write failure");
 				if (stream != null) stream.Close();
 				if (File.Exists(_tempPath)) File.Copy(_tempPath, _filePath);	// restore backup if it exists
 				File.Delete(_tempPath);	// delete backup if it exists

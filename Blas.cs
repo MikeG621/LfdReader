@@ -1,13 +1,15 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2016 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2019 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.2
+ * Version: 1.2.1
  */
 
 /* CHANGE LOG
+ * v1.2.1, 190802
+ * [FIX] Type comparison in Decode was OR and could crash [#1]
  * v1.2, 160712
  * [ADD] _isModified edits. Not fully implemented here, as you can mess with the data still
  * v1.1, 141215
@@ -77,7 +79,7 @@ namespace Idmr.LfdReader
 		/// <summary>Creates a new instance from an existing opened file</summary>
 		/// <param name="stream">The opened LFD file</param>
 		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <exception cref="LoadFileException">Typically due to file corruption</exception>
 		public Blas(FileStream stream, long filePosition)
 		{
 			_read(stream, filePosition);
@@ -85,7 +87,7 @@ namespace Idmr.LfdReader
 		/// <summary>Creates a new instance from an exsiting file</summary>
 		/// <param name="path">The full path to the unopened LFD file</param>
 		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <exception cref="LoadFileException">Typically due to file corruption</exception>
 		public Blas(string path, long filePosition)
 		{
 			FileStream fsLFD = File.OpenRead(path);
@@ -93,6 +95,7 @@ namespace Idmr.LfdReader
 			fsLFD.Close();
 		}
 		#endregion constructors
+
 		void _read(FileStream stream, long filePosition)
 		{
 			try { _process(stream, filePosition); }
@@ -102,13 +105,13 @@ namespace Idmr.LfdReader
 		#region public methods
 		/// <summary>Processes raw data to populate the resource</summary>
 		/// <param name="raw">Raw byte data</param>
-		/// <param name="containsHeader">Whether or not <i>raw</i> contains the resource Header information</param>
+		/// <param name="containsHeader">Whether or not <paramref name="raw"/> contains the resource Header information</param>
 		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Blas"/> or <see cref="Resource.ResourceType.Voic"/>.</exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
 			int offset = _vocHeaderLength;
 			_decodeResource(raw, containsHeader);
-			if (_type != ResourceType.Blas || _type != ResourceType.Voic) throw new ArgumentException("Raw header is not for a Blas or Voic resource");
+			if (_type != ResourceType.Blas && _type != ResourceType.Voic) throw new ArgumentException("Raw header is not for a Blas or Voic resource");
 			_soundBlocks = new SoundDataBlock[2];	// maximum number of Sound blocks observed in TIE
 			for (int i = 0; i < _soundBlocks.Length; i++)
 			{

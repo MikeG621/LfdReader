@@ -2,13 +2,16 @@ Idmr.LfdReader.dll
 =================
 
 Author: Michael Gaisser (mjgaisser@gmail.com)
-Version: 1.2
-Date: 2016.07.12
+Version: 1.2.1
+Date: 2019.09.02
 
 Library for editing LucasArts *.LFD resource files
 
 =========
 Version History
+
+v1.2.1, 02 Sep 2019
+ - (BLAS) Fixed a crash that occur during Decode for VOIC types [Issue #1]
 
 v1.2, 12 Jul 2016
  - _isModifed edits
