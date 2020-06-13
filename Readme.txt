@@ -10,6 +10,8 @@ Library for editing LucasArts *.LFD resource files
 =========
 Version History
 
+ - (ANIM) Fixed the retrieval of Frames when RelativePosition is turned on.
+
 v1.2.1, 02 Sep 2019
  - (BLAS) Fixed a crash that occur during Decode for VOIC types [Issue #1]
 
@@ -43,7 +45,7 @@ Programmer's reference can be found in help/Idmr.LfdReader.chm
 ==========
 Copyright Information
 
-Copyright © 2009-2016 Michael Gaisser
+Copyright © 2009-2020 Michael Gaisser
 This library file and related files are licensed under the Mozilla Public License
 v2.0 or later.  See MPL.txt for further details.
 

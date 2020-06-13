@@ -1,13 +1,14 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2016 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2020 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.2
+ * Version: 1.2+
  */
 
 /* CHANGE LOG
+ * [FIX] getting the image when RelativePosition is used
  * v1.2, 160712
  * [ADD] _isModified edits
  * v1.1, 141215
@@ -95,12 +96,12 @@ namespace Idmr.LfdReader
 						{
 							int localLeft = Left - _parent.Left;
 							int localTop = Top - _parent.Top;
-							Bitmap fullImage = new Bitmap(_parent.Width, _parent.Height, PixelFormat.Format8bppIndexed);
-							Graphics g = Graphics.FromImage(fullImage);
+							Bitmap tempImage = new Bitmap(_parent.Width, _parent.Height);
+							Graphics g = Graphics.FromImage(tempImage);
 							g.DrawImage(_delt.Image, new Point(localLeft, localTop));
 							g.Dispose();
-							if (_parent.HasDefinedPalette) fullImage.Palette = _parent._palette;
-							return fullImage;
+							Bitmap indexedImage = GraphicsFunctions.ConvertTo8bpp(tempImage, _parent._palette);
+							return indexedImage;
 						}
 					}
 					catch { return Delt.ErrorImage; }
