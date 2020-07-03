@@ -23,35 +23,7 @@ namespace Idmr.LfdReader
 	/// <remarks>The Film resource controls everything you see outside of the flight engine. This is where the images are controlled regarding the colors used, when the image is shown, draw order, animation controls, etc. Many of the mouse-click regions are defined here as well, which then activate various animations (doors, etc) or sound effects.<hr/>
 	/// <h4>Raw Data definition</h4>
 	/// <code>// Pseudo-code resource structure
-	/// struct RawData
-	/// {
-	///   /* 0x00 */ Image[] Images;
-	/// }
-	/// 
-	/// struct Image
-	/// {
-	///   /* 0x00 */ Row[] Rows;
-	///   /* 0x?? */ byte EndImage = 0xFF;
-	/// }
-	/// 
-	/// struct Row
-	/// {
-	///   /* 0x00 */ OpCode[] Operations;
-	///   /* 0x?? */ byte EndRow = 0xFE;
-	/// }
-	///
-	/// struct OpCode
-	/// {
-	///   /* 0x00 */ byte Value;
-	///	  #if (Value == 0xFD)	// repeat Type 1
-	///	    /* 0x01 */ byte NumberOfRepeats;
-	///     /* 0x02 */ byte ColorIndex;
-	///	  #elseif (Value == 0xFC)	// repeat Type 2
-	///     /* 0x01 */ byte ColorIndex;
-	///     /* 0x02 */ byte NumberOfRepeats;
-	///   #else	// repeat Type 3 (short)
-	///	  #endif
-	/// }</code>
+	/// stuff</code>
 	/// stuff<br/><br/>
 	/// -- Section --<br/><br/>
 	/// stuff</remarks>
