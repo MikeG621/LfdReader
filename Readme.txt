@@ -11,6 +11,8 @@ Library for editing LucasArts *.LFD resource files
 Version History
 
  - (ANIM) Fixed the retrieval of Frames when RelativePosition is turned on.
+ - (BLAS) Added GetWavBytes() to make audio playback easier, reformats data to .WAV
+ - (FILM) Added ToString() to Block and Chunk
 
 v1.2.1, 02 Sep 2019
  - (BLAS) Fixed a crash that occur during Decode for VOIC types [Issue #1]

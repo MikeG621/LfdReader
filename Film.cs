@@ -1,13 +1,14 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2020 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.1
+ * Version: 1.1+
  */
 
 /* CHANGE LOG
+ * [ADD} ToString for Block and Chunk
  * v1.1, 141215
  * [UPD] changed license to MPL
  * v1.0
@@ -23,7 +24,31 @@ namespace Idmr.LfdReader
 	/// <remarks>The Film resource controls everything you see outside of the flight engine. This is where the images are controlled regarding the colors used, when the image is shown, draw order, animation controls, etc. Many of the mouse-click regions are defined here as well, which then activate various animations (doors, etc) or sound effects.<hr/>
 	/// <h4>Raw Data definition</h4>
 	/// <code>// Pseudo-code resource structure
-	/// stuff</code>
+	/// struct RawData
+	/// {
+	///   /* 0x00 */ short Reserved = 4;
+	///   /* 0x02 */ short NumberOfFrames;
+	///   /* 0x04 */ short NumberOfBlocks; // zero-indexed
+	///   /* 0x06 */ Block[NumberOfBlocks + 1] Blocks;
+	/// }
+	///
+	/// struct Block
+	/// {
+	///   /* 0x00 */ char[4] Type;
+	///   /* 0x04 */ char[8] Name;
+	///   /* 0x0C */ int Length;
+	///   /* 0x10 */ short TypeIndex;
+	///   /* 0x12 */ short NumberOfChunks;
+	///   /* 0x14 */ short ChunkDataLength;
+	///   /* 0x16 */ Chunk[NumberOfChunks] Chunks;
+	/// }
+	///
+	/// struct Chunk
+	/// {
+	///   /* 0x00 short Length;
+	///   /* 0x02 OpCode[] Codes;
+	/// }</code>
+	/// order of Blocks is usually VIEW, VOIC, PLTT, ANIM/DELT/CUST
 	/// stuff<br/><br/>
 	/// -- Section --<br/><br/>
 	/// stuff</remarks>
@@ -67,7 +92,6 @@ namespace Idmr.LfdReader
 		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Film"/></exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
-			//System.Diagnostics.Debug.WriteLine("Decode FILM");
 			_decodeResource(raw, containsHeader);
 			if (_type != ResourceType.Film) throw new ArgumentException("Raw header is not for a Film resource");
 			_numberOfFrames = BitConverter.ToInt16(_rawData, 2);
@@ -75,17 +99,11 @@ namespace Idmr.LfdReader
 			int offset = 6;
 			for (int i = 0; i < _blocks.Length; i++)
 			{
-				//System.Diagnostics.Debug.WriteLine("Block " + (i + 1) + " of " + _blocks.Length);
 				Block.BlockType type = (Block.BlockType)BitConverter.ToInt32(_rawData, offset + TypeOffset);
 				string name = ArrayFunctions.ReadStringFromArray(_rawData, offset + NameOffset, 8);
 				int len = BitConverter.ToInt32(_rawData, offset + LengthOffset);
-				//System.Diagnostics.Debug.WriteLine(type + name + ", " + len);
 				short[] block = new short[(len - 0x12) / 2];
-				//System.Diagnostics.Debug.WriteLine("block len: " + block.Length);
-				//System.Diagnostics.Debug.WriteLine("copying raw...");
 				ArrayFunctions.TrimArray(_rawData, offset + 0x12, block);
-				//for (int i = 0; i < block.Length; i++) block[i] = BitConverter.ToInt16(_rawData, offset + HeaderLength + 2 + i * 2);
-				//System.Diagnostics.Debug.WriteLine("copied, creating block...");
 				_blocks[i] = new Block(type, name, block);
 				offset += len;
 			}
@@ -221,7 +239,13 @@ namespace Idmr.LfdReader
 			/// <summary>Gets Chunk data of the Block</summary>
 			public Chunk[] Chunks { get { return _chunks; } }
 			/// <summary>Gets the number of Chunks contained in the Block</summary>
-			public short NumberOfChunks { get { return (short)_chunks.Length; } }
+			public short NumberOfChunks { get { return (short)(_chunks != null ? _chunks.Length : 0); } }
+			/// <summary>Gets a representative string of the Block</summary>
+			/// <returns>Block in the format <see cref="Type">TYPE</see> <see cref="Name"/></returns>
+			public override string ToString()
+			{
+				return Enum.GetName(typeof(BlockType), _type).ToUpper() + _name;
+			}
 		}
 		/// <summary>Container for individual commands contained within <see cref="Block">Blocks</see></summary>
 		public struct Chunk
@@ -279,6 +303,19 @@ namespace Idmr.LfdReader
 			public short[] Vars { get; set; }
 			/// <summary>Gets the total byte length of the Chunk</summary>
 			public short Length { get { return (short)(4 + (Vars != null ? Vars.Length << 1 : 0)); } }
+
+			/// <summary>Gets a representation of the command</summary>
+			/// <returns>Command in the form of <see cref="Code"/>: <see cref="Vars"/>[0], Vars[1]...</returns>
+			public override string ToString()
+			{
+				string str = Enum.GetName(typeof(OpCode), Code);
+				if (Vars != null)
+				{
+					str += ":";
+					for (int i = 0; i < Vars.Length; i++) str += " " + Vars[i];
+				}
+				return str;
+			}
 		}
 	}
 }

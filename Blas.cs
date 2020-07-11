@@ -1,13 +1,14 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2019 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2020 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.2.1
+ * Version: 1.2.1+
  */
 
 /* CHANGE LOG
+ * [ADD] WAV output
  * v1.2.1, 190802
  * [FIX] Type comparison in Decode was OR and could crash [#1]
  * v1.2, 160712
@@ -117,34 +118,27 @@ namespace Idmr.LfdReader
 			{
 				if (_rawData[offset] == 6)
 				{
-					//System.Diagnostics.Debug.WriteLine("repeat block");
 					_soundBlocks[i].NumberOfRepeats = BitConverter.ToInt16(_rawData, offset + 1);
 					offset += 6;
 				}
 				else _soundBlocks[i].NumberOfRepeats = -2;
 				if (_rawData[offset] == 1)
 				{
-					//System.Diagnostics.Debug.WriteLine("data block");
 					int len = BitConverter.ToUInt16(_rawData, offset + 1) + _rawData[offset + 3] * 256 * 256; // stupid 3-byte value
 					_frequency = 1000000 / (256 - _rawData[offset + 4]);
 					_soundBlocks[i].Data = new byte[len - 2];
 					ArrayFunctions.TrimArray(_rawData, offset + 6, _soundBlocks[i].Data);
-					//^ Buffer.BlockCopy(_rawData, offset + 6, _soundBlocks[i].Data, 0, _soundBlocks[i].Data.Length);
 					if (i != _soundBlocks.Length - 1) offset += len + 4 + (_soundBlocks[i].DoesRepeat ? 4 : 0);	// prep offset for next block
 				}
 				else if (_rawData[offset] == 0)	// i != 0
 				{
-					//System.Diagnostics.Debug.WriteLine("end block");
 					for (int j = i; j < _soundBlocks.Length; j++)
 					{
-						//System.Diagnostics.Debug.WriteLine("set null...");
 						if (_soundBlocks[j].Data != null) _soundBlocks[j].Data = null;
-						//System.Diagnostics.Debug.WriteLine("complete");
 					}
 					break;
 				}
 			}
-			//System.Diagnostics.Debug.WriteLine("blocks complete");
 		}
 
 		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/></summary>
@@ -178,6 +172,50 @@ namespace Idmr.LfdReader
 			}
 			// last byte is EofBlock
 			_rawData = raw;
+		}
+
+		/// <summary>Gets the raw audio data and reformats it to be ready for playback.</summary>
+		/// <returns>The data in .WAV file format</returns>
+		public byte[] GetWavBytes()
+		{
+			MemoryStream s = new MemoryStream();
+			BinaryWriter bw = new BinaryWriter(s);
+			// WAV_HEADER
+			bw.Write("RIFF".ToCharArray());
+			s.Position += 4;                // skip over, come back to later, P = 4  (file.length-8)
+			bw.Write("WAVE".ToCharArray());
+			// WAV_DATA_BLOCK
+			// fmt_HEADER
+			bw.Write("fmt ".ToCharArray());
+			bw.Write((uint)16);             // fmt block length
+			// fmt_DATA_BLOCK
+			bw.Write((short)1);             // uncompressed PCM
+			bw.Write((short)1);             // NumChannels (Mono)
+			bw.Write((uint)Frequency);      // SampleRate
+			bw.Write((uint)Frequency);      // ByteRate (SampleRate * NumChannels * BitsPerSample/8) [SR * 1 * 8/8]
+			bw.Write((short)1);             // BlockAlign (NumChannels * BitsPerSample/8) [1 * 8/8]
+			bw.Write((short)8);             // BitsPerSample
+			// data_HEADER
+			bw.Write("data".ToCharArray());
+			s.Position += 4;                // skip over, come back to later, P = 40 (file.length-44);
+			foreach (SoundDataBlock sdb in SoundBlocks)
+				if (sdb.Data != null)
+					if (sdb.DoesRepeat)
+						for (int i = 0; i < (sdb.NumberOfRepeats != -1 ? sdb.NumberOfRepeats + 1 : 4); i++) // repeat 4 times for infinite repeats
+							bw.Write(sdb.Data);
+					else bw.Write(sdb.Data);
+			s.SetLength(s.Position);
+			s.Position = 4;
+			bw.Write((uint)(s.Length - 8));
+			s.Position = 40;
+			bw.Write((uint)(s.Length - 44));
+
+			byte[] data = new byte[s.Length];
+			s.Position = 0;
+			s.Read(data, 0, (int)s.Length);
+			s.Close();
+
+			return data;
 		}
 		#endregion public methods
 		
