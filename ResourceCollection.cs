@@ -1,13 +1,14 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2020 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.1
+ * Version: 1.1+
  */
 
 /* CHANGE LOG
+ * [UPD] cleanup
  * v1.1, 141215
  * [UPD] changed license to MPL
  * v1.0
@@ -22,7 +23,7 @@ namespace Idmr.LfdReader
 	public class ResourceCollection : IEnumerable<Resource>
 	{
 		List<Resource> _items = null;
-		string _lockedMessage = "Collection structure is currently locked (";
+		readonly string _lockedMessage = "Collection structure is currently locked (";
 
 		#region constructors
 		/// <summary>Creates a new empty Collection</summary>
@@ -51,18 +52,22 @@ namespace Idmr.LfdReader
 		{
 			if (category == LfdFile.LfdCategory.Battle)
 			{
-				_items = new List<Resource>(2);
-				_items.Add(new Text());
+				_items = new List<Resource>(2)
+				{
+					new Text(),
+					new Delt()
+				};
 				_items[0].Name = "battle#";
-				_items.Add(new Delt());
 				_items[1].Name = "b#gal";
 			}
 			else if (category == LfdFile.LfdCategory.Cockpit)
 			{
-				_items = new List<Resource>(3);
-				_items.Add(new Panl(true));
-				_items.Add(new Mask());
-				_items.Add(new Pltt());
+				_items = new List<Resource>(3)
+				{
+					new Panl(true),
+					new Mask(),
+					new Pltt()
+				};
 			}
 			else CanEditStructure = true;
 		}
@@ -118,31 +123,31 @@ namespace Idmr.LfdReader
 		
 		/// <summary>Adds a new Resource to the end of the Collection</summary>
 		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked</exception>
-		public void Add() { _add(new Resource()); }
+		public void Add() { add(new Resource()); }
 
 		/// <summary>Adds the given Resource to the end of the Collection</summary>
 		/// <param name="resource">The Resource to be added</param>
 		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked</exception>
-		public void Add(Resource resource) { _add(resource); }
+		public void Add(Resource resource) { add(resource); }
 		
 		/// <summary>Inserts a new Resource at the specified index</summary>
 		/// <param name="index">Location of the Resource within the Collection</param>
 		/// <exception cref="ArgumentOutOfRangeException">Invalid <i>index</i> value</exception>
 		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked</exception>
-		public void Insert(int index) { _insert(index, new Resource()); }
+		public void Insert(int index) { insert(index, new Resource()); }
 
 		/// <summary>Inserts the given Resource at the specified index</summary>
 		/// <param name="index">Location of the Resource</param>
 		/// <param name="resource">The Resource to be added</param>
 		/// <exception cref="ArgumentOutOfRangeException">Invalid <i>index</i> value</exception>
 		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked</exception>
-		public void Insert(int index, Resource resource) { _insert(index, resource); }
+		public void Insert(int index, Resource resource) { insert(index, resource); }
 		
 		/// <summary>Deletes the Resource at the specified index</summary>
 		/// <param name="index">The index of the Resource to be deleted</param>
 		/// <exception cref="ArgumentOutOfRangeException">Invalid <i>index</i> value</exception>
 		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked<br/><b>-or-</b><br/>Collection is empty</exception>
-		public void RemoveAt(int index) { _removeAt(index); }
+		public void RemoveAt(int index) { removeAt(index); }
 		#endregion public methods
 		
 		#region public properties
@@ -197,20 +202,20 @@ namespace Idmr.LfdReader
 		public bool CanEditStructure { get; set; }
 		#endregion public properties
 		
-		void _add(Resource item)
+		void add(Resource item)
 		{
 			if (!CanEditStructure) throw new InvalidOperationException(_lockedMessage + "add)");
 			if (_items == null) _items = new List<Resource>(1);
 			_items.Add(item);
 		}
-		void _insert(int index, Resource item)
+		void insert(int index, Resource item)
 		{
 			if (!CanEditStructure) throw new InvalidOperationException(_lockedMessage + "insert)");
 			if (_items == null) _items = new List<Resource>(1);
 			if (index >= 0 && index <= Count) _items.Insert(index, item);
 			else throw new ArgumentOutOfRangeException("index", "Invalid index value, (0-" + Count + ")");
 		}
-		void _removeAt(int index)
+		void removeAt(int index)
 		{
 			if (!CanEditStructure) throw new InvalidOperationException(_lockedMessage + "remove)");
 			if (Count == 0) throw new InvalidOperationException("Collection is already empty");

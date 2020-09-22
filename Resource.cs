@@ -1,6 +1,6 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2016 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2020 Michael Gaisser (mjgaisser@gmail.com)
  * 
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the Mozilla Public License; either version 2.0 of the
@@ -13,10 +13,12 @@
  * If a copy of the MPL (MPL.txt) was not distributed with this file,
  * you can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Version: 1.2
+ * Version: 1.2+
  */
 
 /* CHANGE LOG
+ * [ADD] Btmp, Crft and Cplx to ResourceType
+ * [UPD] cleanup
  * v1.2, 160712
  * [ADD] _isModifed
  * [UPD] various minor tweaks
@@ -69,6 +71,12 @@ namespace Idmr.LfdReader
 			Blas = 0x53414C42,
 			/// <summary>Image format</summary>
 			Bmap = 0x50414D42,
+			/// <summary>Image format</summary>
+			Btmp = 0x504D5442,
+			/// <summary>Legacy mesh data (Mac port)</summary>
+			Cplx = 0x584c5043,
+			/// <summary>Legacy mesh data</summary>
+			Crft = 0x54465243,
 			/// <summary>Image format, similar to Delt?</summary>
 			Cust = 0x54535543,
 			/// <summary>Static image format</summary>
@@ -89,7 +97,7 @@ namespace Idmr.LfdReader
 			Pltt = 0x54544C50,
 			/// <summary>File structure map</summary>
 			Rmap = 0x50414D52,
-			/// <summary>Craft AI behaviour?</summary>
+			/// <summary>Mesh data</summary>
 			Ship = 0x50494853,
 			/// <summary>Strings</summary>
 			Text = 0x54584554,
@@ -110,7 +118,7 @@ namespace Idmr.LfdReader
 		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
 		public Resource(FileStream stream, long filePosition)
 		{
-			_read(stream, filePosition);
+			read(stream, filePosition);
 		}
 		/// <summary>Creates a new generic resource from an existing file</summary>
 		/// <param name="filePath">The full path to the unopened LFD file</param>
@@ -119,7 +127,7 @@ namespace Idmr.LfdReader
 		public Resource(string filePath, long filePosition)
 		{
 			FileStream stream = File.OpenRead(filePath);
-			_read(stream, filePosition);
+			read(stream, filePosition);
 			stream.Close();
 		}
 		#endregion constructors
@@ -298,7 +306,7 @@ namespace Idmr.LfdReader
 		public const int LengthOffset = 12;
 		#endregion public properties
 
-		void _read(FileStream stream, long filePosition)
+		void read(FileStream stream, long filePosition)
 		{
 			try { _process(stream, filePosition); }
 			catch (Exception x) { throw new Common.LoadFileException(x); }
