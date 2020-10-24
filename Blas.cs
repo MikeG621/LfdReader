@@ -8,7 +8,9 @@
  */
 
 /* CHANGE LOG
- * [ADD] WAV output
+ * [UPD] _read() renamed to read()
+ * [ADD] Duration
+ * [ADD] GetWaveBytes()
  * v1.2.1, 190802
  * [FIX] Type comparison in Decode was OR and could crash [#1]
  * v1.2, 160712
@@ -65,7 +67,6 @@ namespace Idmr.LfdReader
 	/// Now, the only trick to the block is the <i>Length</i> value. A <c>short</c> is 16-bit, <c>int</c> is 32-bit, well this stupid thing is 24-bit.  It is the length of the remaining values of the data block, however it's awkward to read/write to because of the stupid 3-byte length.</remarks>
 	public class Blas : Resource
 	{
-		SoundDataBlock[] _soundBlocks = new SoundDataBlock[2];
 		int _frequency = 12000;
 		const int _vocHeaderLength = 0x1A;
 
@@ -74,8 +75,8 @@ namespace Idmr.LfdReader
 		public Blas()
 		{
 			_type = ResourceType.Blas;
-			_soundBlocks[0].DoesRepeat = false;
-			_soundBlocks[1].DoesRepeat = false;
+			SoundBlocks[0].DoesRepeat = false;
+			SoundBlocks[1].DoesRepeat = false;
 		}
 		/// <summary>Creates a new instance from an existing opened file</summary>
 		/// <param name="stream">The opened LFD file</param>
@@ -83,7 +84,7 @@ namespace Idmr.LfdReader
 		/// <exception cref="LoadFileException">Typically due to file corruption</exception>
 		public Blas(FileStream stream, long filePosition)
 		{
-			_read(stream, filePosition);
+			read(stream, filePosition);
 		}
 		/// <summary>Creates a new instance from an exsiting file</summary>
 		/// <param name="path">The full path to the unopened LFD file</param>
@@ -92,12 +93,12 @@ namespace Idmr.LfdReader
 		public Blas(string path, long filePosition)
 		{
 			FileStream fsLFD = File.OpenRead(path);
-			_read(fsLFD, filePosition);
+			read(fsLFD, filePosition);
 			fsLFD.Close();
 		}
 		#endregion constructors
 
-		void _read(FileStream stream, long filePosition)
+		void read(FileStream stream, long filePosition)
 		{
 			try { _process(stream, filePosition); }
 			catch (Exception x) { throw new LoadFileException(x); }
@@ -113,28 +114,28 @@ namespace Idmr.LfdReader
 			int offset = _vocHeaderLength;
 			_decodeResource(raw, containsHeader);
 			if (_type != ResourceType.Blas && _type != ResourceType.Voic) throw new ArgumentException("Raw header is not for a Blas or Voic resource");
-			_soundBlocks = new SoundDataBlock[2];	// maximum number of Sound blocks observed in TIE
-			for (int i = 0; i < _soundBlocks.Length; i++)
+			SoundBlocks = new SoundDataBlock[2];	// maximum number of Sound blocks observed in TIE
+			for (int i = 0; i < SoundBlocks.Length; i++)
 			{
 				if (_rawData[offset] == 6)
 				{
-					_soundBlocks[i].NumberOfRepeats = BitConverter.ToInt16(_rawData, offset + 1);
+					SoundBlocks[i].NumberOfRepeats = BitConverter.ToInt16(_rawData, offset + 1);
 					offset += 6;
 				}
-				else _soundBlocks[i].NumberOfRepeats = -2;
+				else SoundBlocks[i].NumberOfRepeats = -2;
 				if (_rawData[offset] == 1)
 				{
 					int len = BitConverter.ToUInt16(_rawData, offset + 1) + _rawData[offset + 3] * 256 * 256; // stupid 3-byte value
 					_frequency = 1000000 / (256 - _rawData[offset + 4]);
-					_soundBlocks[i].Data = new byte[len - 2];
-					ArrayFunctions.TrimArray(_rawData, offset + 6, _soundBlocks[i].Data);
-					if (i != _soundBlocks.Length - 1) offset += len + 4 + (_soundBlocks[i].DoesRepeat ? 4 : 0);	// prep offset for next block
+					SoundBlocks[i].Data = new byte[len - 2];
+					ArrayFunctions.TrimArray(_rawData, offset + 6, SoundBlocks[i].Data);
+					if (i != SoundBlocks.Length - 1) offset += len + 4 + (SoundBlocks[i].DoesRepeat ? 4 : 0);	// prep offset for next block
 				}
 				else if (_rawData[offset] == 0)	// i != 0
 				{
-					for (int j = i; j < _soundBlocks.Length; j++)
+					for (int j = i; j < SoundBlocks.Length; j++)
 					{
-						if (_soundBlocks[j].Data != null) _soundBlocks[j].Data = null;
+						if (SoundBlocks[j].Data != null) SoundBlocks[j].Data = null;
 					}
 					break;
 				}
@@ -145,7 +146,7 @@ namespace Idmr.LfdReader
 		public override void EncodeResource()
 		{
 			int len = _vocHeaderLength + 1;	// VocHeader + EofBlock
-			foreach (SoundDataBlock sdb in _soundBlocks)
+			foreach (SoundDataBlock sdb in SoundBlocks)
 				if (sdb.Data != null) len += sdb.Data.Length + 6 + (sdb.DoesRepeat ? 0xA : 0);	// 6 = SoundBlockHeader + FreqDivisor + Codec
 				else break;
 			byte[] raw = new byte[len];
@@ -155,7 +156,7 @@ namespace Idmr.LfdReader
 			ArrayFunctions.WriteToArray((short)0x10A, raw, 0x16);	// VOC_VERSION
 			ArrayFunctions.WriteToArray((short)0x1129, raw, 0x18); // VERSION VERIFY
 			int offset = _vocHeaderLength;
-			foreach (SoundDataBlock sdb in _soundBlocks)
+			foreach (SoundDataBlock sdb in SoundBlocks)
 			{
 				if (sdb.Data == null) break;
 				if (sdb.DoesRepeat)
@@ -174,9 +175,11 @@ namespace Idmr.LfdReader
 			_rawData = raw;
 		}
 
-		/// <summary>Gets the raw audio data and reformats it to be ready for playback.</summary>
-		/// <returns>The data in .WAV file format</returns>
-		public byte[] GetWavBytes()
+		/// <summary>Gets the raw audio data and reformats it to be ready for playback. </summary>
+		/// <param name="withRepeats">Whether or not to include repeats in the audio data</param>
+		/// <returns>The data in .WAV file format, with repeats if applicable.<br/>
+		/// If <see cref="SoundDataBlock.NumberOfRepeats"/> is infinite and <paramref name="withRepeats"/> is <b>true</b>, will include <b>4</b> repeats.</returns>
+		public byte[] GetWavBytes(bool withRepeats)
 		{
 			MemoryStream s = new MemoryStream();
 			BinaryWriter bw = new BinaryWriter(s);
@@ -188,19 +191,19 @@ namespace Idmr.LfdReader
 			// fmt_HEADER
 			bw.Write("fmt ".ToCharArray());
 			bw.Write((uint)16);             // fmt block length
-			// fmt_DATA_BLOCK
+											// fmt_DATA_BLOCK
 			bw.Write((short)1);             // uncompressed PCM
 			bw.Write((short)1);             // NumChannels (Mono)
 			bw.Write((uint)Frequency);      // SampleRate
 			bw.Write((uint)Frequency);      // ByteRate (SampleRate * NumChannels * BitsPerSample/8) [SR * 1 * 8/8]
 			bw.Write((short)1);             // BlockAlign (NumChannels * BitsPerSample/8) [1 * 8/8]
 			bw.Write((short)8);             // BitsPerSample
-			// data_HEADER
+											// data_HEADER
 			bw.Write("data".ToCharArray());
 			s.Position += 4;                // skip over, come back to later, P = 40 (file.length-44);
 			foreach (SoundDataBlock sdb in SoundBlocks)
 				if (sdb.Data != null)
-					if (sdb.DoesRepeat)
+					if (sdb.DoesRepeat && withRepeats)
 						for (int i = 0; i < (sdb.NumberOfRepeats != -1 ? sdb.NumberOfRepeats + 1 : 4); i++) // repeat 4 times for infinite repeats
 							bw.Write(sdb.Data);
 					else bw.Write(sdb.Data);
@@ -216,6 +219,12 @@ namespace Idmr.LfdReader
 			s.Close();
 
 			return data;
+		}
+		/// <summary>Gets the raw audio data and reformats it to be ready for playback.</summary>
+		/// <returns>The data in .WAV file format, with repeats if applicable. If <see cref="SoundDataBlock.NumberOfRepeats"/> is infinite, will include <b>4</b> repeats.</returns>
+		public byte[] GetWavBytes()
+		{
+			return GetWavBytes(true);
 		}
 		#endregion public methods
 		
@@ -236,7 +245,20 @@ namespace Idmr.LfdReader
 
 		/// <summary>Gets the audio data array</summary>
 		/// <remarks>Array length is always 2 as that's the maximum seen in TIE, although more should be possible.</remarks>
-		public SoundDataBlock[] SoundBlocks { get { return _soundBlocks; } }
+		public SoundDataBlock[] SoundBlocks { get; private set; } = new SoundDataBlock[2];
+
+		/// <summary>Gets the non-repeating length of time in seconds.</summary>
+		/// <remarks>Value is rounded to .01 seconds.</remarks>
+		public decimal Duration
+		{
+			get
+			{
+				int len = 0;
+				foreach (SoundDataBlock s in SoundBlocks)
+					if (s.Data != null) len += s.Data.Length;
+				return Math.Round((decimal)len / Frequency, 2);
+			}
+		}
 		#endregion public properties
 		/// <summary>Container for audio data and repeat information</summary>
 		public struct SoundDataBlock

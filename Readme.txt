@@ -12,6 +12,7 @@ Version History
 
  - (ANIM) Fixed the retrieval of Frames when RelativePosition is turned on.
  - (BLAS) Added GetWavBytes() to make audio playback easier, reformats data to .WAV
+ - (BLAS) Added Duration property to get audio length in seconds
  - (FILM) Added ToString() to Block and Chunk
  - (CRFT) New
  - (Resource) Btmp, Crft and Cplx added to ResourceType
