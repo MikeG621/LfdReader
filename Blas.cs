@@ -61,7 +61,8 @@ namespace Idmr.LfdReader
 	/// }</code>
 	/// For the most part, <i>Header</i> is a formality, the only way to sync it into the LFD file. Since this is simply a pre-existing file format that has been placed into the LFD, the format is very reliable and is safe to use. <i>Header</i> is also fixed. There is technically a possiblity of the <i>Version</i> and <i>Verify</i> values being different, but TIE sticks with the older version, so we don't have to worry about it.<br/><br/>
 	/// -- VocDataBlock --<br/><br/>
-	/// The <i>Blocks</i> array typically consists of a single Sound Data block followed by the EOF block (<c>Type == 0x00</c>), although there are cases where a resource contains two Sound Data blocks. There are a handful of resources that also use the Repeat block; they all have a NumRepeat value of <b>0xFFFF</b> (-1, infinite loop). These resources also contain the End Repeat block (<c>Type == 0x07</c>) after the Sound Data block before EOF. The EOF and End Repeat blocks do not contain any values aside from <i>Type</i>. There are other <i>Type</i> values for *.voc files, but TIE doesn't use them.<br/><br/>
+	/// The <i>Blocks</i> array typically consists of a single Sound Data block followed by the EOF block (<c>Type == 0x00</c>), although there are cases where a resource contains two Sound Data blocks.<br/>
+	/// There are a handful of resources that also use the Repeat block; a NumRepeat value of <b>0xFFFF</b> (-1) is for an infinite loop, otherwise it's a zero-indexed count, so a value of <b>0</b> means 1 repeat in addition to the original, so it plays twice. These resources also contain the End Repeat block (<c>Type == 0x07</c>) after the Sound Data block before EOF. The EOF and End Repeat blocks do not contain any values aside from <i>Type</i>. There are other <i>Type</i> values for *.voc files, but TIE doesn't use them.<br/><br/>
 	/// The sound block is simple. <i>FrequencyDivisor</i> has known values of <b>0xA1-0xA6</b>.  The sample rate of the sound is defined as <c>(1e6 / (256 - FrequencyDivisor))</c>, which gets us 10.526-11.111 KHz.<br/><br/>
 	/// <i>Codec</i> simply tells us that the sound data is uncompressed 8-bit PCM, which is easy enough to extract and form a wave file, or if you have a VOC reader, you can just cut up the LFD and be done with it.<br/><br/>
 	/// Now, the only trick to the block is the <i>Length</i> value. A <c>short</c> is 16-bit, <c>int</c> is 32-bit, well this stupid thing is 24-bit.  It is the length of the remaining values of the data block, however it's awkward to read/write to because of the stupid 3-byte length.</remarks>
@@ -204,7 +205,7 @@ namespace Idmr.LfdReader
 			foreach (SoundDataBlock sdb in SoundBlocks)
 				if (sdb.Data != null)
 					if (sdb.DoesRepeat && withRepeats)
-						for (int i = 0; i < (sdb.NumberOfRepeats != -1 ? sdb.NumberOfRepeats + 1 : 4); i++) // repeat 4 times for infinite repeats
+						for (int i = 0; i < (sdb.NumberOfRepeats != -1 ? sdb.NumberOfRepeats + 2 : 5); i++) // repeat 4 times for infinite repeats
 							bw.Write(sdb.Data);
 					else bw.Write(sdb.Data);
 			s.SetLength(s.Position);
@@ -286,7 +287,7 @@ namespace Idmr.LfdReader
 			/// <summary>Gets or sets the repeat flag</summary>
 			public bool DoesRepeat
 			{
-				get { return (NumberOfRepeats > -2); }
+				get { return NumberOfRepeats > -2; }
 				set { if (!value) NumberOfRepeats = -2; }
 			}
 		}

@@ -49,6 +49,7 @@ namespace Idmr.LfdReader
 	///   /* 0x02 OpCode[] Codes;
 	/// }</code>
 	/// order of Blocks is usually VIEW, VOIC, PLTT, ANIM/DELT/CUST
+	/// first Chunk if the block is used will always be Time, otherwise straight to End
 	/// stuff<br/><br/>
 	/// -- Section --<br/><br/>
 	/// stuff</remarks>
