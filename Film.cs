@@ -152,8 +152,7 @@ namespace Idmr.LfdReader
 		{
 			BlockType _type;
 			string _name;
-			Chunk[] _chunks;
-			
+
 			/// <summary>Preset Block types</summary>
 			public enum BlockType : int {
 				/// <summary>Default uninitialized value</summary>
@@ -183,19 +182,19 @@ namespace Idmr.LfdReader
 				_name = name;
 				if (rawData.Length == 0)
 				{
-					_chunks = null;
+					Chunks = null;
 					return;
 				}
-				_chunks = new Chunk[rawData[0]];
+				Chunks = new Chunk[rawData[0]];
 				for (int c = 0, j = 2; c < rawData[0]; c++)
 				{
 					short code = rawData[j + 1];	// op code
-					_chunks[c].Code = (Chunk.OpCode)code;
+					Chunks[c].Code = (Chunk.OpCode)code;
 					if (code != 2 && code != 0x11)
 					{
 						short[] vars = new short[(rawData[j] - 4) >> 1];
 						ArrayFunctions.TrimArray(rawData, (j + 2) << 1, vars);
-						_chunks[c].Vars = vars;
+						Chunks[c].Vars = vars;
 					}
 					j += rawData[j] >> 1;
 				}
@@ -207,7 +206,7 @@ namespace Idmr.LfdReader
 				get
 				{
 					short length = 0x16;	// HeaderLength + TypeNum + NumberOfChunks + ??
-					for (int c = 0; c < NumberOfChunks; c++) length += _chunks[c].Length;
+					for (int c = 0; c < NumberOfChunks; c++) length += Chunks[c].Length;
 					return length;
 				}
 			}
@@ -238,9 +237,9 @@ namespace Idmr.LfdReader
 				set { _name = StringFunctions.GetTrimmed(value, 8); }
 			}
 			/// <summary>Gets Chunk data of the Block</summary>
-			public Chunk[] Chunks { get { return _chunks; } }
+			public Chunk[] Chunks { get; }
 			/// <summary>Gets the number of Chunks contained in the Block</summary>
-			public short NumberOfChunks { get { return (short)(_chunks != null ? _chunks.Length : 0); } }
+			public short NumberOfChunks { get { return (short)(Chunks != null ? Chunks.Length : 0); } }
 			/// <summary>Gets a representative string of the Block</summary>
 			/// <returns>Block in the format <see cref="Type">TYPE</see> <see cref="Name"/></returns>
 			public override string ToString()

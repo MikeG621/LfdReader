@@ -248,15 +248,20 @@ namespace Idmr.LfdReader
 		/// <remarks>Array length is always 2 as that's the maximum seen in TIE, although more should be possible.</remarks>
 		public SoundDataBlock[] SoundBlocks { get; private set; } = new SoundDataBlock[2];
 
-		/// <summary>Gets the non-repeating length of time in seconds.</summary>
-		/// <remarks>Value is rounded to .01 seconds.</remarks>
+		/// <summary>Gets the length of time in seconds.</summary>
+		/// <remarks>Value is rounded to .01 seconds.<br/>
+		/// If sound data has a finite number of repeats, includes that duration</remarks>
 		public decimal Duration
 		{
 			get
 			{
 				int len = 0;
 				foreach (SoundDataBlock s in SoundBlocks)
-					if (s.Data != null) len += s.Data.Length;
+					if (s.Data != null)
+					{
+						if (!s.DoesRepeat || s.NumberOfRepeats == -1) len += s.Data.Length;
+						else len += s.Data.Length * (s.NumberOfRepeats + 1);
+					}
 				return Math.Round((decimal)len / Frequency, 2);
 			}
 		}
