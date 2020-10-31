@@ -27,7 +27,7 @@ using Idmr.Common;
 namespace Idmr.LfdReader
 {
 	/// <summary>Object for "BLAS" and "VOIC" audio resources</summary>
-	/// <remarks>The Blas resource is used for both the <see cref="Resource.ResourceType.Blas"/> and <see cref="Resource.ResourceType.Voic"/> types, as they are in fact the same resource. The only difference is the usage of the resources within the program. Blas resources tend to be sound effects such as doors, weapons, etc. Voic resources as one might guess are voice audio, primarily for cutscene use. The resources themselves are wrappers for Creative Voice Files (*.voc). Although the format supports other methods, it is assumed that the audio data is always uncompressed 8-bit PCM.<hr/>
+	/// <remarks>The Blas resource is used for both the <see cref="Resource.ResourceType.Blas"/> and <see cref="Resource.ResourceType.Voic"/> types, as they are in fact the same resource. The only difference is the usage of the resources within the program. Blas resources tend to be flight engine sound effects such as engines, weapons, comms, etc. Voic resources are voices or sounds primarily for cutscene use. The resources themselves are wrappers for Creative Voice Files (*.voc). Although the format supports other methods, it is assumed that the audio data is always uncompressed 8-bit PCM.<hr/>
 	/// <h4>Raw Data definition</h4>
 	/// <code>// Pseudo-code resource structure
 	/// struct RawData

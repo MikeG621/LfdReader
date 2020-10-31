@@ -21,12 +21,14 @@ using Idmr.Common;
 namespace Idmr.LfdReader
 {
 	/// <summary>Object for "FILM" layout resources</summary>
-	/// <remarks>The Film resource controls everything you see outside of the flight engine. This is where the images are controlled regarding the colors used, when the image is shown, draw order, animation controls, etc. Many of the mouse-click regions are defined here as well, which then activate various animations (doors, etc) or sound effects.<hr/>
+	/// <remarks>The Film resource controls everything you see outside of the flight engine. This is where the images are controlled
+	/// regarding the colors used, when the image is shown, draw order, animation controls, etc. Many of the mouse-click regions are
+	/// defined here as well, which then activate various animations (doors, etc) or sound effects.<hr/>
 	/// <h4>Raw Data definition</h4>
 	/// <code>// Pseudo-code resource structure
 	/// struct RawData
 	/// {
-	///   /* 0x00 */ short Reserved = 4;
+	///   /* 0x00 */ short FilmHeaderDataLength = 4;
 	///   /* 0x02 */ short NumberOfFrames;
 	///   /* 0x04 */ short NumberOfBlocks; // zero-indexed
 	///   /* 0x06 */ Block[NumberOfBlocks + 1] Blocks;
@@ -36,23 +38,23 @@ namespace Idmr.LfdReader
 	/// {
 	///   /* 0x00 */ char[4] Type;
 	///   /* 0x04 */ char[8] Name;
-	///   /* 0x0C */ int Length;
+	///   /* 0x0C */ int Length;	// total length of Block
 	///   /* 0x10 */ short TypeIndex;
 	///   /* 0x12 */ short NumberOfChunks;
-	///   /* 0x14 */ short ChunkDataLength;
+	///   /* 0x14 */ short ChunkDataLength;	// total length of all Chunks
 	///   /* 0x16 */ Chunk[NumberOfChunks] Chunks;
 	/// }
 	///
 	/// struct Chunk
 	/// {
-	///   /* 0x00 short Length;
-	///   /* 0x02 OpCode[] Codes;
+	///   /* 0x00 */ short Length;
+	///   /* 0x02 */ short Code;
+	///   /* 0x04 */ short[Length-4] Vars;
 	/// }</code>
-	/// order of Blocks is usually VIEW, VOIC, PLTT, ANIM/DELT/CUST
-	/// first Chunk if the block is used will always be Time, otherwise straight to End
-	/// stuff<br/><br/>
-	/// -- Section --<br/><br/>
-	/// stuff</remarks>
+	/// The order of the Blocks is usually VIEW, VOIC, PLTT, ANIM/DELT/CUST. Within the
+	/// Blocks themselves, if it's to be used then the first Chunk will be a Time code,
+	/// otherwise it will skip directly to the End.
+	/// </remarks>
 	public class Film : Resource
 	{
 		short _numberOfFrames;
