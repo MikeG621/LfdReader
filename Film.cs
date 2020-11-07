@@ -8,7 +8,7 @@
  */
 
 /* CHANGE LOG
- * [ADD} ToString for Block and Chunk
+ * [ADD] ToString for Block and Chunk
  * v1.1, 141215
  * [UPD] changed license to MPL
  * v1.0

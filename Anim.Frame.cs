@@ -98,6 +98,7 @@ namespace Idmr.LfdReader
 							int localTop = Top - _parent.Top;
 							Bitmap tempImage = new Bitmap(_parent.Width, _parent.Height);
 							Graphics g = Graphics.FromImage(tempImage);
+							g.Clear(_parent._palette.Entries[0]);
 							g.DrawImage(_delt.Image, new Point(localLeft, localTop));
 							g.Dispose();
 							Bitmap indexedImage = GraphicsFunctions.ConvertTo8bpp(tempImage, _parent._palette);
