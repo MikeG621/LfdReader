@@ -15,6 +15,7 @@ Version History
  - (BLAS) Added Duration property to get audio length in seconds
  - (FILM) Added ToString() to Block and Chunk
  - (CRFT) New
+ - (CPLX) New
  - (Resource) Btmp, Crft and Cplx added to ResourceType
  - various updates
 

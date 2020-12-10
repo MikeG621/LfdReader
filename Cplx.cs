@@ -18,8 +18,9 @@ using Idmr.Common;
 
 namespace Idmr.LfdReader
 {
-	/// <summary>Object for "CRFT" mesh resources</summary>
-	/// <remarks>This is the original format used in X-wing, resource is read-only.<hr/>
+	/// <summary>Object for "CPLX" mesh resources</summary>
+	/// <remarks>This is the second iteration of the craft mesh format used in X-wing, adds the vertex normals. Resource is read-only.<hr/>
+	/// <b>*WARNING*:</b> The entire RawData is Big-endian!<br/><br/>
 	/// <h4>Raw Data definition</h4>
 	/// <code>// Pseudo-code resource structure
 	/// struct RawData
@@ -60,6 +61,7 @@ namespace Idmr.LfdReader
 	/// 		Vertex16 MinimumBound
 	/// 		Vertex16 MaximumBound
 	/// 		Vertex16[NumVertices] MeshVertices
+	/// 		Vertex16[NumVertices] VertexNormals
 	/// 		ShapeSettings[NumShapes]
 	/// 		Shape[NumShapes]    MeshGeometry
 	/// 		Unknown1[NumShapes]
@@ -128,29 +130,28 @@ namespace Idmr.LfdReader
 	/// ShapeSettings.Offset is a jump offset from the beginning of the ShapeSettings object, similar to LodHeader.Offset.<br/><br/>
 	/// Shape.Type uses the bottom nibble for the number of vertices, top nibble for type. Data is length(3 + (numVertices* 2)). If the number of vertices is 2, then Data has a pair of vertex indexes for a line defined in Data[2] and Data[3]. Otherwise, for each vertex there is a line, with the vertex indexes defined in Data[v * 2] and Data[(v + 1) * 2].<br/><br/>
 	/// After that there's some Unknown data, the Offset within Unknown2 points to the Unknown3 struct, measured from Unknown2 start position.</remarks>
-	public partial class Crft : Resource
+	public partial class Cplx : Resource
 	{
-		bool _isCft { get { return _fileName.ToUpper().EndsWith(".CFT"); } }
 
 		#region constructors
 		/// <summary>Blank constructor</summary>
-		public Crft()
+		public Cplx()
 		{
 			_type = ResourceType.Crft;
 		}
 		/// <summary>Creates a new instance from an existing opened file</summary>
-		/// <param name="stream">The opened LFD or CFT file</param>
+		/// <param name="stream">The opened LFD file</param>
 		/// <param name="filePosition">The offset of the beginning of the resource</param>
 		/// <exception cref="LoadFileException">Typically due to file corruption</exception>
-		public Crft(FileStream stream, long filePosition)
+		public Cplx(FileStream stream, long filePosition)
 		{
 			read(stream, filePosition);
 		}
 		/// <summary>Creates a new instance from an existing file</summary>
-		/// <param name="path">The full path to the unopened LFD or CFT file</param>
+		/// <param name="path">The full path to the unopened LFD file</param>
 		/// <param name="filePosition">The offset of the beginning of the resource</param>
 		/// <exception cref="LoadFileException">Typically due to file corruption</exception>
-		public Crft(string path, long filePosition)
+		public Cplx(string path, long filePosition)
 		{
 			FileStream stream = File.OpenRead(path);
 			read(stream, filePosition);
@@ -162,38 +163,47 @@ namespace Idmr.LfdReader
 		{
 			try
 			{
-				_fileName = stream.Name;    // Resource._fileName: even though _process gets it, _isCft needs it first
-				if (!_isCft) _process(stream, filePosition);
-				else
-				{
-					BinaryReader br = new BinaryReader(stream);
-					_offset = filePosition; // Resource._offset
-					_type = ResourceType.Crft;
-					// *.CFT files do not contain headers, just the raw data
-					_name = StringFunctions.GetFileName(_fileName);
-					DecodeResource(br.ReadBytes((int)stream.Length), false);
-				}
+				_process(stream, filePosition);
 			}
 			catch (Exception x) { throw new LoadFileException(x); }
+		}
+
+		/// <summary>Swaps the endianess of the given value</summary>
+		/// <param name="original">The original value</param>
+		/// <returns>The opposite endianess, can go either way</returns>
+		short convertInt16(short original)
+		{
+			short result = (short)((original >> 8) | ((original & 0xFF) << 8));
+			return result;
+		}
+		/// <summary>Swaps the endianess of the given value</summary>
+		/// <param name="buffer">Raw bytes</param>
+		/// <param name="offset">Starting index</param>
+		/// <returns>The opposite endianess, can go either way</returns>
+		short convertInt16(byte[] buffer, int offset)
+		{
+			short result = (short)(buffer[offset++] << 8 | buffer[offset]);
+			return result;
+		}
+		/// <summary>Swaps the endianess of the given value</summary>
+		/// <param name="buffer">Raw bytes</param>
+		/// <param name="offset">Starting index</param>
+		/// <returns>The opposite endianess, can go either way</returns>
+		int convertInt32(byte[] buffer, int offset)
+		{
+			int result = buffer[offset++] << 24 | buffer[offset++] << 16 | buffer[offset++] << 8 | buffer[offset];
+			return result;
 		}
 
 		#region public methods
 		/// <summary>Processes raw data to populate the resource</summary>
 		/// <param name="raw">Raw byte data</param>
 		/// <param name="containsHeader">Whether or not <paramref name="raw"/> contains the resource Header information</param>
-		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> from the LFD is not <see cref="Resource.ResourceType.Crft"/></exception>
-		/// <remarks>If resource was created from a *.CFT file, <paramref name="containsHeader"/> is ignored.</remarks>
+		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> from the LFD is not <see cref="Resource.ResourceType.Cplx"/></exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
-			if (!_isCft)
-			{
-				_decodeResource(raw, containsHeader);
-				if (_type != ResourceType.Crft) throw new ArgumentException("Raw header is not for a Crft resource");
-			}
-			else
-			{
-				_rawData = raw;
-			}
+			_decodeResource(raw, containsHeader);
+			if (_type != ResourceType.Cplx) throw new ArgumentException("Raw header is not for a Cplx resource");
 
 			int pos = 2;
 			byte componentCount = _rawData[pos++];
@@ -223,7 +233,7 @@ namespace Idmr.LfdReader
 			short[] componentJumps = new short[componentCount];
 			for (int i = 0; i < componentCount; i++)
 			{
-				componentJumps[i] = BitConverter.ToInt16(_rawData, pos);
+				componentJumps[i] = convertInt16(_rawData, pos);
 				pos += 2;
 			}
 
@@ -235,8 +245,8 @@ namespace Idmr.LfdReader
 				int lodCount = 0;
 				do
 				{
-					lodDistances.Add(BitConverter.ToInt32(_rawData, pos + lodCount * 6));
-					lodJumps.Add(BitConverter.ToInt16(_rawData, pos + 4 + lodCount * 6));
+					lodDistances.Add(convertInt32(_rawData, pos + lodCount * 6));
+					lodJumps.Add(convertInt16(_rawData, pos + 4 + lodCount * 6));
 					lodCount++;
 				}
 				while (lodDistances[lodDistances.Count - 1] != int.MaxValue);
@@ -259,14 +269,23 @@ namespace Idmr.LfdReader
 					for (int i = 0; i < shapeCount; i++) readOnly[i] = true;
 					lod.ColorIndices = new Indexer<byte>(colors, readOnly);
 
-					lod.MinimumBound = new Lod.Vertex16(_rawData, ref pos);
-					lod.MaximumBound = new Lod.Vertex16(_rawData, ref pos);
+					lod.MinimumBound = new Crft.Lod.Vertex16(_rawData, ref pos);
+					lod.MinimumBound.X = convertInt16(lod.MinimumBound.X);
+					lod.MinimumBound.Y = convertInt16(lod.MinimumBound.Y);
+					lod.MinimumBound.Z = convertInt16(lod.MinimumBound.Z);
+					lod.MaximumBound = new Crft.Lod.Vertex16(_rawData, ref pos);
+					lod.MaximumBound.X = convertInt16(lod.MaximumBound.X);
+					lod.MaximumBound.Y = convertInt16(lod.MaximumBound.Y);
+					lod.MaximumBound.Z = convertInt16(lod.MaximumBound.Z);
 
-					Lod.Vertex16[] vertices = new Lod.Vertex16[vertexCount];
+					Crft.Lod.Vertex16[] vertices = new Crft.Lod.Vertex16[vertexCount];
 					readOnly = new bool[vertexCount];
 					for (int v = 0; v < vertexCount; v++)
 					{
-						vertices[v] = new Lod.Vertex16(_rawData, ref pos);
+						vertices[v] = new Crft.Lod.Vertex16(_rawData, ref pos);
+						vertices[v].X = convertInt16(vertices[v].X);
+						vertices[v].Y = convertInt16(vertices[v].Y);
+						vertices[v].Z = convertInt16(vertices[v].Z);
 						readOnly[v] = true;
 
 						for (int i = 0; i < 3; i++)
@@ -278,22 +297,34 @@ namespace Idmr.LfdReader
 							}
 						}
 					}
-					lod.MeshVertices = new Indexer<Lod.Vertex16>(vertices, readOnly);
+					lod.MeshVertices = new Indexer<Crft.Lod.Vertex16>(vertices, readOnly);
+					Crft.Lod.Vector16[] normals = new Crft.Lod.Vector16[vertexCount];
+					for (int v = 0; v < vertexCount; v++)
+					{
+						normals[v] = new Crft.Lod.Vector16(_rawData, ref pos);
+						normals[v].X = convertInt16(normals[v].X);
+						normals[v].Y = convertInt16(normals[v].Y);
+						normals[v].Z = convertInt16(normals[v].Z);
+					}
+					lod.VertexNormals = new Indexer<Crft.Lod.Vector16>(normals, readOnly);
 
-					Lod.Vector16[] normals = new Lod.Vector16[shapeCount];
+					normals = new Crft.Lod.Vector16[shapeCount];
 					short[] shapeJumps = new short[shapeCount];
 					int shapeJumpStart = pos;
 					for (int s = 0; s < shapeCount; s++)
 					{
-						normals[s] = new Lod.Vector16(_rawData, ref pos);
-						shapeJumps[s] = BitConverter.ToInt16(_rawData, pos);
+						normals[s] = new Crft.Lod.Vector16(_rawData, ref pos);
+						normals[s].X = convertInt16(normals[s].X);
+						normals[s].Y = convertInt16(normals[s].Y);
+						normals[s].Z = convertInt16(normals[s].Z);
+						shapeJumps[s] = convertInt16(_rawData, pos);
 						pos += 2;
 					}
-					Lod.Shape[] shapes = new Lod.Shape[shapeCount];	
+					Crft.Lod.Shape[] shapes = new Crft.Lod.Shape[shapeCount];
 					for (int s = 0; s < shapeCount; s++)
 					{
-						shapes[s] = new Lod.Shape();
-						pos = shapeJumpStart + s * 8 + shapeJumps[s];	// this really shouldn't do anything
+						shapes[s] = new Crft.Lod.Shape();
+						pos = shapeJumpStart + s * 8 + shapeJumps[s];   // this really shouldn't do anything
 						shapes[s].FaceNormal = normals[s];
 						shapes[s].Type = _rawData[pos++];
 						int len = (shapes[s].Type & 0x0F) * 2 + 3;
@@ -309,12 +340,12 @@ namespace Idmr.LfdReader
 					{
 						readOnly[s] = true;
 						shapes[s].Unknown1 = _rawData[pos++];
-						shapes[s].Unknown2 = BitConverter.ToInt16(_rawData, pos);
+						shapes[s].Unknown2 = convertInt16(_rawData, pos);
 						pos += 2;
 					}
-					lod.Shapes = new Indexer<Lod.Shape>(shapes, readOnly);
+					lod.Shapes = new Indexer<Crft.Lod.Shape>(shapes, readOnly);
 
-					short unkCount = BitConverter.ToInt16(_rawData, pos);
+					short unkCount = convertInt16(_rawData, pos);
 					pos += 2;
 					if (unkCount != 0)
 					{
@@ -324,14 +355,14 @@ namespace Idmr.LfdReader
 						for (int u = 0; u < unkCount; u++)
 						{
 							unkID[u] = _rawData[pos++];
-							unkJumps[u] = BitConverter.ToInt16(_rawData, pos);
+							unkJumps[u] = convertInt16(_rawData, pos);
 							pos += 2;
 						}
-						Lod.UnknownData[] unks = new Lod.UnknownData[unkCount];
+						Crft.Lod.UnknownData[] unks = new Crft.Lod.UnknownData[unkCount];
 						for (int u = 0; u < unkCount; u++)
 						{
 							pos = unkJumpStart + u * 3 + unkJumps[u];
-							unks[u] = new Lod.UnknownData
+							unks[u] = new Crft.Lod.UnknownData
 							{
 								Type = _rawData[pos],
 								Unknown = unkID[u]
@@ -352,7 +383,7 @@ namespace Idmr.LfdReader
 						}
 						readOnly = new bool[unkCount];
 						for (int i = 0; i < unkCount; i++) readOnly[i] = true;
-						lod.UnkData = new Indexer<Lod.UnknownData>(unks, readOnly);
+						lod.UnkData = new Indexer<Crft.Lod.UnknownData>(unks, readOnly);
 					}
 					else { lod.UnkData = null; }
 				}
