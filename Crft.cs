@@ -19,7 +19,115 @@ using Idmr.Common;
 namespace Idmr.LfdReader
 {
 	/// <summary>Object for "CRFT" mesh resources</summary>
-	/// <remarks>This is the original format used in X-wing, resource is read-only</remarks>
+	/// <remarks>This is the original format used in X-wing, resource is read-only.<hr/>
+	/// <h4>Raw Data definition</h4>
+	/// <code>// Pseudo-code resource structure
+	/// struct RawData
+	/// {
+	///		0x0	SHORT	Length
+	///		0x2	BYTE NumComponents
+	///		0x3	BYTE NumShadingSets
+	///		0x4	ShadingSet[NumShadingSets]
+	///			SHORT[NumComponents]    ComponentOffsets
+	///			Component[NumComponents]
+	/// }
+	/// 
+	/// struct ShadingSet (size 0x10)
+	/// {
+	/// 	???	// don't know what this does
+	/// }
+	/// 
+	/// struct Component
+	/// {
+	/// 	0x0	LodHeader[]
+	/// 		LodMesh[]
+	/// }
+	/// 
+	/// struct LodHeader (size 0x6)
+	/// {
+	/// 	0x0 INT Distance
+	/// 	0x4 SHORT Offset
+	/// }
+	/// 
+	/// struct LodMesh
+	/// {
+	/// 	0x0	BYTE Signature(Reserved 0x83)
+	/// 	0x1	BYTE Unknown
+	/// 	0x2	BYTE NumVertices
+	/// 	0x3	BYTE Unknown
+	/// 	0x4	BYTE NumShapes
+	/// 	0x5	BYTE[NumShapes] ColorIndices
+	/// 		Vertex16 MinimumBound
+	/// 		Vertex16 MaximumBound
+	/// 		Vertex16[NumVertices] MeshVertices
+	/// 		ShapeSettings[NumShapes]
+	/// 		Shape[NumShapes]    MeshGeometry
+	/// 		Unknown1[NumShapes]
+	/// 		SHORT NumUnk2
+	/// 		Unknown2[NumUnk2]
+	/// 		Unknown3[NumUnk2]
+	/// }
+	/// 
+	/// struct Vertex16 (size 0x6)
+	/// {
+	/// 	0x0 SHORT X
+	/// 	0x2 SHORT Y
+	/// 	0x4 SHORT Z
+	/// }
+	/// 
+	/// struct ShapeSettings (size 0x8)
+	/// {
+	/// 	0x0 Vertex16 FaceNormal
+	/// 	0x6 SHORT Offset
+	/// }
+	/// 
+	/// struct Shape
+	/// {
+	/// 	0x0	BYTE Type
+	/// 	0x1	BYTE[] Data
+	/// }
+	/// 
+	/// struct Unknown1 (size 0x3)
+	/// {
+	/// 	0x0 BYTE
+	/// 	0x1 SHORT
+	/// }
+	/// 
+	/// struct Unknown2 (size 0x3)
+	/// {
+	/// 	0x0 BYTE
+	/// 	0x1 SHORT Offset
+	/// }
+	/// 
+	/// struct Unknown3
+	/// {
+	/// 	0x00	BYTE Type?
+	/// 	#if Type==1
+	/// 		0x01	BYTE
+	/// 		0x02	BYTE ArraySize
+	/// 		0x03	Triplet[ArraySize]
+	/// 	#elseif Type==2
+	/// 		0x01	BYTE[16]
+	/// 	// Don't know if length is fixed
+	///		#endif
+	/// }
+	/// 
+	/// struct Triplet
+	/// {
+	/// 	// Thanks to LE/BE CRFT/CPLX comparisons, these are definitely BYTE,
+	/// 	// and not a BYTE/SHORT combo
+	/// 	0x0	BYTE
+	/// 	0x1	BYTE
+	/// 	0x2	BYTE
+	/// }
+	/// }</code>
+	/// The Length after the header is the remaining data after that SHORT, so it will always be(Header.Length-2).<br/><br/>
+	/// The ComponentsOffsets values are jump offsets from the beginning of their respective value, such that if an offset value is at location p, the component will be at(p+offset).<br/><br/>
+	/// The LodHeader.Offset is a jump offset from the beginning of the LodHeader object, such that if LodHeader[i] is at location p, the Mesh will start at (p+offset). This also means that LodHeader[0].Offset will be the entire length of the array.There isn't a defined length for the LOD arrays, rather the last LOD will have a Distance of 0x7FFFFFFF.<br/><br/>
+	/// In LodMesh.MeshVertices, if the top byte of a value is 0x7F then it's repeating a previous vertex's value. The repeat will match the sub-type (X-X, Y-Y, Z-Z) and the appropriate index is calculated with the bottom byte, right-shifted once, and subtracted from the current index. E.g. if the current index is 5 and the Y value is 0x7F02, then it will be using MeshVertices[5 - (2 >> 1)].Y, or [4].Y.<br/><br/>
+	/// ShapeSettings.Offset is a jump offset from the beginning of the ShapeSettings object, similar to LodHeader.Offset.<br/><br/>
+	/// Shape.Type uses the bottom nibble for the number of vertices, top nibble for type. Data is length(3 + (numVertices* 2)). If the number of vertices is 2, then Data has a pair of vertex indexes for a line defined in Data[2] and Data[3]. Otherwise, for each vertex there is a line, with the vertex indexes defined in Data[v * 2] and Data[(v + 1) * 2].<br/><br/>
+	/// After that there's some Unknown data, the Offset within Unknown2 points to the Unknown3 struct, measured from Unknown2 start position.</remarks>
 	public partial class Crft : Resource
 	{
 		bool _isCft { get { return _fileName.ToUpper().EndsWith(".CFT"); } }
@@ -38,7 +146,7 @@ namespace Idmr.LfdReader
 		{
 			read(stream, filePosition);
 		}
-		/// <summary>Creates a new instance from an exsiting file</summary>
+		/// <summary>Creates a new instance from an existing file</summary>
 		/// <param name="path">The full path to the unopened LFD or CFT file</param>
 		/// <param name="filePosition">The offset of the beginning of the resource</param>
 		/// <exception cref="LoadFileException">Typically due to file corruption</exception>

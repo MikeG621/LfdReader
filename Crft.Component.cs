@@ -41,6 +41,7 @@ namespace Idmr.LfdReader
 		/// <summary>Represents a single Level of Detail (LOD) mesh</summary>
 		public class Lod
 		{
+			/// <summary>Gets the distance at which the LOD becomes active</summary>
 			public int Distance { get; internal set; }
 
 			/// <summary>At 0x1, after the 0x83 signature</summary>
@@ -50,7 +51,9 @@ namespace Idmr.LfdReader
 			/// <summary>Gets the color indices</summary>
 			/// <remarks>Each value is read-only</remarks>
 			public Indexer<byte> ColorIndices { get; internal set; }
+			/// <summary>Gets the minimum value for the bounding box</summary>
 			public Vertex16 MinimumBound { get; internal set; }
+			/// <summary>Gets the maximum value for the bounding box</summary>
 			public Vertex16 MaximumBound { get; internal set; }
 			/// <summary>Gets the vertices for the Lod</summary>
 			/// <remarks>Each vertex is read-only</remarks>
@@ -62,6 +65,7 @@ namespace Idmr.LfdReader
 			/// <remarks>Might be texture related? Each entry is read-only</remarks>
 			public Indexer<UnknownData> UnkData { get; internal set; }
 
+			/// <summary>Represents a single point in 3D space</summary>
 			public class Vertex16
 			{
 				internal Vertex16(byte[] raw, ref int offset)
@@ -74,8 +78,11 @@ namespace Idmr.LfdReader
 					offset += 2;
 				}
 
+				/// <summary>Gets the X value</summary>
 				public short X { get; internal set; }
+				/// <summary>Gets the Y value</summary>
 				public short Y { get; internal set; }
+				/// <summary>Gets the Z value</summary>
 				public short Z { get; internal set; }
 
 				/// <summary>Provides quick access to the values</summary>
@@ -99,16 +106,22 @@ namespace Idmr.LfdReader
 				}
 			}
 
+			/// <summary>Represents a direction in 3D space</summary>
+			/// <remarks>This is a derived class, only adds the <see cref="Magnitude"/> calculation to the inherited <see cref="Vertex16"/>.</remarks>
 			public class Vector16 : Vertex16
 			{
 				internal Vector16(byte[] raw, ref int offset) : base(raw, ref offset) { }
 
+				/// <summary>Gets the RSS length of the vector.</summary>
 				public short Magnitude => (short)Math.Sqrt(X * X + Y * Y + Z * Z);
 			}
 
+			/// <summary>Represents a single line or face within the mesh</summary>
 			public class Shape
 			{
+				/// <summary>Gets the normal vector of the shape</summary>
 				public Vector16 FaceNormal { get; internal set; }
+				/// <summary>Gets the Shape's Type</summary>
 				public byte Type { get; internal set; }
 				/// <summary>Gets the data array</summary>
 				/// <remarks>Length is (Type &amp; 0x0F)*2 + 3. The array of pairs are Vertex indices, the remaining 3 are unknown.<br/>
@@ -122,13 +135,17 @@ namespace Idmr.LfdReader
 				public short Unknown2 { get; internal set; }
 			}
 
+			/// <summary>Represents an unknown data set at the end of the Mesh data</summary>
 			public class UnknownData
 			{
 				/// <summary>From the preceding jump array</summary>
 				/// <remarks>Probably an ID value, looks unique and can be 0 to ShapeCount</remarks>
 				public byte Unknown { get; internal set; }
 
+				/// <summary>Gets the type of the <see cref="Data"/> structure</summary>
+				/// <remarks>Looks like this can either equal <b>1</b> or <b>2</b>.</remarks>
 				public byte Type { get; internal set; }
+
 				/// <summary>Gets the data array</summary>
 				/// <remarks>If Type==1, data is { Unk, ArrayCount } followed by 3*ArrayCount bytes<br/>
 				/// If Type==2, data is 16 bytes.<br/>
