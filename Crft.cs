@@ -1,6 +1,6 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2020 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
@@ -18,18 +18,22 @@ using Idmr.Common;
 
 namespace Idmr.LfdReader
 {
-	/// <summary>Object for "CRFT" mesh resources</summary>
-	/// <remarks>This is the original format used in X-wing, resource is read-only.<hr/>
+	/// <summary>Object for "CRFT" mesh resources.</summary>
+	/// <remarks>This is the original format used in X-wing.<br/>
+	/// Resource is read-only.</remarks>
+	/// <seealso cref="Cplx"/>
+	/// <seealso cref="Ship"/>
+	/// <example>
 	/// <h4>Raw Data definition</h4>
 	/// <code>// Pseudo-code resource structure
 	/// struct RawData
 	/// {
-	///		0x0	SHORT	Length
-	///		0x2	BYTE NumComponents
-	///		0x3	BYTE NumShadingSets
-	///		0x4	ShadingSet[NumShadingSets]
-	///			SHORT[NumComponents]    ComponentOffsets
-	///			Component[NumComponents]
+	///		0x00	SHORT	Length
+	///		0x02	BYTE NumComponents
+	///		0x03	BYTE NumShadingSets
+	///		0x04	ShadingSet[NumShadingSets]
+	///				SHORT[NumComponents]    ComponentOffsets
+	///				Component[NumComponents]
 	/// }
 	/// 
 	/// struct ShadingSet (size 0x10)
@@ -39,8 +43,8 @@ namespace Idmr.LfdReader
 	/// 
 	/// struct Component
 	/// {
-	/// 	0x0	LodHeader[]
-	/// 		LodMesh[]
+	/// 	0x00	LodHeader[]
+	/// 			LodMesh[]
 	/// }
 	/// 
 	/// struct LodHeader (size 0x6)
@@ -51,21 +55,21 @@ namespace Idmr.LfdReader
 	/// 
 	/// struct LodMesh
 	/// {
-	/// 	0x0	BYTE Signature(Reserved 0x83)
-	/// 	0x1	BYTE Unknown
-	/// 	0x2	BYTE NumVertices
-	/// 	0x3	BYTE Unknown
-	/// 	0x4	BYTE NumShapes
-	/// 	0x5	BYTE[NumShapes] ColorIndices
-	/// 		Vertex16 MinimumBound
-	/// 		Vertex16 MaximumBound
-	/// 		Vertex16[NumVertices] MeshVertices
-	/// 		ShapeSettings[NumShapes]
-	/// 		Shape[NumShapes]    MeshGeometry
-	/// 		Unknown1[NumShapes]
-	/// 		SHORT NumUnk2
-	/// 		Unknown2[NumUnk2]
-	/// 		Unknown3[NumUnk2]
+	/// 	0x00	BYTE Signature(Reserved 0x83)
+	/// 	0x01	BYTE Unknown
+	/// 	0x02	BYTE NumVertices
+	/// 	0x03	BYTE Unknown
+	/// 	0x04	BYTE NumShapes
+	/// 	0x05	BYTE[NumShapes] ColorIndices
+	/// 			Vertex16 MinimumBound
+	/// 			Vertex16 MaximumBound
+	/// 			Vertex16[NumVertices] MeshVertices
+	/// 			ShapeSettings[NumShapes]
+	/// 			Shape[NumShapes]    MeshGeometry
+	/// 			Unknown1[NumShapes]
+	/// 			SHORT NumUnk2
+	/// 			Unknown2[NumUnk2]
+	/// 			Unknown3[NumUnk2]
 	/// }
 	/// 
 	/// struct Vertex16 (size 0x6)
@@ -121,35 +125,41 @@ namespace Idmr.LfdReader
 	/// 	0x2	BYTE
 	/// }
 	/// }</code>
-	/// The first Length value is the remaining data after that SHORT, so it will always be (Resource.Length-2).<br/><br/>
-	/// The ComponentsOffsets values are jump offsets from the beginning of their respective value, such that if an offset value is at location p, the component will be at(p+offset).<br/><br/>
-	/// The LodHeader.Offset is a jump offset from the beginning of the LodHeader object, such that if LodHeader[i] is at location p, the Mesh will start at (p+offset). This also means that LodHeader[0].Offset will be the entire length of the array.There isn't a defined length for the LOD arrays, rather the last LOD will have a Distance of 0x7FFFFFFF.<br/><br/>
-	/// In LodMesh.MeshVertices, if the top byte of a value is 0x7F then it's repeating a previous vertex's value. The repeat will match the sub-type (X-X, Y-Y, Z-Z) and the appropriate index is calculated with the bottom byte, right-shifted once, and subtracted from the current index. E.g. if the current index is 5 and the Y value is 0x7F02, then it will be using MeshVertices[5 - (2 >> 1)].Y, or [4].Y.<br/><br/>
-	/// ShapeSettings.Offset is a jump offset from the beginning of the ShapeSettings object, similar to LodHeader.Offset.<br/><br/>
-	/// Shape.Type uses the bottom nibble for the number of vertices, top nibble for type. Data is length(3 + (numVertices* 2)). If the number of vertices is 2, then Data has a pair of vertex indexes for a line defined in Data[2] and Data[3]. Otherwise, for each vertex there is a line, with the vertex indexes defined in Data[v * 2] and Data[(v + 1) * 2].<br/><br/>
-	/// After that there's some Unknown data, the Offset within Unknown2 points to the Unknown3 struct, measured from Unknown2 start position.</remarks>
+	/// <para>The first Length value is the remaining data after that SHORT, so it will always be (Resource.Length-2)</para>
+	/// <para>The ComponentsOffsets values are jump offsets from the beginning of their respective value, such that if an offset value is at location p, the component will be at(p+offset).</para>
+	/// <para>The LodHeader.Offset is a jump offset from the beginning of the LodHeader object, such that if LodHeader[i] is at location p, the Mesh will start at (p+offset).
+	/// This also means that LodHeader[0].Offset will be the entire length of the array.
+	/// There isn't a defined length for the LOD arrays, rather the last LOD will have a Distance of 0x7FFFFFFF.</para>
+	/// <para>In LodMesh.MeshVertices, if the top byte of a value is 0x7F then it's repeating a previous vertex's value.
+	/// The repeat will match the sub-type (X-X, Y-Y, Z-Z) and the appropriate index is calculated with the bottom byte, right-shifted once, and subtracted from the current index.
+	/// E.g. if the current index is 5 and the Y value is 0x7F02, then it will be using MeshVertices[5 - (2 >> 1)].Y, or [4].Y.</para>
+	/// <para>ShapeSettings.Offset is a jump offset from the beginning of the ShapeSettings object, similar to LodHeader.Offset.</para>
+	/// <para>Shape.Type uses the bottom nibble for the number of vertices, top nibble for type.
+	/// Data is length(3 + (numVertices* 2)). If the number of vertices is 2, then Data has a pair of vertex indexes for a line defined in Data[2] and Data[3].
+	/// Otherwise, for each vertex there is a line, with the vertex indexes defined in Data[v * 2] and Data[(v + 1) * 2].</para>
+	/// <para>After that there's some Unknown data, the Offset within Unknown2 points to the Unknown3 struct, measured from Unknown2 start position.</para></example>
 	public partial class Crft : Resource
 	{
 		bool _isCft { get { return _fileName.ToUpper().EndsWith(".CFT"); } }
 
 		#region constructors
-		/// <summary>Blank constructor</summary>
+		/// <summary>Blank constructor.</summary>
 		public Crft()
 		{
 			_type = ResourceType.Crft;
 		}
-		/// <summary>Creates a new instance from an existing opened file</summary>
-		/// <param name="stream">The opened LFD or CFT file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <exception cref="LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an existing opened file.</summary>
+		/// <param name="stream">The opened LFD or CFT file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Crft(FileStream stream, long filePosition)
 		{
 			read(stream, filePosition);
 		}
-		/// <summary>Creates a new instance from an existing file</summary>
-		/// <param name="path">The full path to the unopened LFD or CFT file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <exception cref="LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an existing file.</summary>
+		/// <param name="path">The full path to the unopened LFD or CFT file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Crft(string path, long filePosition)
 		{
 			FileStream stream = File.OpenRead(path);
@@ -178,10 +188,10 @@ namespace Idmr.LfdReader
 		}
 
 		#region public methods
-		/// <summary>Processes raw data to populate the resource</summary>
-		/// <param name="raw">Raw byte data</param>
-		/// <param name="containsHeader">Whether or not <paramref name="raw"/> contains the resource Header information</param>
-		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> from the LFD is not <see cref="Resource.ResourceType.Crft"/></exception>
+		/// <summary>Processes raw data to populate the resource.</summary>
+		/// <param name="raw">Raw byte data.</param>
+		/// <param name="containsHeader">Whether or not <paramref name="raw"/> contains the resource Header information.</param>
+		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> from the LFD is not <see cref="Resource.ResourceType.Crft"/>.</exception>
 		/// <remarks>If resource was created from a *.CFT file, <paramref name="containsHeader"/> is ignored.</remarks>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
@@ -203,13 +213,14 @@ namespace Idmr.LfdReader
 			if (shadingCount != 0)
 			{
 				Indexer<byte>[] sets = new Indexer<byte>[shadingCount];
-				readOnly = new bool[16];
-				for (int i = 0; i < 16; i++) readOnly[i] = true;
+				int setLength = 16;
+				readOnly = new bool[setLength];
+				for (int i = 0; i < setLength; i++) readOnly[i] = true;
 				for (int i = 0; i < shadingCount; i++)
 				{
-					byte[] shadingSet = new byte[16];
+					byte[] shadingSet = new byte[setLength];
 					ArrayFunctions.TrimArray(_rawData, pos, shadingSet);
-					pos += 16;
+					pos += setLength;
 					sets[i] = new Indexer<byte>(shadingSet, readOnly);
 				}
 				readOnly = new bool[shadingCount];
@@ -363,11 +374,11 @@ namespace Idmr.LfdReader
 		}
 		#endregion public methods
 
-		/// <summary>Gets the components of the model</summary>
-		/// <remarks>Each component is read-only</remarks>
+		/// <summary>Gets the components of the model.</summary>
+		/// <remarks>Each component is read-only.</remarks>
 		public Indexer<Component> Components { get; private set; }
-		/// <summary>Gets the shading data</summary>
-		/// <remarks>Each set is read-only</remarks>
+		/// <summary>Gets the shading data.</summary>
+		/// <remarks>Each set is read-only.</remarks>
 		public Indexer<Indexer<byte>> ShadingSets { get; private set; }
 	}
 }

@@ -78,7 +78,8 @@ namespace Idmr.LfdReader
 		bool _isPnl { get { return _fileName.ToUpper().EndsWith(".PNL"); } }
 
 		#region constructors
-		/// <summary>Blank constructor</summary>
+		/// <summary>Blank constructor.</summary>
+		/// <param name="forLfd">If <b>true</b> the Panl is meant to be in stored in a LFD file, otherwise a standalone .PNL file.</param>
 		public Panl(bool forLfd)
 		{
 			_type = ResourceType.Panl;
@@ -86,39 +87,39 @@ namespace Idmr.LfdReader
 			else _images = new Bitmap[104];
 			_imageIndexer = new ImageIndexer(this);
 		}
-		/// <summary>Creates a new instance from an existing opened file with default 256 color Palette</summary>
-		/// <param name="stream">The opened LFD or PNL file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an existing opened file with default 256 color Palette.</summary>
+		/// <param name="stream">The opened LFD or PNL file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Panl(FileStream stream, long filePosition)
 		{
 			_read(stream, filePosition);
 		}
-		/// <summary>Creates a new instance from an existing opened file with the supplied Palette</summary>
-		/// <param name="stream">The opened LFD or PNL file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <param name="palette">The colors used for the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an existing opened file with the supplied Palette.</summary>
+		/// <param name="stream">The opened LFD or PNL file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <param name="palette">The colors used for the resource.</param>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Panl(FileStream stream, long filePosition, ColorPalette palette)
 		{
 			_palette = palette;
 			_read(stream, filePosition);
 		}
-		/// <summary>Creates a new instance from an exsiting file with default 256 color Palette</summary>
-		/// <param name="path">The full path to the unopened LFD or PNL file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an exsiting file with default 256 color Palette.</summary>
+		/// <param name="path">The full path to the unopened LFD or PNL file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Panl(string path, long filePosition)
 		{
 			FileStream stream = File.OpenRead(path);
 			_read(stream, filePosition);
 			stream.Close();
 		}
-		/// <summary>Creates a new instance from an exsiting file with the supplied Palette</summary>
-		/// <param name="path">The full path to the unopened LFD or PNL file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <param name="palette">The colors used for the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an exsiting file with the supplied Palette.</summary>
+		/// <param name="path">The full path to the unopened LFD or PNL file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <param name="palette">The colors used for the resource.</param>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Panl(string path, long filePosition, ColorPalette palette)
 		{
 			_palette = palette;
