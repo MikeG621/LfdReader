@@ -9,7 +9,7 @@
 
 /* CHANGE LOG
  * [UPD] cleanup
- * [ADD] Crft to assignResource
+ * [ADD] Cplx, Crft to assignResource
  * v1.2, 160712
  * [UPD] Always zeroes out name before writing
  * [UPD] Only calls _encode on children if they report being modified
@@ -213,7 +213,7 @@ namespace Idmr.LfdReader
 			else if (type == Resource.ResourceType.Blas || type == Resource.ResourceType.Voic) Resources[index] = new Blas(stream, offset);
 			//TODO: else if (type == Resource.ResourceType.Bmap) Resources[index] = new Bmap(stream, offset);
 			//TODO: else if (type == Resource.ResourceType.Btmp) Resources[index] = new Btmp(stream, offset);
-			//TODO: else if (type == Resource.ResourceType.Cplx) Resources[index] = new Cplx(stream, offset);
+			else if (type == Resource.ResourceType.Cplx) Resources[index] = new Cplx(stream, offset);
 			else if (type == Resource.ResourceType.Crft) Resources[index] = new Crft(stream, offset);
 			//TODO: else if (type == Resource.ResourceType.Cust) Resources[index] = new Cust(stream, offset);
 			else if (type == Resource.ResourceType.Delt) Resources[index] = new Delt(stream, offset);
@@ -225,7 +225,7 @@ namespace Idmr.LfdReader
 			else if (type == Resource.ResourceType.Panl) Resources[index] = new Panl(stream, offset);
 			else if (type == Resource.ResourceType.Pltt) Resources[index] = new Pltt(stream, offset);
 			// skip Rmap
-			//TODO: else if (type == Resource.ResourceType.Ship) Resources[index] = new Ship(stream, offset);
+			else if (type == Resource.ResourceType.Ship) Resources[index] = new Ship(stream, offset);
 			else if (type == Resource.ResourceType.Text) Resources[index] = new Text(stream, offset);
 			else if (type == Resource.ResourceType.Xact) Resources[index] = new Xact(stream, offset);
 			else Resources[index] = new Resource(stream, offset);
