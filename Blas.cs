@@ -1,6 +1,6 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2020 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
@@ -8,7 +8,6 @@
  */
 
 /* CHANGE LOG
- * [UPD] _read() renamed to read()
  * [ADD] Duration
  * [ADD] GetWaveBytes()
  * v1.2.1, 190802
@@ -26,9 +25,14 @@ using Idmr.Common;
 
 namespace Idmr.LfdReader
 {
-	/// <summary>Object for "BLAS" and "VOIC" audio resources</summary>
-	/// <remarks>The Blas resource is used for both the <see cref="Resource.ResourceType.Blas"/> and <see cref="Resource.ResourceType.Voic"/> types, as they are in fact the same resource. The only difference is the usage of the resources within the program. Blas resources tend to be flight engine sound effects such as engines, weapons, comms, etc. Voic resources are voices or sounds primarily for cutscene use. The resources themselves are wrappers for Creative Voice Files (*.voc). Although the format supports other methods, it is assumed that the audio data is always uncompressed 8-bit PCM.<hr/>
-	/// <h4>Raw Data definition</h4>
+	/// <summary>Object for "BLAS" and "VOIC" audio resources.</summary>
+	/// <remarks>The Blas resource is used for both the <see cref="Resource.ResourceType.Blas"/> and <see cref="Resource.ResourceType.Voic"/> types, as they are in fact the same resource.
+	/// The only difference is the usage of the resources within the program.
+	/// Blas resources tend to be flight engine sound effects such as engines, weapons, comms, etc.
+	/// Voic resources are voices or sounds primarily for cutscene use.
+	/// The resources themselves are wrappers for Creative Voice Files (*.voc).
+	/// Although the format supports other methods, it is assumed that the audio data is always uncompressed 8-bit PCM.</remarks>
+	/// <example><h4>Raw Data definition</h4>
 	/// <code>// Pseudo-code resource structure
 	/// struct RawData
 	/// {
@@ -59,38 +63,47 @@ namespace Idmr.LfdReader
 	///     #endif
 	///   #endif
 	/// }</code>
-	/// For the most part, <i>Header</i> is a formality, the only way to sync it into the LFD file. Since this is simply a pre-existing file format that has been placed into the LFD, the format is very reliable and is safe to use. <i>Header</i> is also fixed. There is technically a possiblity of the <i>Version</i> and <i>Verify</i> values being different, but TIE sticks with the older version, so we don't have to worry about it.<br/><br/>
-	/// -- VocDataBlock --<br/><br/>
-	/// The <i>Blocks</i> array typically consists of a single Sound Data block followed by the EOF block (<c>Type == 0x00</c>), although there are cases where a resource contains two Sound Data blocks.<br/>
-	/// There are a handful of resources that also use the Repeat block; a NumRepeat value of <b>0xFFFF</b> (-1) is for an infinite loop, otherwise it's a zero-indexed count, so a value of <b>0</b> means 1 repeat in addition to the original, so it plays twice. These resources also contain the End Repeat block (<c>Type == 0x07</c>) after the Sound Data block before EOF. The EOF and End Repeat blocks do not contain any values aside from <i>Type</i>. There are other <i>Type</i> values for *.voc files, but TIE doesn't use them.<br/><br/>
-	/// The sound block is simple. <i>FrequencyDivisor</i> has known values of <b>0xA1-0xA6</b>.  The sample rate of the sound is defined as <c>(1e6 / (256 - FrequencyDivisor))</c>, which gets us 10.526-11.111 KHz.<br/><br/>
-	/// <i>Codec</i> simply tells us that the sound data is uncompressed 8-bit PCM, which is easy enough to extract and form a wave file, or if you have a VOC reader, you can just cut up the LFD and be done with it.<br/><br/>
-	/// Now, the only trick to the block is the <i>Length</i> value. A <c>short</c> is 16-bit, <c>int</c> is 32-bit, well this stupid thing is 24-bit.  It is the length of the remaining values of the data block, however it's awkward to read/write to because of the stupid 3-byte length.</remarks>
+	/// <para>For the most part, <i>Header</i> is a formality, the only way to sync it into the LFD file.
+	/// Since this is simply a pre-existing file format that has been placed into the LFD, the format is very reliable and is safe to use.
+	/// <i>Header</i> is also fixed.
+	/// There is technically a possiblity of the <i>Version</i> and <i>Verify</i> values being different, but TIE sticks with the older version, so we don't have to worry about it.</para>
+	/// <h4>-- VocDataBlock --</h4>
+	/// <para>The <i>Blocks</i> array typically consists of a single Sound Data block followed by the EOF block (<c>Type == 0x00</c>), although there are cases where a resource contains two Sound Data blocks.<br/>
+	/// There are a handful of resources that also use the Repeat block; a NumRepeat value of <b>0xFFFF</b> (-1) is for an infinite loop, otherwise it's a zero-indexed count, so a value of <b>0</b> means 1 repeat in addition to the original, so it plays twice. 
+	/// These resources also contain the End Repeat block (<c>Type == 0x07</c>) after the Sound Data block before EOF. 
+	/// The EOF and End Repeat blocks do not contain any values aside from <i>Type</i>.
+	/// There are other <i>Type</i> values for *.voc files, but TIE doesn't use them.</para>
+	/// <para>The sound block is simple. <i>FrequencyDivisor</i> has known values of <b>0xA1-0xA6</b>.
+	/// The sample rate of the sound is defined as <c>(1e6 / (256 - FrequencyDivisor))</c>, which gets us 10.526-11.111 KHz.</para>
+	/// <para><i>Codec</i> simply tells us that the sound data is uncompressed 8-bit PCM, which is easy enough to extract and form a wave file, or if you have a VOC reader, you can just cut up the LFD and be done with it.</para>
+	/// <para>Now, the only trick to the block is the <i>Length</i> value.
+	/// A <c>short</c> is 16-bit, <c>int</c> is 32-bit, well this stupid thing is 24-bit.
+	/// It is the length of the remaining values of the data block, however it's awkward to read/write to because of the stupid 3-byte length.</para></example>
 	public class Blas : Resource
 	{
 		int _frequency = 12000;
 		const int _vocHeaderLength = 0x1A;
 
 		#region constructors
-		/// <summary>Creates a blank resource</summary>
+		/// <summary>Creates a blank resource.</summary>
 		public Blas()
 		{
 			_type = ResourceType.Blas;
 			SoundBlocks[0].DoesRepeat = false;
 			SoundBlocks[1].DoesRepeat = false;
 		}
-		/// <summary>Creates a new instance from an existing opened file</summary>
-		/// <param name="stream">The opened LFD file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <exception cref="LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an existing opened file.</summary>
+		/// <param name="stream">The opened LFD file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Blas(FileStream stream, long filePosition)
 		{
 			read(stream, filePosition);
 		}
-		/// <summary>Creates a new instance from an exsiting file</summary>
-		/// <param name="path">The full path to the unopened LFD file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <exception cref="LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an exsiting file.</summary>
+		/// <param name="path">The full path to the unopened LFD file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Blas(string path, long filePosition)
 		{
 			FileStream fsLFD = File.OpenRead(path);
@@ -106,9 +119,9 @@ namespace Idmr.LfdReader
 		}
 
 		#region public methods
-		/// <summary>Processes raw data to populate the resource</summary>
-		/// <param name="raw">Raw byte data</param>
-		/// <param name="containsHeader">Whether or not <paramref name="raw"/> contains the resource Header information</param>
+		/// <summary>Processes raw data to populate the resource.</summary>
+		/// <param name="raw">Raw byte data.</param>
+		/// <param name="containsHeader">Whether or not <paramref name="raw"/> contains the resource Header information.</param>
 		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Blas"/> or <see cref="Resource.ResourceType.Voic"/>.</exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
@@ -143,7 +156,7 @@ namespace Idmr.LfdReader
 			}
 		}
 
-		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/></summary>
+		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/>.</summary>
 		public override void EncodeResource()
 		{
 			int len = _vocHeaderLength + 1;	// VocHeader + EofBlock
@@ -176,8 +189,8 @@ namespace Idmr.LfdReader
 			_rawData = raw;
 		}
 
-		/// <summary>Gets the raw audio data and reformats it to be ready for playback. </summary>
-		/// <param name="withRepeats">Whether or not to include repeats in the audio data</param>
+		/// <summary>Gets the raw audio data and reformats it to be ready for playback.</summary>
+		/// <param name="withRepeats">Whether or not to include repeats in the audio data.</param>
 		/// <returns>The data in .WAV file format, with repeats if applicable.<br/>
 		/// If <see cref="SoundDataBlock.NumberOfRepeats"/> is infinite and <paramref name="withRepeats"/> is <b>true</b>, will include <b>4</b> repeats.</returns>
 		public byte[] GetWavBytes(bool withRepeats)
@@ -222,7 +235,8 @@ namespace Idmr.LfdReader
 			return data;
 		}
 		/// <summary>Gets the raw audio data and reformats it to be ready for playback.</summary>
-		/// <returns>The data in .WAV file format, with repeats if applicable. If <see cref="SoundDataBlock.NumberOfRepeats"/> is infinite, will include <b>4</b> repeats.</returns>
+		/// <returns>The data in .WAV file format, with repeats if applicable.<br/>
+		/// If <see cref="SoundDataBlock.NumberOfRepeats"/> is infinite, will include <b>4</b> repeats.</returns>
 		public byte[] GetWavBytes()
 		{
 			return GetWavBytes(true);
@@ -230,9 +244,9 @@ namespace Idmr.LfdReader
 		#endregion public methods
 		
 		#region public properties
-		/// <summary>Frequency in Hertz of the audio data.</summary>
-		/// <remarks><i>value</i> must be <b>10-12 kHz</b> (10000-12000). Defaults to <b>12000</b></remarks>
-		/// <exception cref="ArgumentOutOfRangeException"><i>value</i> is outside the required range</exception>
+		/// <summary>Gets or sets the frequency in Hertz of the audio data.</summary>
+		/// <remarks><i>value</i> must be <b>10-12 kHz</b> (10000-12000). Defaults to <b>12000</b>.</remarks>
+		/// <exception cref="ArgumentOutOfRangeException"><i>value</i> is outside the required range.</exception>
 		public int Frequency
 		{
 			get { return _frequency; }
@@ -244,7 +258,7 @@ namespace Idmr.LfdReader
 			}
 		}
 
-		/// <summary>Gets the audio data array</summary>
+		/// <summary>Gets the audio data array.</summary>
 		/// <remarks>Array length is always 2 as that's the maximum seen in TIE, although more should be possible.</remarks>
 		public SoundDataBlock[] SoundBlocks { get; private set; } = new SoundDataBlock[2];
 
@@ -266,15 +280,15 @@ namespace Idmr.LfdReader
 			}
 		}
 		#endregion public properties
-		/// <summary>Container for audio data and repeat information</summary>
+		/// <summary>Container for audio data and repeat information.</summary>
 		public struct SoundDataBlock
 		{
 			// FrequencyDivisor is left global, Codec is ignored and always 00
 			byte[] _data;
 
-			/// <summary>Gets or sets the raw 8-bit PCM audio data</summary>
-			/// <remarks><i>value</i>.Length is restricted to <b>0xFFFFFD</b></remarks>
-			/// <exception cref="ArgumentException"><i>value</i> length exceeds limits</exception>
+			/// <summary>Gets or sets the raw 8-bit PCM audio data.</summary>
+			/// <remarks><i>value</i>.Length is restricted to <b>0xFFFFFD</b>.</remarks>
+			/// <exception cref="ArgumentException"><i>value</i> length exceeds limits.</exception>
 			public byte[] Data
 			{
 				get { return _data; }
@@ -285,11 +299,11 @@ namespace Idmr.LfdReader
 				}
 			}
 
-			/// <summary>Gets or sets the number of repeats</summary>
-			/// <remarks>Values <b>-1</b> (infinite repeat) and higher activate repeat flag, <b>-2</b> and lower deactivate</remarks>
+			/// <summary>Gets or sets the number of repeats.</summary>
+			/// <remarks>Values <b>-1</b> (infinite repeat) and higher activate repeat flag, <b>-2</b> and lower deactivate.</remarks>
 			public short NumberOfRepeats { get; set; }
 
-			/// <summary>Gets or sets the repeat flag</summary>
+			/// <summary>Gets or sets the repeat flag.</summary>
 			public bool DoesRepeat
 			{
 				get { return NumberOfRepeats > -2; }
