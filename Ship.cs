@@ -63,7 +63,7 @@ namespace Idmr.LfdReader
 	/// 
 	/// struct LodMesh
 	/// {
-	/// 	0x00	BYTE Signature (Reserved 0x83)
+	/// 	0x00	BYTE Signature
 	/// 	0x01	BYTE Unknown
 	/// 	0x02	BYTE NumVertices
 	/// 	0x03	BYTE Unknown
@@ -119,16 +119,14 @@ namespace Idmr.LfdReader
 	/// 		0x01	BYTE
 	/// 		0x02	BYTE ArraySize
 	/// 		0x03	Triplet[ArraySize]
-	/// 	#elseif Type==2
-	/// 		0x01	BYTE[16]
-	/// 	// Don't know if length is fixed
+	/// 	#else
+	/// 		0x01	BYTE[]
+	/// 	// I've seen Types 2-5 and 7, but don't know how the data is sized
 	///		#endif
 	/// }
 	/// 
 	/// struct Triplet
 	/// {
-	/// 	// Thanks to LE/BE CRFT/CPLX comparisons, these are definitely BYTE,
-	/// 	// and not a BYTE/SHORT combo
 	/// 	0x0	BYTE
 	/// 	0x1	BYTE
 	/// 	0x2	BYTE
@@ -146,7 +144,9 @@ namespace Idmr.LfdReader
 	/// <para>Shape.Type uses the bottom nibble for the number of vertices, top nibble for type. Data is length(3 + (numVertices* 2)).
 	/// If the number of vertices is 2, then Data has a pair of vertex indexes for a line defined in Data[2] and Data[3].
 	/// Otherwise, for each vertex there is a line, with the vertex indexes defined in Data[v * 2] and Data[(v + 1) * 2].</para>
-	/// <para>After that there's some Unknown data, the Offset within Unknown2 points to the Unknown3 struct, measured from Unknown2 start position.</para></example>
+	/// <para>After that there's some Unknown data which is currently not read into the class.
+	/// The Offset within Unknown2 points to the Unknown3 struct, measured from Unknown2 start position.<br/>
+	/// Some meshes are missing the Unknown1 array. I've noticed this in CONTAIN, on a Signature=81 LOD.</para></example>
 	public partial class Ship : Resource
 	{
 		public enum MeshType : short
@@ -272,7 +272,7 @@ namespace Idmr.LfdReader
 			}
 			for (int c = 0; c < componentCount; c++)
 			{
-				pos = componentJumpStart + c * 2 + componentJumps[c];
+				pos = componentJumpStart + c * 0x40 + componentJumps[c];
 				List<int> lodDistances = new List<int>();
 				List<short> lodJumps = new List<short>();
 				int lodCount = 0;
@@ -289,7 +289,8 @@ namespace Idmr.LfdReader
 				{
 					Cplx.Lod lod = components[c].Lods[l];
 					lod.Distance = lodDistances[l];
-					pos = componentJumpStart + c * 2 + componentJumps[c] + l * 6 + lodJumps[l];
+					pos = componentJumpStart + c * 0x40 + componentJumps[c] + l * 6 + lodJumps[l];
+
 					pos++; //skip Signature
 					lod.Unknown1 = _rawData[pos++];
 					byte vertexCount = _rawData[pos++];
@@ -342,7 +343,7 @@ namespace Idmr.LfdReader
 					for (int s = 0; s < shapeCount; s++)
 					{
 						shapes[s] = new Crft.Lod.Shape();
-						pos = shapeJumpStart + s * 8 + shapeJumps[s];   // this really shouldn't do anything
+						pos = shapeJumpStart + s * 8 + shapeJumps[s];
 						shapes[s].FaceNormal = normals[s];
 						shapes[s].Type = _rawData[pos++];
 						int len = (shapes[s].Type & 0x0F) * 2 + 3;
@@ -354,17 +355,25 @@ namespace Idmr.LfdReader
 						shapes[s].Data = new Indexer<byte>(data, readOnly);
 					}
 					readOnly = new bool[shapeCount];
-					for (int s = 0; s < shapeCount; s++)
+					//short unkCount;
+					for (int i = 0; i < shapeCount; i++) readOnly[i] = true;
+					try
 					{
-						readOnly[s] = true;
-						shapes[s].Unknown1 = _rawData[pos++];
-						shapes[s].Unknown2 = BitConverter.ToInt16(_rawData, pos);
-						pos += 2;
+						for (int s = 0; s < shapeCount; s++)
+						{
+							shapes[s].Unknown1 = _rawData[pos++];
+							shapes[s].Unknown2 = BitConverter.ToInt16(_rawData, pos);   // this throws in SHIPCONTAIN, effectively these values are missing
+							pos += 2;
+						}
+						//unkCount = BitConverter.ToInt16(_rawData, pos);
 					}
+					catch
+					{
+						//unkCount = 0;
+					}	// if it threw, assume it doesn't exist and skip the Unks since now we can't trust it.
 					lod.Shapes = new Indexer<Crft.Lod.Shape>(shapes, readOnly);
 
-					short unkCount = BitConverter.ToInt16(_rawData, pos);
-					pos += 2;
+					/*pos += 2;
 					if (unkCount != 0)
 					{
 						byte[] unkID = new byte[unkCount];
@@ -385,14 +394,14 @@ namespace Idmr.LfdReader
 								Type = _rawData[pos],
 								Unknown = unkID[u]
 							};
-							byte[] data = null;
+							byte[] data;
 							if (unks2[u].Type == 1)
 							{
 								data = new byte[_rawData[pos + 2] * 3 + 2];
 							}
-							else if (unks2[u].Type == 2)
+							else
 							{
-								data = new byte[16];
+								data = new byte[1];	// don't keep it, haven't figured out how the sizing is done
 							}
 							ArrayFunctions.TrimArray(_rawData, pos + 1, data);
 							readOnly = new bool[data.Length];
@@ -403,9 +412,12 @@ namespace Idmr.LfdReader
 						for (int i = 0; i < unkCount; i++) readOnly[i] = true;
 						lod.UnkData = new Indexer<Crft.Lod.UnknownData>(unks2, readOnly);
 					}
-					else { lod.UnkData = null; }
+					else { lod.UnkData = null; }*/
 				}
 			}
+			readOnly = new bool[componentCount];
+			for (int i = 0; i < componentCount; i++) readOnly[i] = true;
+			Components = new Indexer<Component>(components, readOnly);
 		}
 
 		/// <summary>Gets the components of the model.</summary>

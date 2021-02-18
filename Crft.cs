@@ -55,7 +55,7 @@ namespace Idmr.LfdReader
 	/// 
 	/// struct LodMesh
 	/// {
-	/// 	0x00	BYTE Signature(Reserved 0x83)
+	/// 	0x00	BYTE Signature
 	/// 	0x01	BYTE Unknown
 	/// 	0x02	BYTE NumVertices
 	/// 	0x03	BYTE Unknown
@@ -137,7 +137,8 @@ namespace Idmr.LfdReader
 	/// <para>Shape.Type uses the bottom nibble for the number of vertices, top nibble for type.
 	/// Data is length(3 + (numVertices* 2)). If the number of vertices is 2, then Data has a pair of vertex indexes for a line defined in Data[2] and Data[3].
 	/// Otherwise, for each vertex there is a line, with the vertex indexes defined in Data[v * 2] and Data[(v + 1) * 2].</para>
-	/// <para>After that there's some Unknown data, the Offset within Unknown2 points to the Unknown3 struct, measured from Unknown2 start position.</para></example>
+	/// <para>After that there's some Unknown data which is currently not read into the class.
+	/// The Offset within Unknown2 points to the Unknown3 struct, measured from Unknown2 start position.</para></example>
 	public partial class Crft : Resource
 	{
 		bool _isCft { get { return _fileName.ToUpper().EndsWith(".CFT"); } }
@@ -316,16 +317,20 @@ namespace Idmr.LfdReader
 						shapes[s].Data = new Indexer<byte>(data, readOnly);
 					}
 					readOnly = new bool[shapeCount];
-					for (int s = 0; s < shapeCount; s++)
+					for (int i = 0; i < shapeCount; i++) readOnly[i] = true;
+					try
 					{
-						readOnly[s] = true;
-						shapes[s].Unknown1 = _rawData[pos++];
-						shapes[s].Unknown2 = BitConverter.ToInt16(_rawData, pos);
-						pos += 2;
+						for (int s = 0; s < shapeCount; s++)
+						{
+							shapes[s].Unknown1 = _rawData[pos++];
+							shapes[s].Unknown2 = BitConverter.ToInt16(_rawData, pos);
+							pos += 2;
+						}
 					}
+					catch { /* do nothing */ }
 					lod.Shapes = new Indexer<Lod.Shape>(shapes, readOnly);
 
-					short unkCount = BitConverter.ToInt16(_rawData, pos);
+					/*short unkCount = BitConverter.ToInt16(_rawData, pos);
 					pos += 2;
 					if (unkCount != 0)
 					{
@@ -365,7 +370,7 @@ namespace Idmr.LfdReader
 						for (int i = 0; i < unkCount; i++) readOnly[i] = true;
 						lod.UnkData = new Indexer<Lod.UnknownData>(unks, readOnly);
 					}
-					else { lod.UnkData = null; }
+					else { lod.UnkData = null; }*/
 				}
 			}
 			readOnly = new bool[componentCount];

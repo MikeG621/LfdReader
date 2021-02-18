@@ -28,7 +28,11 @@ namespace Idmr.LfdReader
 			{
 				Cplx.Lod[] lods = new Cplx.Lod[lodCount];
 				bool[] readOnly = new bool[lodCount];
-				for (int i = 0; i < lodCount; i++) readOnly[i] = true;
+				for (int i = 0; i < lodCount; i++)
+				{
+					lods[i] = new Cplx.Lod();
+					readOnly[i] = true;
+				}
 
 				Lods = new Indexer<Cplx.Lod>(lods, readOnly);
 			}

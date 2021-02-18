@@ -28,7 +28,11 @@ namespace Idmr.LfdReader
 			{
 				Lod[] lods = new Lod[lodCount];
 				bool[] readOnly = new bool[lodCount];
-				for (int i = 0; i < lodCount; i++) readOnly[i] = true;
+				for (int i = 0; i < lodCount; i++)
+				{
+					lods[i] = new Lod();
+					readOnly[i] = true;
+				}
 
 				Lods = new Indexer<Lod>(lods, readOnly);
 			}
@@ -44,7 +48,7 @@ namespace Idmr.LfdReader
 			/// <summary>Gets the distance at which the LOD becomes active</summary>
 			public int Distance { get; internal set; }
 
-			/// <summary>At 0x1, after the 0x83 signature</summary>
+			/// <summary>At 0x1, after the signature</summary>
 			public byte Unknown1 { get; internal set; }
 			/// <summary>At 0x3</summary>
 			public byte Unknown2 { get; internal set; }
@@ -61,9 +65,9 @@ namespace Idmr.LfdReader
 			/// <summary>Gets the Shapes for the Lod</summary>
 			/// <remarks>Each shape is read-only</remarks>
 			public Indexer<Shape> Shapes { get; internal set; }
-			/// <summary>Gets the unknown data at the end of the Lod</summary>
-			/// <remarks>Might be texture related? Each entry is read-only</remarks>
-			public Indexer<UnknownData> UnkData { get; internal set; }
+			// <summary>Gets the unknown data at the end of the Lod</summary>
+			// <remarks>Might be texture related? Each entry is read-only</remarks>
+			//public Indexer<UnknownData> UnkData { get; internal set; }
 
 			/// <summary>Represents a single point in 3D space</summary>
 			public class Vertex16
@@ -135,8 +139,8 @@ namespace Idmr.LfdReader
 				public short Unknown2 { get; internal set; }
 			}
 
-			/// <summary>Represents an unknown data set at the end of the Mesh data</summary>
-			public class UnknownData
+			// <summary>Represents an unknown data set at the end of the Mesh data</summary>
+			/*public class UnknownData
 			{
 				/// <summary>From the preceding jump array</summary>
 				/// <remarks>Probably an ID value, looks unique and can be 0 to ShapeCount</remarks>
@@ -151,7 +155,7 @@ namespace Idmr.LfdReader
 				/// If Type==2, data is 16 bytes.<br/>
 				/// Each value is read-only</remarks>
 				public Indexer<byte> Data { get; internal set; }
-			}
+			}*/
 		}
 	}
 }
