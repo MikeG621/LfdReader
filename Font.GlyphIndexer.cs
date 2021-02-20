@@ -1,6 +1,6 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2016 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
@@ -23,25 +23,25 @@ namespace Idmr.LfdReader
 {
     public partial class Font : Resource
 	{
-		/// <summary>Object to provide array access to the character glyphs</summary>
+		/// <summary>Object to provide array access to the character glyphs.</summary>
 		public class GlyphIndexer : Indexer<Bitmap>
 		{
-			Font _parent;
+			readonly Font _parent;
 			
-			/// <summary>Initializes the indexer</summary>
-			/// <param name="parent">The parent resource</param>
+			/// <summary>Initializes the indexer.</summary>
+			/// <param name="parent">The parent resource.</param>
 			internal GlyphIndexer(Font parent)
 			{
 				_parent = parent;
 				_items = parent._glyphs;
 			}
 			
-			/// <summary>Gets or sets the individual images</summary>
-			/// <param name="index">Array index</param>
-			/// <returns><see cref="System.Drawing.Imaging.PixelFormat.Format1bppIndexed"/> Bitmap</returns>
-			/// <exception cref="ArgumentException">Image Height is incorrect</exception>
-			/// <exception cref="BoundaryException">Maximum character width is exceeded</exception>
-			/// <exception cref="IndexOutOfRangeException">Invalid <i>index</i> value</exception>
+			/// <summary>Gets or sets the individual images.</summary>
+			/// <param name="index">Array index.</param>
+			/// <returns><see cref="System.Drawing.Imaging.PixelFormat.Format1bppIndexed"/> Bitmap.</returns>
+			/// <exception cref="ArgumentException">Image Height is incorrect.</exception>
+			/// <exception cref="BoundaryException">Maximum character width is exceeded.</exception>
+			/// <exception cref="IndexOutOfRangeException">Invalid <i>index</i> value.</exception>
 			public override Bitmap this[int index]
 			{
 				get { return _items[index]; }

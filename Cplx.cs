@@ -24,7 +24,7 @@ namespace Idmr.LfdReader
 	/// <seealso cref="Crft"/>
 	/// <seealso cref="Ship"/>
 	/// <example>
-	/// <b>*WARNING*:</b> The entire RawData is Big-endian!<br/><br/>
+	/// <b>*WARNING*:</b> The entire RawData is Big-endian!
 	/// <h4>Raw Data definition</h4>
 	/// <code>// Pseudo-code resource structure
 	/// struct RawData

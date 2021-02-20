@@ -83,7 +83,7 @@ namespace Idmr.LfdReader
 			/// <remarks><para><see cref="Delt.ErrorImage"/> is returned if there's an error retrieving the image.</para>
 			/// <para>When setting the image, if <see cref="HasFixedDimensions"/> is <b>false</b>, the parent dimensions will adjust as necessary.
 			/// Otherwise, out-of-bounds content results in an exception.
-			/// <i>Image</i> is converted to <see cref="PixelFormat.Format8bppIndexed"/> using the current <see cref="Anim"/> palette if it exists.
+			/// <i>value</i> is converted to <see cref="PixelFormat.Format8bppIndexed"/> using the current <see cref="Anim"/> palette if it exists.
 			/// If the palette is undefined, loading a <see cref="PixelFormat.Format8bppIndexed"/> image will set the palette for the <see cref="Anim"/>.</para></remarks>
 			/// <exception cref="InvalidOperationException">The image is not <see cref="PixelFormat.Format8bppIndexed"/> and the parent <see cref="Anim"/> does not have a defined palette.</exception>
 			/// <exception cref="BoundaryException">The image's <see cref="Size"/> would result in portions of the image being outside the acceptable boundaries.</exception>

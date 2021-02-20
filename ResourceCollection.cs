@@ -1,6 +1,6 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2020 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
@@ -19,24 +19,24 @@ using System.Collections.Generic;
 
 namespace Idmr.LfdReader
 {
-	/// <summary>Collection object for the resources in an <see cref="LfdFile"/></summary>
+	/// <summary>Collection object for the resources in an <see cref="LfdFile"/>.</summary>
 	public class ResourceCollection : IEnumerable<Resource>
 	{
 		List<Resource> _items = null;
 		readonly string _lockedMessage = "Collection structure is currently locked (";
 
 		#region constructors
-		/// <summary>Creates a new empty Collection</summary>
-		/// <remarks>Structure is unlocked, <see cref="ResourceCollection.Add"/>, <see cref="ResourceCollection.Insert"/> and <see cref="RemoveAt"/> can be used</remarks>
+		/// <summary>Creates a new empty Collection.</summary>
+		/// <remarks>Structure is unlocked, <see cref="Add()"/>, <see cref="Insert(int)"/> and <see cref="RemoveAt"/> can be used.</remarks>
 		public ResourceCollection()
 		{
 			CanEditStructure = true;
 		}
 		
-		/// <summary>Creates a new Collection with multiple initial Resource placeholders</summary>
-		/// <param name="quantity">Number of Resources to start with</param>
-		/// <remarks>Structure is locked</remarks>
-		/// <exception cref="ArgumentOutOfRangeException"><i>quantity</i> is not positive</exception>
+		/// <summary>Creates a new Collection with multiple initial Resource placeholders.</summary>
+		/// <param name="quantity">Number of Resources to start with.</param>
+		/// <remarks>Structure is locked.</remarks>
+		/// <exception cref="ArgumentOutOfRangeException"><paramref name="quantity"/> is not positive.</exception>
 		public ResourceCollection(int quantity)
 		{
 			if (quantity > 0) _items = new List<Resource>(quantity);
@@ -44,8 +44,8 @@ namespace Idmr.LfdReader
 			for (int i = 0; i < quantity; i++) _items.Add(new Resource());
 		}
 		
-		/// <summary>Creates a new Collection with the specified structure</summary>
-		/// <param name="category">Structure of file to initialize</param>
+		/// <summary>Creates a new Collection with the specified structure.</summary>
+		/// <param name="category">Structure of file to initialize.</param>
 		/// <remarks>Using <see cref="LfdFile.LfdCategory.Normal"/> is the same as using the blank constructor, otherwise structure is locked.<br/>
 		/// Battle Delt palette is defined by EMPIRE.PLTTstandard and TOURDESK.PLTTtoddesk.</remarks>
 		public ResourceCollection(LfdFile.LfdCategory category)
@@ -74,9 +74,9 @@ namespace Idmr.LfdReader
 		#endregion constructors
 		
 		#region public methods
-		/// <summary>Finds the resource with the specified <see cref="Resource.Tag"/> value</summary>
-		/// <param name="tag">User-defined data</param>
-		/// <returns>The first matching Resource, otherwise <b>null</b></returns>
+		/// <summary>Finds the resource with the specified <see cref="Resource.Tag"/> value.</summary>
+		/// <param name="tag">User-defined data.</param>
+		/// <returns>The first matching Resource, otherwise <b>null</b>.</returns>
 		public Resource GetResourceByTag(object tag)
 		{
 			for (int i = 0; i < Count; i++)
@@ -84,9 +84,9 @@ namespace Idmr.LfdReader
 			return null;
 		}
 
-		/// <summary>Finds the index of the resource with the specified <see cref="Resource.Tag"/> value</summary>
-		/// <param name="tag">User-defined data</param>
-		/// <returns>The index of the first matching Resource, otherwise <b>-1</b></returns>
+		/// <summary>Finds the index of the resource with the specified <see cref="Resource.Tag"/> value.</summary>
+		/// <param name="tag">User-defined data.</param>
+		/// <returns>The index of the first matching Resource, otherwise <b>-1</b>.</returns>
 		public int GetIndexByTag(object tag)
 		{
 			for (int i = 0; i < Count; i++)
@@ -94,11 +94,11 @@ namespace Idmr.LfdReader
 			return -1;
 		}
 
-		/// <summary>Finds the resource with the specified <see cref="Resource.Tag"/> value and replaces it with <i>resource</i></summary>
-		/// <param name="tag">The value to search for</param>
-		/// <param name="resource">The new Resource</param>
-		/// <remarks>If <i>tag</i> is not found, no action is taken.</remarks>
-		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked and <see cref="Resource.Type"/> or <see cref="Resource.Name"/> have been changed</exception>
+		/// <summary>Finds the resource with the specified <see cref="Resource.Tag"/> value and replaces it with <paramref name="resource"/>.</summary>
+		/// <param name="tag">The value to search for.</param>
+		/// <param name="resource">The new Resource.</param>
+		/// <remarks>If <paramref name="tag"/> is not found, no action is taken.</remarks>
+		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked and <see cref="Resource.Type"/> or <see cref="Resource.Name"/> have been changed.</exception>
 		public void SetByTag(object tag, Resource resource)
 		{
 			for (int i = 0; i < Count; i++)
@@ -112,49 +112,49 @@ namespace Idmr.LfdReader
 				}
 		}
 
-		/// <summary>Empties the Collection of entries</summary>
+		/// <summary>Empties the Collection of entries.</summary>
 		/// <remarks>All existing resources are lost, <see cref="Count"/> will be <b>zero</b>.</remarks>
-		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked</exception>
+		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked.</exception>
 		public void Clear()
 		{
 			if (!CanEditStructure) throw new InvalidOperationException(_lockedMessage + "Clear)");
 			_items.Clear();
 		}
 		
-		/// <summary>Adds a new Resource to the end of the Collection</summary>
-		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked</exception>
+		/// <summary>Adds a new Resource to the end of the Collection.</summary>
+		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked.</exception>
 		public void Add() { add(new Resource()); }
 
-		/// <summary>Adds the given Resource to the end of the Collection</summary>
-		/// <param name="resource">The Resource to be added</param>
-		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked</exception>
+		/// <summary>Adds the given Resource to the end of the Collection.</summary>
+		/// <param name="resource">The Resource to be added.</param>
+		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked.</exception>
 		public void Add(Resource resource) { add(resource); }
 		
-		/// <summary>Inserts a new Resource at the specified index</summary>
-		/// <param name="index">Location of the Resource within the Collection</param>
-		/// <exception cref="ArgumentOutOfRangeException">Invalid <i>index</i> value</exception>
-		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked</exception>
+		/// <summary>Inserts a new Resource at the specified index.</summary>
+		/// <param name="index">Location of the Resource within the Collection.</param>
+		/// <exception cref="ArgumentOutOfRangeException">Invalid <paramref name="index"/> value.</exception>
+		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked.</exception>
 		public void Insert(int index) { insert(index, new Resource()); }
 
-		/// <summary>Inserts the given Resource at the specified index</summary>
-		/// <param name="index">Location of the Resource</param>
-		/// <param name="resource">The Resource to be added</param>
-		/// <exception cref="ArgumentOutOfRangeException">Invalid <i>index</i> value</exception>
-		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked</exception>
+		/// <summary>Inserts the given Resource at the specified index.</summary>
+		/// <param name="index">Location of the Resource.</param>
+		/// <param name="resource">The Resource to be added.</param>
+		/// <exception cref="ArgumentOutOfRangeException">Invalid <paramref name="index"/> value.</exception>
+		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked.</exception>
 		public void Insert(int index, Resource resource) { insert(index, resource); }
 		
-		/// <summary>Deletes the Resource at the specified index</summary>
-		/// <param name="index">The index of the Resource to be deleted</param>
-		/// <exception cref="ArgumentOutOfRangeException">Invalid <i>index</i> value</exception>
-		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked<br/><b>-or-</b><br/>Collection is empty</exception>
+		/// <summary>Deletes the Resource at the specified index.</summary>
+		/// <param name="index">The index of the Resource to be deleted.</param>
+		/// <exception cref="ArgumentOutOfRangeException">Invalid <paramref name="index"/> value.</exception>
+		/// <exception cref="InvalidOperationException">Attempted to call when structure is locked<br/><b>-or-</b><br/>Collection is empty.</exception>
 		public void RemoveAt(int index) { removeAt(index); }
 		#endregion public methods
 		
 		#region public properties
-		/// <summary>A single Resource within the collection</summary>
-		/// <param name="index">The location within the collection</param>
-		/// <exception cref="IndexOutOfRangeException">Invalid <i>index</i> value</exception>
-		/// <exception cref="InvalidOperationException">Attempted to set when structure is locked and <see cref="Resource.Type"/> or <see cref="Resource.Name"/> have been changed</exception>
+		/// <summary>A single Resource within the collection.</summary>
+		/// <param name="index">The location within the collection.</param>
+		/// <exception cref="IndexOutOfRangeException">Invalid <paramref name="index"/> value.</exception>
+		/// <exception cref="InvalidOperationException">Attempted to set when structure is locked and <see cref="Resource.Type"/> or <see cref="Resource.Name"/> have been changed.</exception>
 		public Resource this[int index]
 		{
 			get { return _items[index]; }
@@ -166,12 +166,12 @@ namespace Idmr.LfdReader
 			}
 		}
 		
-		/// <summary>A single Resource within the collection</summary>
-		/// <param name="label">The identifying string of the Resource in the form of "<see cref="Type">TYPE</see><see cref="Resource.Name"/>"</param>
-		/// <exception cref="ArgumentException">Resource not found</exception>
-		/// <exception cref="InvalidOperationException">Attempted to set when structure is locked and <see cref="Resource.Type"/> or <see cref="Resource.Name"/> have been changed</exception>
-		/// <returns>The Resource matching <i>label</i>, otherwise <b>null</b></returns>
-		/// <remarks><i>label</i> is the same format as <see cref="Resource.ToString()"/></remarks>
+		/// <summary>A single Resource within the collection.</summary>
+		/// <param name="label">The identifying string of the Resource in the form of "<see cref="Type">TYPE</see><see cref="Resource.Name"/>".</param>
+		/// <exception cref="ArgumentException">Resource not found.</exception>
+		/// <exception cref="InvalidOperationException">Attempted to set when structure is locked and <see cref="Resource.Type"/> or <see cref="Resource.Name"/> have been changed.</exception>
+		/// <returns>The Resource matching <paramref name="label"/>, otherwise <b>null</b>.</returns>
+		/// <remarks><paramref name="label"/> is the same format as <see cref="Resource.ToString()"/>.</remarks>
 		public Resource this[string label]
 		{
 			get
@@ -192,13 +192,13 @@ namespace Idmr.LfdReader
 			}
 		}
 		
-		/// <summary>Gets the number of objects in the Collection</summary>
-		/// <remarks>If internal List is <b>null</b>, returns <b>-1</b></remarks>
+		/// <summary>Gets the number of objects in the Collection.</summary>
+		/// <remarks>If internal List is <b>null</b>, returns <b>-1</b>.</remarks>
 		public int Count { get { return (_items == null ? -1 : _items.Count); } }
 		
-		/// <summary>Gets or sets whether or not the structure is unlocked</summary>
+		/// <summary>Gets or sets whether or not the structure is unlocked.</summary>
 		/// <remarks>Default is <b>false</b>, set to <b>true</b> when initialized with <see cref="ResourceCollection()"/> or <see cref="LfdFile.LfdCategory.Normal"/>.<br/>
-		///	When locked, <see cref="Resource.Type"/> and <see cref="Resource.Name"/> are read-only, Collection cannot be resized</remarks>
+		///	When locked, <see cref="Resource.Type"/> and <see cref="Resource.Name"/> are read-only, Collection cannot be resized.</remarks>
 		public bool CanEditStructure { get; set; }
 		#endregion public properties
 		

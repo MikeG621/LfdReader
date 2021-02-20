@@ -11,7 +11,6 @@
  * [ADD] Created
  */
 
-using System;
 using Idmr.Common;
 
 namespace Idmr.LfdReader

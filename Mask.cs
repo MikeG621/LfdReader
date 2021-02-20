@@ -1,6 +1,6 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2016 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
@@ -23,10 +23,12 @@ using Idmr.Common;
 
 namespace Idmr.LfdReader
 {
-	/// <summary>Object for "MASK" cockpit transparency resources</summary>
-	/// <remarks>The Mask resource controls the windows for the in-flight cockpits. Sloppy application of the Mask can result in stars being visible through the solid parts of your cockpit, much like how the snowspeeder cockpits in Empire Strikes Back were transparent!<br/>
-	/// Images are monochrome, white is solid and black is transparent. Maximum dimensions are controlled by <see cref="Panl"/>.<hr/>
-	/// <h4>Raw Data definition</h4>
+	/// <summary>Object for "MASK" cockpit transparency resources.</summary>
+	/// <remarks>The Mask resource controls the windows for the in-flight cockpits.
+	/// Sloppy application of the Mask can result in stars being visible through the solid parts of your cockpit, much like how the snowspeeder cockpits in Empire Strikes Back were transparent!<br/>
+	/// Images are monochrome, white is solid and black is transparent.
+	/// Maximum dimensions are controlled by <see cref="Panl"/>.</remarks>
+	/// <example><h4>Raw Data definition</h4>
 	/// <code>// Pseudo-code resource structure
 	/// struct RawData
 	/// {
@@ -42,112 +44,123 @@ namespace Idmr.LfdReader
 	///   #endif
 	///   /* 0x01 */ byte[] Lengths;
 	/// }</code>
-	/// If you know the dimensions of the Mask before you start, that's great. If not, it can be determined iteratively, however there is some degree of error.<br/><br/>
-	/// The iterative method currently used by <see cref="DecodeResource"/> when the dimensions are unknown assumes the first two rows start with the same state (solid/transparent) and the top row does not have any Length values that equal <i>FirstColor</i>. It's not perfect, but it seems to work fine with the stock cockpits. Results may vary with custom cockpits.<br/>
-	/// Quickly iterating through <i>Rows</i> using the width value until the end of RawData or until a Row starts with <b>0x00</b> will determine the height. Of course, if you know the dimensions beforehand, that would be for the best and is almost definitely how the program operates.<br/><br/>
-	/// The <i>FirstColor</i> for the Row is a marker that defines the starting color. After that point, it simple alternates solid/transparent <i>Lengths</i> until it reaches the end of the Row. The <i>Lengths</i> values are one-indexed, so a value of <b>0x01</b> is one pixel. For values larger than <b>0xFF</b>, <b>0x00</b> is used as 256 pixels and must be followed by a "closing" value, as it will not switch pixel states.<br/>
-	/// For example, a row of <c>0xFF 0x00 0x0C 0x0A 0x00 0x6A</c> starts solid with 268 pixels (256 + 12), followed by 10 transparent pixels and 362 solid pixels (256 + 106). To make a row over 512 pixels, simple repeat the <b>0x00</b> value. So a full-length 640-pixel solid row would be <c>0xFF 0x00 0x00 0x80</c>.<br/><br/>
-	/// Because the closing value is required, lengths of 256 or 512 pixels cannot be used in a row. The exception to this rule is at the end of the row, where the closing pixel would be off the screen. In this case there's a "throw-away" pixel, usually <b>0x01</b>, so the <i>Row</i> actually defines 641 pixels instead of 640. One of the Gunbboat views does this and TIEEdit does not account for it properly and displays the view corrupted.</remarks>
+	/// <para>If you know the dimensions of the Mask before you start, that's great. If not, it can be determined iteratively, however there is some degree of error.</para>
+	/// <para>The iterative method currently used by <see cref="DecodeResource"/> when the dimensions are unknown assumes the first two rows start with the same state (solid/transparent) and the top row does not have any Length values that equal <i>FirstColor</i>.
+	/// It's not perfect, but it seems to work fine with the stock cockpits.
+	/// Results may vary with custom cockpits.<br/>
+	/// Quickly iterating through <i>Rows</i> using the width value until the end of RawData or until a Row starts with <b>0x00</b> will determine the height.
+	/// Of course, if you know the dimensions beforehand, that would be for the best and is almost definitely how the program operates.</para>
+	/// <para>The <i>FirstColor</i> for the Row is a marker that defines the starting color.
+	/// After that point, it simple alternates solid/transparent <i>Lengths</i> until it reaches the end of the Row.
+	/// The <i>Lengths</i> values are one-indexed, so a value of <b>0x01</b> is one pixel.
+	/// For values larger than <b>0xFF</b>, <b>0x00</b> is used as 256 pixels and must be followed by a "closing" value, as it will not switch pixel states.<br/>
+	/// For example, a row of <c>0xFF 0x00 0x0C 0x0A 0x00 0x6A</c> starts solid with 268 pixels (256 + 12), followed by 10 transparent pixels and 362 solid pixels (256 + 106).
+	/// To make a row over 512 pixels, simply repeat the <b>0x00</b> value.
+	/// So a full-length 640-pixel solid row would be <c>0xFF 0x00 0x00 0x80</c>.</para>
+	/// <para>Because the closing value is required, lengths of 256 or 512 pixels cannot be used in a row.
+	/// The exception to this rule is at the end of the row, where the closing pixel would be off the screen.
+	/// In this case there's a "throw-away" pixel, usually <b>0x01</b>, so the <i>Row</i> actually defines 641 pixels instead of 640.
+	/// One of the Gunbboat views does this and TIEEdit does not account for it properly and displays the view corrupted.</para></example>
 	public class Mask : Resource
 	{
 		Bitmap _image = null;
 
 		#region constructors
-		/// <summary>Blank constructor</summary>
-		/// <remarks><see cref="Image"/> is <b>null</b></remarks>
+		/// <summary>Blank constructor.</summary>
+		/// <remarks><see cref="Image"/> is <b>null</b>.</remarks>
 		public Mask()
 		{
 			_type = ResourceType.Mask;
 		}
-		/// <summary>Creates a new instance from an existing opened file</summary>
-		/// <param name="stream">The opened LFD file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an existing opened file.</summary>
+		/// <param name="stream">The opened LFD file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Mask(FileStream stream, long filePosition)
 		{
-			_read(stream, filePosition);
+			read(stream, filePosition);
 		}
-		/// <summary>Creates a new instance from an exsiting file</summary>
-		/// <param name="path">The full path to the unopened LFD file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an exsiting file.</summary>
+		/// <param name="path">The full path to the unopened LFD file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Mask(string path, long filePosition)
 		{
 			FileStream stream = File.OpenRead(path);
-			_read(stream, filePosition);
+			read(stream, filePosition);
 			stream.Close();
 		}
-		/// <summary>Creates a new instance from an existing opened file</summary>
-		/// <param name="stream">The opened LFD file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <param name="width">Predefined width of the mask</param>
-		/// <param name="height">Predefined height of the mask</param>
-		/// <exception cref="Idmr.Common.BoundaryException"><i>width</i> or <i>height</i> exceed maximum allowable dimensions</exception>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an existing opened file.</summary>
+		/// <param name="stream">The opened LFD file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <param name="width">Predefined width of the mask.</param>
+		/// <param name="height">Predefined height of the mask.</param>
+		/// <exception cref="BoundaryException"><paramref name="width"/> or <paramref name="height"/> exceed maximum allowable dimensions.</exception>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Mask(FileStream stream, long filePosition, short width, short height)
 		{
 			if (width > Panl.MaximumWidth || height > Panl.MaximumHeight) throw new Common.BoundaryException("dimensions", Panl.MaximumWidth + "x" + Panl.MaximumHeight);
 			Width = width;
 			Height = height;
-			_read(stream, filePosition);
+			read(stream, filePosition);
 		}
-		/// <summary>Creates a new instance from an exsiting file</summary>
-		/// <param name="path">The full path to the unopened LFD file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <param name="width">Predefined width of the mask</param>
-		/// <param name="height">Predefined height of the mask</param>
-		/// <exception cref="Idmr.Common.BoundaryException"><i>width</i> or <i>height</i> exceed maximum allowable dimensions</exception>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an exsiting file.</summary>
+		/// <param name="path">The full path to the unopened LFD file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <param name="width">Predefined width of the mask.</param>
+		/// <param name="height">Predefined height of the mask.</param>
+		/// <exception cref="BoundaryException"><paramref name="width"/> or <paramref name="height"/> exceed maximum allowable dimensions.</exception>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Mask(string path, long filePosition, short width, short height)
 		{
 			if (width > Panl.MaximumWidth || height > Panl.MaximumHeight) throw new Common.BoundaryException("dimensions", Panl.MaximumWidth + "x" + Panl.MaximumHeight);
 			Width = width;
 			Height = height;
 			FileStream stream = File.OpenRead(path);
-			_read(stream, filePosition);
+			read(stream, filePosition);
 			stream.Close();
 		}
-		/// <summary>Creates a new instance from an existing opened file</summary>
-		/// <param name="stream">The opened LFD file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <param name="dimensions">Predefined size of the mask</param>
-		/// <exception cref="Idmr.Common.BoundaryException"><i>dimensions</i> exceeds maximum allowable dimensions</exception>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an existing opened file.</summary>
+		/// <param name="stream">The opened LFD file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <param name="dimensions">Predefined size of the mask.</param>
+		/// <exception cref="BoundaryException"><paramref name="dimensions"/> exceeds maximum allowable dimensions.</exception>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Mask(FileStream stream, long filePosition, Size dimensions)
 		{
 			if (dimensions.Width > Panl.MaximumWidth || dimensions.Height > Panl.MaximumHeight) throw new Common.BoundaryException("dimensions", Panl.MaximumWidth + "x" + Panl.MaximumHeight);
 			Width = (short)dimensions.Width;
 			Height = (short)dimensions.Height;
-			_read(stream, filePosition);
+			read(stream, filePosition);
 		}
-		/// <summary>Creates a new instance from an exsiting file</summary>
-		/// <param name="path">The full path to the unopened LFD file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <param name="dimensions">Predefined size of the mask</param>
-		/// <exception cref="Idmr.Common.BoundaryException"><i>dimensions</i> exceeds maximum allowable dimensions</exception>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an exsiting file.</summary>
+		/// <param name="path">The full path to the unopened LFD file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <param name="dimensions">Predefined size of the mask.</param>
+		/// <exception cref="BoundaryException"><paramref name="dimensions"/> exceeds maximum allowable dimensions.</exception>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Mask(string path, long filePosition, Size dimensions)
 		{
 			if (dimensions.Width > Panl.MaximumWidth || dimensions.Height > Panl.MaximumHeight) throw new Common.BoundaryException("dimensions", Panl.MaximumWidth + "x" + Panl.MaximumHeight);
 			Width = (short)dimensions.Width;
 			Height = (short)dimensions.Height;
 			FileStream stream = File.OpenRead(path);
-			_read(stream, filePosition);
+			read(stream, filePosition);
 			stream.Close();
 		}
 		#endregion constructors
 		
-		void _read(FileStream stream, long filePosition)
+		void read(FileStream stream, long filePosition)
 		{
 			try { _process(stream, filePosition); }
 			catch (Exception x) { throw new LoadFileException(x); }
 		}
 
 		#region public methods
-		/// <summary>Processes raw data to populate the resource</summary>
-		/// <param name="raw">Raw byte data</param>
-		/// <param name="containsHeader">Whether or not <i>raw</i> contains the resource Header information</param>
-		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Mask"/></exception>
+		/// <summary>Processes raw data to populate the resource.</summary>
+		/// <param name="raw">Raw byte data.</param>
+		/// <param name="containsHeader">Whether or not <paramref name="raw"/> contains the resource Header information.</param>
+		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Mask"/>.</exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
 			_decodeResource(raw, containsHeader);
@@ -200,7 +213,7 @@ namespace Idmr.LfdReader
 			GraphicsFunctions.CopyBytesToImage(pixels, bd);
 			_image.UnlockBits(bd);
 		}
-		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/></summary>
+		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/>.</summary>
 		public override void EncodeResource()
 		{
 			BitmapData bd = GraphicsFunctions.GetBitmapData(_image);
@@ -248,27 +261,28 @@ namespace Idmr.LfdReader
 			_rawData = raw;
 		}
 
-		/// <summary>Sets the transparency mask</summary>
-		/// <param name="image">New image mask. Converts to <see cref="PixelFormat.Format1bppIndexed"/>, must be <b>640x480</b> or smaller</param>
-		/// <exception cref="ArgumentException"><i>image</i> contains a consecutive length of 256 or 512 pixels not located at the end of the image</exception>
-		/// <exception cref="Idmr.Common.BoundaryException"><i>image</i> exceeds maximum allowable dimensions</exception>
+		/// <summary>Sets the transparency mask.</summary>
+		/// <param name="image">New image mask. Converts to <see cref="PixelFormat.Format1bppIndexed"/>, must be <b>640x480</b> or smaller.</param>
+		/// <exception cref="ArgumentException"><paramref name="image"/> contains a consecutive length of 256 or 512 pixels not located at the end of the image.</exception>
+		/// <exception cref="BoundaryException"><paramref name="image"/> exceeds maximum allowable dimensions.</exception>
 		/// <remarks>The MASK format cannot handle the 256 or 512px lengths in the middle of the image. It can however do that at the end of the image, via "throw away" pixels.<br/>
-		/// Maximum size is defined by <see cref="Panl.MaximumWidth"/> and <see cref="Panl.MaximumHeight"/></remarks>
+		/// Maximum size is defined by <see cref="Panl.MaximumWidth"/> and <see cref="Panl.MaximumHeight"/>.<br/>
+		/// Black is used as the transparecny color.</remarks>
 		public void SetMask(Bitmap image)
 		{
 			SetMask(image, Color.FromArgb(0,0,0));
 		}
-		/// <summary>Sets the transparency mask</summary>
-		/// <param name="image">New image mask. Converts to <see cref="PixelFormat.Format1bppIndexed"/>, must be <b>640x480</b> or smaller</param>
-		/// <param name="transparentColor">The Color to be used as transparent</param>
-		/// <exception cref="ArgumentException"><i>image</i> contains a consecutive length of 256 or 512 pixels not located at the end of the image</exception>
-		/// <exception cref="Idmr.Common.BoundaryException"><i>image</i> exceeds maximum allowable dimensions</exception>
+		/// <summary>Sets the transparency mask.</summary>
+		/// <param name="image">New image mask. Converts to <see cref="PixelFormat.Format1bppIndexed"/>, must be <b>640x480</b> or smaller.</param>
+		/// <param name="transparentColor">The Color to be used as transparent.</param>
+		/// <exception cref="ArgumentException"><paramref name="image"/> contains a consecutive length of 256 or 512 pixels not located at the end of the image.</exception>
+		/// <exception cref="BoundaryException"><paramref name="image"/> exceeds maximum allowable dimensions.</exception>
 		/// <remarks>The MASK format cannot handle the 256 or 512px lengths in the middle of the image. It can however do that at the end of the image, via "throw away" pixels.<br/>
-		/// Maximum size is defined by <see cref="Panl.MaximumWidth"/> and <see cref="Panl.MaximumHeight"/></remarks>
+		/// Maximum size is defined by <see cref="Panl.MaximumWidth"/> and <see cref="Panl.MaximumHeight"/>.</remarks>
 		public void SetMask(Bitmap image, Color transparentColor)
 		{
 			string message = "Image contains line length of 256 or 512 pixels";
-			if (image.Width > Panl.MaximumWidth || image.Height > Panl.MaximumHeight) throw new Common.BoundaryException("image.Size", Panl.MaximumWidth + "x" + Panl.MaximumHeight);
+			if (image.Width > Panl.MaximumWidth || image.Height > Panl.MaximumHeight) throw new BoundaryException("image.Size", Panl.MaximumWidth + "x" + Panl.MaximumHeight);
 			Bitmap temp = _image;
 			try
 			{
@@ -309,11 +323,11 @@ namespace Idmr.LfdReader
 		#endregion public methods
 		
 		#region public properties
-		/// <summary>Gets the monochrome mask image</summary>
+		/// <summary>Gets the monochrome mask image.</summary>
 		public Bitmap Image { get { return _image; } }
-		/// <summary>Gets the width of the Mask image</summary>
+		/// <summary>Gets the width of the Mask image.</summary>
 		public short Width { get; internal set; }
-		/// <summary>Gets the height of the Mask image</summary>
+		/// <summary>Gets the height of the Mask image.</summary>
 		public short Height { get; internal set; }
 		#endregion public properties
 	}

@@ -1,6 +1,6 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2020 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
@@ -23,7 +23,7 @@ using System.IO;
 
 namespace Idmr.LfdReader
 {
-	/// <summary>Object to manage LFD resource files</summary>
+	/// <summary>Object to manage LFD resource files.</summary>
 	public class LfdFile
 	{
 		Rmap _rmp = null;
@@ -32,32 +32,32 @@ namespace Idmr.LfdReader
 		string _tempPath { get { return FilePath + ".tmp"; } }
 		LfdCategory _lfdCategory = LfdCategory.Normal;
 
-		/// <summary>Preset Lfd structures</summary>
+		/// <summary>Preset Lfd structures.</summary>
 		public enum LfdCategory : byte {
-			/// <summary>Typical LFD file, unlocked structure, no restrictions</summary>
+			/// <summary>Typical LFD file, unlocked structure, no restrictions.</summary>
 			Normal,
-			/// <summary>Cockpit view LFDs, locked structure, does not contain an RMAP</summary>
+			/// <summary>Cockpit view LFDs, locked structure, does not contain an RMAP.</summary>
 			Cockpit,
-			/// <summary>Battle#.LFD files, locked structure</summary>
+			/// <summary>Battle#.LFD files, locked structure.</summary>
 			Battle }
 		
 		#region constructors
-		/// <summary>Populates with an existing *.lfd file</summary>
-		/// <param name="stream">Opened *.lfd</param>
+		/// <summary>Populates with an existing *.lfd file.</summary>
+		/// <param name="stream">Opened *.lfd.</param>
 		public LfdFile(FileStream stream)
 		{
 			read(stream);
 		}
-		/// <summary>Populates with an existing *.lfd file</summary>
-		/// <param name="filePath">Full path to the unopened *.lfd</param>
+		/// <summary>Populates with an existing *.lfd file.</summary>
+		/// <param name="filePath">Full path to the unopened *.lfd.</param>
 		public LfdFile(string filePath)
 		{
 			FileStream stream = File.OpenRead(filePath);
 			read(stream);
 			stream.Close();
 		}
-		/// <summary>Creates an empty file with the appropriate file structure</summary>
-		/// <param name="category">Preset type</param>
+		/// <summary>Creates an empty file with the appropriate file structure.</summary>
+		/// <param name="category">Preset type.</param>
 		/// <remarks><see cref="Rmap"/> and <see cref="Resources"/> are initialized accordingly.</remarks>
 		public LfdFile(LfdCategory category)
 		{
@@ -68,8 +68,8 @@ namespace Idmr.LfdReader
 		#endregion constructors
 
 		#region public methods
-		/// <summary>Initializes <see cref="Rmap"/> using the contents of the LfdFile. If Rmap is already defined, it is updated</summary>
-		/// <remarks>Processes individual <see cref="Resource.EncodeResource"/> functions, thus updating all <see cref="Resource.RawData"/> properties</remarks>
+		/// <summary>Initializes <see cref="Rmap"/> using the contents of the LfdFile. If Rmap is already defined, it is updated.</summary>
+		/// <remarks>Processes individual <see cref="Resource.EncodeResource"/> functions, thus updating all <see cref="Resource.RawData"/> properties.</remarks>
 		public void CreateRmap()
 		{
 			if (_lfdCategory == LfdCategory.Cockpit) throw new ArgumentException(_cockpitRmapErrorMessage);
@@ -90,8 +90,8 @@ namespace Idmr.LfdReader
 			_rmp.EncodeResource();
 		}
 
-		/// <summary>Writes the file to disk</summary>
-		/// <exception cref="Idmr.Common.SaveFileException">An error occured, file remains unchanged</exception>
+		/// <summary>Writes the file to disk.</summary>
+		/// <exception cref="Common.SaveFileException">An error occured, file remains unchanged.</exception>
 		public void Write()
 		{
 			System.Diagnostics.Debug.WriteLine("Encoding Lfd...");
@@ -140,18 +140,18 @@ namespace Idmr.LfdReader
 		#endregion public methods
 
 		#region public properties
-		/// <summary>Resources contained within the file</summary>
-		/// <remarks>Does <u>not</u> contain <see cref="Rmap"/> if applicable</remarks>
+		/// <summary>Resources contained within the file.</summary>
+		/// <remarks>Does <u>not</u> contain <see cref="Rmap"/> if applicable.</remarks>
 		public ResourceCollection Resources { get; set; } = new ResourceCollection();
 
-		/// <summary>Gets the full path to the file</summary>
+		/// <summary>Gets the full path to the file.</summary>
 		public string FilePath { get; private set; } = "resource.lfd";
-		/// <summary>Gets the file name and extension of the file</summary>
+		/// <summary>Gets the file name and extension of the file.</summary>
 		public string FileName { get { return Common.StringFunctions.GetFileName(FilePath); } }
-		/// <summary>Gets if <see cref="Rmap"/> is defined</summary>
+		/// <summary>Gets if <see cref="Rmap"/> is defined.</summary>
 		public bool HasRmap { get { return (_rmp != null); } }
-		/// <summary>Gets or sets the Rmap resource for the file</summary>
-		/// <exception cref="ArgumentException">Cannot set if file is defined by the <see cref="LfdCategory.Cockpit"/> preset</exception>
+		/// <summary>Gets or sets the Rmap resource for the file.</summary>
+		/// <exception cref="ArgumentException">Cannot set if file is defined by the <see cref="LfdCategory.Cockpit"/> preset.</exception>
 		public Rmap Rmap
 		{
 			get { return _rmp; }
@@ -164,7 +164,7 @@ namespace Idmr.LfdReader
 		#endregion public properties
 		
 		#region private methods
-		/// <summary>Loops through Resources and calls the individual EncodeResource() functions</summary>
+		/// <summary>Loops through Resources and calls the individual EncodeResource() functions.</summary>
 		void encodeResources()
 		{
 			for (int i = 0; i < Resources.Count; i++) if (Resources[i]._isModifed) Resources[i].EncodeResource();
@@ -232,7 +232,8 @@ namespace Idmr.LfdReader
 		}
 		#endregion private methods
 
-        bool isModified
+		/// <summary>Gets if any of the resources are known to have been modified.</summary>
+        public bool IsModified
         {
             get
             {

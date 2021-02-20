@@ -1,13 +1,14 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2016 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.2
+ * Version: 1.2+
  */
 
 /* CHANGE LOG
+ * [UPD] TotalChars renamed to NumberOfGlyphs
  * v1.2, 160712
  * [FIX] Fixed EncodeResource writing to array due to large Stride
  * [ADD] _isModified edits
@@ -26,8 +27,8 @@ using Idmr.Common;
 namespace Idmr.LfdReader
 {
 	/// <summary>Object for "FONT" typeface resources</summary>
-	/// <remarks>The Font resource controls all of the typefaces used outside of the flight engine. Menus, briefing text, even the scrolling text during the intro.<hr/>
-	/// <h4>Raw Data definition</h4>
+	/// <remarks>The Font resource controls all of the typefaces used outside of the flight engine. Menus, briefing text, even the scrolling text during the intro.</remarks>
+	/// <example><h4>Raw Data definition</h4>
 	/// <code>// Pseudo-code resource structure
 	/// struct RawData
 	/// {
@@ -45,19 +46,27 @@ namespace Idmr.LfdReader
 	/// {
 	///   /* 0x00 */ byte[BitsPerScanLine * Height / 8] Rows;
 	/// }</code>
-	/// In TIE95 there are a total of seven FONT resources, all of which have a <i>StartingChar</i> of <b>0x20</b>, which makes sense since you kinda need a space, and there's nothing really before that anyway. Only "TITLE.LFD:FONThelv-20" has a non-0x60 value for <i>NumberOfGlyphs</i>, which is the scrolling text in the title crawl.<br/><br/>
-	/// <i>BitsPerScanLine</i> tells you how much you have to read before going on to the next line. <u>Must be a multiple of 8</u>. <i>Height</i> is just that, how many rows per glyph. <i>BaseLine</i> is a zero-indexed row that is defined as the bottom of the glyphs. This is so letters such as 'j' and 'g' hang below the "bottom" as they should.<br/><br/>
-	/// The <i>GlyphWidth</i> values are in pixels, starting from the left of the glyph.<br/><br/>
-	/// -- Row --<br/><br/>
-	/// The Row values within the actual glyph data are bit fields.  Monochrome bitmaps, so '0' is transparent, '1' is solid.<br/><br/>
-	/// EMPIRE.LFD:FONTfont6 has <i>BitsPerScanLine</i> = <b>0x08</b>, <i>Height</i> = <b>0x06</b> and <i>BaseLine</i> = <b>0x04</b>. The letter 'A' in that resource has its <i>Rows</i> array as <c>E0 A0 E0 A0 A0 00</c>.<br/><br/>
-	/// <c>XXX.....</c>		E0 = b11100000<br/>
+	/// <para>In TIE95 there are a total of seven FONT resources, all of which have a <see cref="StartingChar"/> of <b>0x20</b>, which makes sense since you kinda need a space, and there's nothing really before that anyway.
+	/// Only "TITLE.LFD:FONThelv-20" has a non-0x60 value for <see cref="NumberOfGlyphs"/>, which is the scrolling text in the title crawl.</para>
+	/// <para><see cref="BitsPerScanLine"/> tells you how much you have to read before going on to the next line.
+	/// <u>Must be a multiple of 8</u>.
+	/// <see cref="Height"/> is just that, how many rows per glyph.
+	/// <see cref="BaseLine"/> is a zero-indexed row that is defined as the bottom of the glyphs.
+	/// This is so letters such as 'j' and 'g' hang below the "bottom" as they should.</para>
+	/// <para>The <i>GlyphWidth</i> values are in pixels, starting from the left of the glyph.</para>
+	/// <h4>-- Row --</h4>
+	/// <para>The Row values within the actual glyph data are bit fields.  Monochrome bitmaps, so '0' is transparent, '1' is solid.</para>
+	/// <para>EMPIRE.LFD:FONTfont6 has <i>BitsPerScanLine</i> = <b>0x08</b>, <i>Height</i> = <b>0x06</b> and <i>BaseLine</i> = <b>0x04</b>.
+	/// The letter 'A' in that resource has its <i>Rows</i> array as <c>E0 A0 E0 A0 A0 00</c>.</para>
+	/// <para><c>XXX.....</c>		E0 = b11100000<br/>
 	/// <c>X.X.....</c>		A0 = b10100000<br/>
 	/// <c>XXX.....</c>		b11100000<br/>
 	/// <c>X.X.....</c>		b10100000<br/>
 	/// <c>X.X.....</c>		b10100000<br/>
-	/// <c>........</c>		b00000000<br/><br/>
-	/// If <i>BitsPerScanLine</i> is <b>0x10</b>, then the rows are 16 pixels wide, <b>0x18</b> is 24 pix wide, etc.  The Width value for the letter 'A' in this case is <b>0x03</b>, which as shown above is the occupied width of the character.  Spaces between glyphs are automatically counted as 1 pixel.</remarks>
+	/// <c>........</c>		b00000000</para>
+	/// <para>If <i>BitsPerScanLine</i> is <b>0x10</b>, then the rows are 16 pixels wide, <b>0x18</b> is 24 pix wide, etc.
+	/// The Width value for the letter 'A' in this case is <b>0x03</b>, which as shown above is the occupied width of the character.
+	/// Spaces between glyphs are automatically counted as 1 pixel.</para></example>
 	public partial class Font : Resource
 	{
 		short _startingChar;
@@ -68,16 +77,16 @@ namespace Idmr.LfdReader
 		GlyphIndexer _glyphIndexer;
 
 		#region constructors
-		/// <summary>Creates a new instance and prepares for a new character set</summary>
-		/// <param name="startChar">First defined ASCII value (normally <b>32</b>)</param>
-		/// <param name="numberOfChars">Number of characters to be defined</param>
-		/// <param name="height">Height of the character set in pixels</param>
-		/// <remarks><see cref="BaseLine"/> is set between 2/3 and 3/4 of <i>height</i>.<br/>
+		/// <summary>Creates a new instance and prepares for a new character set.</summary>
+		/// <param name="startChar">First defined ASCII value (normally <b>32</b>).</param>
+		/// <param name="numberOfChars">Number of characters to be defined.</param>
+		/// <param name="height">Height of the character set in pixels.</param>
+		/// <remarks><see cref="BaseLine"/> is set between 2/3 and 3/4 of <paramref name="height"/>.<br/>
 		/// <see cref="BitsPerScanLine"/> is set to round up from square characters.
-		/// A <i>height</i> of <b>8</b> produces a maximum width of <b>8</b>,
-		/// while a <i>height</i> of <b>12</b> produces a width of <b>16</b>.<br/>
+		/// A <paramref name="height"/> of <b>8</b> produces a maximum width of <b>8</b>,
+		/// while a <paramref name="height"/> of <b>12</b> produces a width of <b>16</b>.<br/>
 		/// All images in <see cref="Glyphs"/> are initialized to blank <see cref="PixelFormat.Format1bppIndexed"/> images,
-		/// <see cref="BitsPerScanLine"/>x<see cref="Height"/> in size.</remarks>
+		/// (<see cref="BitsPerScanLine"/>, <see cref="Height"/>) in size.</remarks>
 		public Font(short startChar, short numberOfChars, short height)
 		{
 			_startingChar = startChar;
@@ -88,15 +97,15 @@ namespace Idmr.LfdReader
 			for (int i = 0; i < _glyphs.Length; i++) _glyphs[i] = new Bitmap(_bitsPerScanLine, _height, PixelFormat.Format1bppIndexed);
 			_glyphIndexer = new GlyphIndexer(this);
 		}
-		/// <summary>Creates a new instance and prepares for a new character set starting from ASCII 32 (space)</summary>
-		/// <param name="numberOfChars">Number of characters to be defined</param>
-		/// <param name="height">Height of the character set in pixels</param>
-		/// <remarks><see cref="BaseLine"/> is set between 2/3 and 3/4 of <i>height</i>.<br/>
+		/// <summary>Creates a new instance and prepares for a new character set starting from ASCII 32 (space).</summary>
+		/// <param name="numberOfChars">Number of characters to be defined.</param>
+		/// <param name="height">Height of the character set in pixels.</param>
+		/// <remarks><see cref="BaseLine"/> is set between 2/3 and 3/4 of <paramref name="height"/>.<br/>
 		/// <see cref="BitsPerScanLine"/> is set to round up from square characters.
-		/// A <i>height</i> of <b>8</b> produces a maximum width of <b>8</b>,
-		/// while a <i>height</i> of <b>12</b> produces a width of <b>16</b>.<br/>
+		/// A <paramref name="height"/> of <b>8</b> produces a maximum width of <b>8</b>,
+		/// while a <paramref name="height"/> of <b>12</b> produces a width of <b>16</b>.<br/>
 		/// All images in <see cref="Glyphs"/> are initialized to blank <see cref="PixelFormat.Format1bppIndexed"/> images,
-		/// <see cref="BitsPerScanLine"/>x<see cref="Height"/> in size.<br/>
+		/// (<see cref="BitsPerScanLine"/>, <see cref="Height"/>) in size.<br/>
 		/// <see cref="StartingChar"/> defaults to <b>32</b>.</remarks>
 		public Font(short numberOfChars, short height)
 		{
@@ -108,37 +117,37 @@ namespace Idmr.LfdReader
 			for (int i = 0; i < _glyphs.Length; i++) _glyphs[i] = new Bitmap(_bitsPerScanLine, _height, PixelFormat.Format1bppIndexed);
 			_glyphIndexer = new GlyphIndexer(this);
 		}
-		/// <summary>Creates a new instance from an existing opened file</summary>
-		/// <param name="stream">The opened LFD file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an existing opened file.</summary>
+		/// <param name="stream">The opened LFD file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Font(FileStream stream, long filePosition)
 		{
-			_read(stream, filePosition);
+			read(stream, filePosition);
 		}
-		/// <summary>Creates a new instance from an exsiting file</summary>
-		/// <param name="path">The full path to the unopened LFD file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an exsiting file.</summary>
+		/// <param name="path">The full path to the unopened LFD file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Font(string path, long filePosition)
 		{
 			FileStream fsLFD = File.OpenRead(path);
-			_read(fsLFD, filePosition);
+			read(fsLFD, filePosition);
 			fsLFD.Close();
 		}
 		#endregion constructors
 		
-		void _read(FileStream stream, long filePosition)
+		void read(FileStream stream, long filePosition)
 		{
 			try { _process(stream, filePosition); }
 			catch (Exception x) { throw new LoadFileException(x); }
 		}
 
 		#region public methods
-		/// <summary>Processes raw data to populate the resource</summary>
-		/// <param name="raw">Raw byte data</param>
-		/// <param name="containsHeader">Whether or not <i>raw</i> contains the resource Header information</param>
-		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Font"/></exception>
+		/// <summary>Processes raw data to populate the resource.</summary>
+		/// <param name="raw">Raw byte data.</param>
+		/// <param name="containsHeader">Whether or not <paramref name="raw"/> contains the resource Header information.</param>
+		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Font"/>.</exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
 			_decodeResource(raw, containsHeader);
@@ -165,7 +174,7 @@ namespace Idmr.LfdReader
 			_glyphIndexer = new GlyphIndexer(this);
 		}
 
-		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/></summary>
+		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/>.</summary>
 		public override void EncodeResource()
 		{
 			System.Diagnostics.Debug.WriteLine("bit width: " + _bitsPerScanLine + ", height: " + _height + "num glyphs: " + _glyphs.Length);
@@ -192,17 +201,19 @@ namespace Idmr.LfdReader
 			}
 			_rawData = raw;
 		}
-		
-		/// <summary>Changes the primary color of the font</summary>
-		/// <remarks>Background color will be <see cref="Color.Transparent"/></remarks>
-		/// <param name="glyphColor">The new font color</param>
+
+		/// <summary>Changes the primary color of the font.</summary>
+		/// <param name="glyphColor">The new font color.</param>
+		/// <remarks>Background color will be <see cref="Color.Transparent"/>.<br/>
+		/// These colors are for display purposes only and do not affect the data.</remarks>
 		public void SetColor(Color glyphColor) { SetColor(glyphColor, true); }
 
-		/// <summary>Changes the primary color of the font</summary>
-		/// <remarks>If <i>transparent</i> is <b>false</b>, the background color will be <see cref="Color.Black"/>.<br/>
-		/// If <i>glyphColor</i> is Black, then the background will be <see cref="Color.White"/></remarks>
-		/// <param name="glyphColor">The new font color</param>
-		/// <param name="transparent">If the background will be <see cref="Color.Transparent"/></param>
+		/// <summary>Changes the primary color of the font.</summary>
+		/// <param name="glyphColor">The new font color.</param>
+		/// <param name="transparent">If the background will be <see cref="Color.Transparent"/>.</param>
+		/// <remarks>If <paramref name="transparent"/> is <b>false</b>, the background color will be <see cref="Color.Black"/>.<br/>
+		/// If <paramref name="glyphColor"/> is Black, then the background will be <see cref="Color.White"/>.<br/>
+		/// These colors are for display purposes only and do not affect the data.</remarks>
 		public void SetColor(Color glyphColor, bool transparent)
 		{
 			ColorPalette newpal = _glyphs[0].Palette;
@@ -218,16 +229,16 @@ namespace Idmr.LfdReader
 		#endregion public methods
 
 		#region public properties
-		/// <summary>Gets the indexer for the glyphs</summary>
+		/// <summary>Gets the indexer for the glyphs.</summary>
 		public GlyphIndexer Glyphs { get { return _glyphIndexer; } }
-		/// <summary>Gets the ASCII value of the first character within the resource</summary>
+		/// <summary>Gets the ASCII value of the first character within the resource.</summary>
 		/// <remarks>Typically <b>32</b> (space).</remarks>
 		public short StartingChar {	get { return _startingChar; } }
-		/// <summary>Gets the number of characters contained within the resource</summary>
-		public short TotalChars { get { return (short)_glyphs.Length; } }
-		/// <summary>Gets or sets the length of bits required per scanline</summary>
+		/// <summary>Gets the number of characters contained within the resource.</summary>
+		public short NumberOfGlyphs { get { return (short)_glyphs.Length; } }
+		/// <summary>Gets or sets the length of bits required per scanline.</summary>
 		/// <remarks>Must be a multiple of <b>8</b>.</remarks>
-		/// <exception cref="ArgumentException"><i>value</i> is not a positive multiple of 8</exception>
+		/// <exception cref="ArgumentException"><i>value</i> is not a positive multiple of 8.</exception>
 		public short BitsPerScanLine
 		{
 			get { return _bitsPerScanLine; }
@@ -238,9 +249,9 @@ namespace Idmr.LfdReader
                 _isModifed = true;
 			}	// this is left as write-enabled to allow wider characters
 		}
-		/// <summary>Gets the total height of the font, also number of ScanLines</summary>
+		/// <summary>Gets the total height of the font, also number of ScanLines.</summary>
 		public short Height { get { return _height; } }
-		/// <summary>Gets or sets the zero-indexed ScanLine that is used as the "bottom" of the font</summary>
+		/// <summary>Gets or sets the zero-indexed ScanLine that is used as the "bottom" of the font.</summary>
 		/// <remarks>Characters such as 'j' typically drop below this line. Is typically 2/3 to 3/4 the value of <see cref="Height"/>.</remarks>
 		public short BaseLine
         {
@@ -252,15 +263,5 @@ namespace Idmr.LfdReader
             }
         }
 		#endregion public properties
-
-		/* // This only exists for brute forcing new glyphs for now
-		public void DebugAdd()
-		{
-			Bitmap[] newArray = new Bitmap[_glyphs.Length + 1];
-			for (int i = 0; i < _glyphs.Length; i++) newArray[i] = _glyphs[i];
-			Bitmap blank = new Bitmap(1, _height, PixelFormat.Format1bppIndexed);
-			newArray[newArray.Length - 1] = new Bitmap(1, _height, PixelFormat.Format1bppIndexed);
-			_glyphs = newArray;
-		}*/
 	}
 }

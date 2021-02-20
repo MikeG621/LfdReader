@@ -135,13 +135,12 @@ namespace Idmr.LfdReader
 		#region public methods
 		/// <summary>Processes raw data to populate the resource.</summary>
 		/// <param name="raw">Raw byte data.</param>
-		/// <param name="containsHeader">Whether or not <paramref name="raw"/> contains the resource Header information</param>
+		/// <param name="containsHeader">Whether or not <paramref name="raw"/> contains the resource Header information.</param>
 		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Anim"/>.</exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
 			_decodeResource(raw, containsHeader);
 			if (_type != ResourceType.Anim) throw new ArgumentException("Raw header is not for an Anim resource");
-			//System.Diagnostics.Debug.WriteLine("decoding...");
 			short numberOfFrames = BitConverter.ToInt16(_rawData, 0);
 			_frames = new FrameCollection(this);
 			for (int i = 0; i < numberOfFrames; i++) _frames.Add(new Frame(this));
@@ -149,18 +148,14 @@ namespace Idmr.LfdReader
 			int offset = 2;
 			for (int i = 0; i < NumberOfFrames; i++)
 			{
-                //System.Diagnostics.Debug.WriteLine("frame " + i + ", offset " + offset);
                 frameLength = BitConverter.ToInt32(_rawData, offset);
 				byte[] delt = new byte[frameLength];
 				ArrayFunctions.TrimArray(_rawData, offset + 4, delt);
-				//System.Diagnostics.Debug.WriteLine("Frame offset: " + offset);
 				_frames[i]._delt.DecodeResource(delt, false);
 				if (HasDefinedPalette) _frames[i]._delt.Palette = _palette;
 				offset += frameLength + 4;
 			}
 			recalculateDimensions();
-			//System.Diagnostics.Debug.WriteLine("Anim LTWH: " + _left + ", " + _top + ", " + _width + ", " + _height);
-			//System.Diagnostics.Debug.WriteLine("... complete");
 		}
 
 		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/>.</summary>

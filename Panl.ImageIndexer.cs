@@ -1,6 +1,6 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
@@ -22,26 +22,26 @@ namespace Idmr.LfdReader
 {
 	public partial class Panl : Resource
 	{
-		/// <summary>Object to provide array access to individual images in the Panl</summary>
+		/// <summary>Object to provide array access to individual images in the Panl.</summary>
 		public class ImageIndexer : Indexer<Bitmap>
 		{
-			Panl _parent;
+			readonly Panl _parent;
 			
-			/// <summary>Initializes the indexer</summary>
-			/// <param name="parent">The parent resource</param>
+			/// <summary>Initializes the indexer.</summary>
+			/// <param name="parent">The parent resource.</param>
 			internal ImageIndexer(Panl parent)
 			{
 				_parent = parent;
 				_items = _parent._images;
 			}
-			
-			/// <summary>Gets or sets the individual images</summary>
-			/// <param name="index">Array index</param>
-			/// <returns><see cref="PixelFormat.Format8bppIndexed"/> Bitmap of the indicated image</returns>
-			/// <exception cref="IndexOutOfRangeException">Invalid <i>index</i> value</exception>
-			/// <exception cref="Idmr.Common.BoundaryException">Image exceeds allowable dimensions</exception>
-			/// <exception cref="NullReferenceException">Images have not been initialized</exception>
-			/// <remarks>If the resource was created from an LFD file, <i>index</i> is ignored.<br/>
+
+			/// <summary>Gets or sets the individual images.</summary>
+			/// <param name="index">Array index.</param>
+			/// <returns><see cref="PixelFormat.Format8bppIndexed"/> Bitmap of the indicated image.</returns>
+			/// <exception cref="IndexOutOfRangeException">Invalid <paramref name="index"/> value.</exception>
+			/// <exception cref="BoundaryException">Image exceeds allowable dimensions.</exception>
+			/// <exception cref="NullReferenceException">Images have not been initialized.</exception>
+			/// <remarks>If the resource was created from an LFD file, <paramref name="index"/> is ignored.<br/>
 			/// Image is converted to <see cref="PixelFormat.Format8bppIndexed"/>, must be <b>640x480</b> or smaller.</remarks>
 			public override Bitmap this[int index]
 			{
@@ -61,8 +61,8 @@ namespace Idmr.LfdReader
 				}
 			}
 			
-			/// <summary>Sets the image Palette</summary>
-			/// <param name="palette">The Palette to be used</param>
+			/// <summary>Sets the image Palette.</summary>
+			/// <param name="palette">The Palette to be used.</param>
 			public void SetPalette(ColorPalette palette)
 			{
 				_parent._palette = palette;

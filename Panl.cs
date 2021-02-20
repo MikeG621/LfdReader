@@ -1,6 +1,6 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2014 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
@@ -22,10 +22,14 @@ using Idmr.Common;
 namespace Idmr.LfdReader
 {
 	/// <summary>Object for "PANL" cockpit image resources</summary>
-	/// <remarks>The Panl resource contains the in-flight images. Everything from your targeting reticule to the Goal Summary screen are all stored in these resources. Many items are in separate *.PNL files, which this class can also edit.<br/>
-	/// For images stored in LFD files, the resource contains a single image being one of the cockpit views (cockpit, left, Goal summary, etc). The <see cref="Pltt"/> in that file determines the colors used.<br/>
-	/// The separate *.PNL files contain all of the individual images that make up your display and instrumentation (targeting reticule, shield indicator, etc). The palette is defined by the controlling cockpit LFD.<hr/>
-	/// <h4>Raw Data definition</h4>
+	/// <remarks>The Panl resource contains the in-flight images.
+	/// Everything from your targeting reticule to the Goal Summary screen are all stored in these resources.
+	/// Many items are in separate *.PNL files, which this class can also edit.<br/>
+	/// For images stored in LFD files, the resource contains a single image being one of the cockpit views (cockpit, left, Goal summary, etc).
+	/// The <see cref="Pltt"/> in that file determines the colors used.<br/>
+	/// The separate *.PNL files contain all of the individual images that make up your display and instrumentation (targeting reticule, shield indicator, etc).
+	/// The palette is defined by the controlling cockpit LFD.</remarks>
+	/// <example><h4>Raw Data definition</h4>
 	/// <code>// Pseudo-code resource structure
 	/// struct RawData
 	/// {
@@ -56,20 +60,29 @@ namespace Idmr.LfdReader
 	///   #else	// repeat Type 3 (short)
 	///	  #endif
 	/// }</code>
-	/// This resource is a little annoying to work with, as the thing is entirely iterative. There are no properties aside from <i>Images</i> itself, so to decode the resource requires an iterative approach to determine the number of images and the individual image dimensions. Thankfully the use of the <i>EndImage</i> and <i>EndRow</i> markers (special OpCodes) make this possible.<br/><br/>
-	/// For the layout of the format there's not a lot to it. Each Image has the usual <i>Rows</i> array followed by the <i>EndImage</i> OpCode. Iterating through <i>RawData</i> and counting these markers gets you the number of images.<br/>
-	/// Each Row has the usual <i>Operations</i> array and is terminated by the <i>EndRow</i> OpCode. Iterating through <i>Rows</i> and counting these markers gets you the height of the image.<br/><br/>
-	/// -- OpCode --<br/><br/>
-	/// The <i>Operations</i> array contains the information for a full row of pixels, starting from the top left. The OpCodes in the Panl resource are all different forms of repeat codes. Type 1 and Type 2 are effectively the same thing, except the value order is reversed. I don't know why. I learned to stop questioning why they did things like this, I just shake my head and move on. <see cref="EncodeResource"/> does not use Type 2.<br/>
-	/// The important thing about <i>NumberOfRepeats</i> is that it is zero-indexed (hence <u>Repeats</u> instead of <u>Pixels</u>). A value of <b>0x00</b> means the pixels occurs once, <b>0x01</b> is twice, etc.<br/><br/>
-	/// For the Type 3 or Short code, it has a fixed Shift value of <b>0x02</b> (Shift is used primarily for the *.ACT/XACT and *.DAT image formats). What this means is that <i>Value</i> combines the <i>NumberOfRepeats</i> and <i>ColorIndex</i> values into a single byte using two bits for <i>NumberOfRepeats</i> and the remaining six for the <i>ColorIndex</i>.<br/>
-	/// <example>
+	/// <para>This resource is a little annoying to work with, as the thing is entirely iterative.
+	/// There are no properties aside from <i>Images</i> itself, so to decode the resource requires an iterative approach to determine the number of images and the individual image dimensions.
+	/// Thankfully the use of the <i>EndImage</i> and <i>EndRow</i> markers (special OpCodes) make this possible.</para>
+	/// <para>For the layout of the format there's not a lot to it.
+	/// Each Image has the usual <i>Rows</i> array followed by the <i>EndImage</i> OpCode.
+	/// Iterating through <i>RawData</i> and counting these markers gets you the number of images.<br/>
+	/// Each Row has the usual <i>Operations</i> array and is terminated by the <i>EndRow</i> OpCode.
+	/// Iterating through <i>Rows</i> and counting these markers gets you the height of the image.</para>
+	/// <h4>-- OpCode --</h4>
+	/// <para>The <i>Operations</i> array contains the information for a full row of pixels, starting from the top left.
+	/// The OpCodes in the Panl resource are all different forms of repeat codes.
+	/// Type 1 and Type 2 are effectively the same thing, except the value order is reversed, I don't know why.
+	/// I learned to stop questioning why they did things like this, I just shake my head and move on. <see cref="EncodeResource"/> does not use Type 2.<br/>
+	/// The important thing about <i>NumberOfRepeats</i> is that it is zero-indexed (hence <u>Repeats</u> instead of <u>Pixels</u>).
+	/// A value of <b>0x00</b> means the pixel occurs once, <b>0x01</b> is twice, etc.</para>
+	/// <para>For the Type 3 or Short code, it has a fixed Shift value of <b>0x02</b> (Shift is used primarily for the *.ACT/XACT and *.DAT image formats). What this means is that <i>Value</i> combines the <i>NumberOfRepeats</i> and <i>ColorIndex</i> values into a single byte using two bits for <i>NumberOfRepeats</i> and the remaining six for the <i>ColorIndex</i>.<br/>
 	/// <code>
 	/// Value = 0x93;	// b10010011
 	/// 
 	/// NumberOfRepeats = (Value &#038; 3);	// b00000011
-	/// ColorIndex = (Value >> 2);	// b00100100</code></example><br/>
-	/// Because of the Shift value, a <i>ColorIndex</i> of <b>0x3F</b> (b11111100) or higher cannot be used for Type 3 codes. <b>0x3F</b> would cause false OpCodes to be detected while <b>0x40</b> and higher uses more than six bits.</remarks>
+	/// ColorIndex = (Value >> 2);	// b00100100</code></para>
+	/// <para>Because of the Shift value, a <i>ColorIndex</i> of <b>0x3F</b> (b11111100) or higher cannot be used for Type 3 codes.
+	/// <b>0x3F</b> would cause false OpCodes to be detected while <b>0x40</b> and higher uses more than six bits.</para></example>
 	public partial class Panl : Resource
 	{
 		ColorPalette _palette = null;
@@ -93,7 +106,7 @@ namespace Idmr.LfdReader
 		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Panl(FileStream stream, long filePosition)
 		{
-			_read(stream, filePosition);
+			read(stream, filePosition);
 		}
 		/// <summary>Creates a new instance from an existing opened file with the supplied Palette.</summary>
 		/// <param name="stream">The opened LFD or PNL file.</param>
@@ -103,7 +116,7 @@ namespace Idmr.LfdReader
 		public Panl(FileStream stream, long filePosition, ColorPalette palette)
 		{
 			_palette = palette;
-			_read(stream, filePosition);
+			read(stream, filePosition);
 		}
 		/// <summary>Creates a new instance from an exsiting file with default 256 color Palette.</summary>
 		/// <param name="path">The full path to the unopened LFD or PNL file.</param>
@@ -112,7 +125,7 @@ namespace Idmr.LfdReader
 		public Panl(string path, long filePosition)
 		{
 			FileStream stream = File.OpenRead(path);
-			_read(stream, filePosition);
+			read(stream, filePosition);
 			stream.Close();
 		}
 		/// <summary>Creates a new instance from an exsiting file with the supplied Palette.</summary>
@@ -124,12 +137,12 @@ namespace Idmr.LfdReader
 		{
 			_palette = palette;
 			FileStream stream = File.OpenRead(path);
-			_read(stream, filePosition);
+			read(stream, filePosition);
 			stream.Close();
 		}
 		#endregion constructors
 
-		void _read(FileStream stream, long filePosition)
+		void read(FileStream stream, long filePosition)
 		{
 			try
 			{
@@ -149,10 +162,10 @@ namespace Idmr.LfdReader
 			_imageIndexer = new ImageIndexer(this);
 		}
 
-		panlInfo decodeImage(byte[] rawData, int imageIndex)
+		PanlInfo decodeImage(byte[] rawData, int imageIndex)
 		{
-			panlInfo pi;
-			short width = 0, height = 0;
+			PanlInfo pi;
+			short width = 0, height;
 			for (int i=0;;)
 			{
 				if (rawData[i] == 0xFE || rawData[i] == 0xFF) break;
@@ -232,10 +245,10 @@ namespace Idmr.LfdReader
 		}
 		
 		#region public methods
-		/// <summary>Processes raw data to populate the resource</summary>
-		/// <param name="raw">Raw byte data</param>
-		/// <param name="containsHeader">Whether or not <i>raw</i> contains the resource Header information</param>
-		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> from the LFD is not <see cref="Resource.ResourceType.Panl"/></exception>
+		/// <summary>Processes raw data to populate the resource.</summary>
+		/// <param name="raw">Raw byte data.</param>
+		/// <param name="containsHeader">Whether or not <paramref name="raw"/> contains the resource Header information.</param>
+		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> from the LFD is not <see cref="Resource.ResourceType.Panl"/>.</exception>
 		/// <remarks>If resource was created from a *.PNL file, <i>containsHeader</i> is ignored.</remarks>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
@@ -257,14 +270,14 @@ namespace Idmr.LfdReader
 				{
 					byte[] remainder = new byte[_rawData.Length - offset];
 					ArrayFunctions.TrimArray(_rawData, offset, remainder);
-					panlInfo pi = decodeImage(remainder, i);
+					PanlInfo pi = decodeImage(remainder, i);
 					pos += pi.RawLength;
 					offset = pos;
 				}
 			}
 		}
 
-		/// <summary>Preparess the resource for writing and updates <see cref="Resource.RawData"/></summary>
+		/// <summary>Preparess the resource for writing and updates <see cref="Resource.RawData"/>.</summary>
 		public override void EncodeResource()
 		{
 			//TODO: test Panl.Write()
@@ -312,21 +325,21 @@ namespace Idmr.LfdReader
 		#endregion public methods
 
 		#region public properties
-		/// <summary>Gets the indexer for the images</summary>
+		/// <summary>Gets the indexer for the images.</summary>
 		public ImageIndexer Images { get { return _imageIndexer; } }
 		
-		/// <summary>Gets the number of images contained within the resource</summary>
+		/// <summary>Gets the number of images contained within the resource.</summary>
 		public int NumberOfImages { get { return _images.Length; } }
 
-		/// <summary>Maximum allowable image width</summary>
-		/// <remarks>Value is <b>640</b></remarks>
+		/// <summary>Maximum allowable image width.</summary>
+		/// <remarks>Value is <b>640</b>.</remarks>
 		public const short MaximumWidth = 640;
-		/// <summary>Maximum allowable image height</summary>
-		/// <remarks>Value is <b>480</b></remarks>
+		/// <summary>Maximum allowable image height.</summary>
+		/// <remarks>Value is <b>480</b>.</remarks>
 		public const short MaximumHeight = 480;
 		#endregion public properties
 
-		struct panlInfo
+		struct PanlInfo
 		{
 			public byte[] PixelData;
 			public short RawLength;

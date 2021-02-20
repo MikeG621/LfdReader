@@ -1,6 +1,6 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2016 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
@@ -22,8 +22,8 @@ using Idmr.Common;
 namespace Idmr.LfdReader
 {
 	/// <summary>Object for "TEXT" string resources</summary>
-	/// <remarks>The Text resource holds much, although not all of the text in the game. Line breaks are denoted by the '\0' character.<hr/>
-	/// <h4>Raw Data definition</h4>
+	/// <remarks>The Text resource holds much, although not all of the text in the game. Line breaks are denoted by the '\0' character.</remarks>
+	/// <example><h4>Raw Data definition</h4>
 	/// <code>// Pseudo-code resource structure
 	/// struct RawData
 	/// {
@@ -37,50 +37,56 @@ namespace Idmr.LfdReader
 	///   /* 0x02 */ string[] SubStrings;
 	///   /* 0x?? */ byte Reserved = 0x00;
 	/// }</code>
-	/// The Text's RawData block is one of the simplest of resource types. The first value, <i>NumberOfStrings</i> tells you the number of <i>LfdString</i> items contained in the resource. Each LfdString has a <i>Length</i> value, which is the total length of all <i>SubStrings</i> and the final <i>Reserved</i> value. <u>All SubStrings are null-terminated (<c>'\0'</c>)</u>. This is useful for listing similar strings in a single group, or by listing "pages" in a single definition, with the zero bytes sometimes being used as line breaks.<br/><br/>
-	/// Note however that when using SubStrings, there is no indication of the individual lengths or quantity. This is determined by the program itself and is context-specific.</remarks>
+	/// <para>The Text's RawData block is one of the simplest of resource types.
+	/// The first value, <see cref="NumberOfStrings"/> tells you the number of <i>LfdString</i> items contained in the resource.
+	/// Each LfdString has a <i>Length</i> value, which is the total length of all <i>SubStrings</i> and the final <i>Reserved</i> value.
+	/// <u>All SubStrings are null-terminated (<c>'\0'</c>)</u>.
+	/// This is useful for listing similar strings in a single group, or by listing "pages" in a single definition, with the zero bytes sometimes being used as line breaks.<br/>
+	/// Within the class, <i>SubStrings</i> is treated as a single string and it's up to the user to split it appropriately.</para>
+	/// <para>Note however that when using SubStrings, there is no indication of the individual lengths or quantity.
+	/// This is determined by the program itself and is context-specific.</para></example>
 	public class Text : Resource
 	{
 		short _numberOfStrings;
 		string[] _strings;
 
 		#region constructors
-		/// <summary>Blank constructor</summary>
+		/// <summary>Blank constructor.</summary>
 		public Text()
 		{
 			_type = ResourceType.Text;
 		}
-		/// <summary>Creates a new instance from an existing opened file</summary>
-		/// <param name="stream">The opened LFD file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an existing opened file.</summary>
+		/// <param name="stream">The opened LFD file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Text(FileStream stream, long filePosition)
 		{
-			_read(stream, filePosition);
+			read(stream, filePosition);
 		}
-		/// <summary>Creates a new instance from an exsiting file</summary>
-		/// <param name="path">The full path to the unopened LFD file</param>
-		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <summary>Creates a new instance from an exsiting file.</summary>
+		/// <param name="path">The full path to the unopened LFD file.</param>
+		/// <param name="filePosition">The offset of the beginning of the resource.</param>
+		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Text(string path, long filePosition)
 		{
 			FileStream stream = File.OpenRead(path);
-			_read(stream, filePosition);
+			read(stream, filePosition);
 			stream.Close();
 		}
 		#endregion
 
-		void _read(FileStream stream, long filePosition)
+		void read(FileStream stream, long filePosition)
 		{
 			try { _process(stream, filePosition); }
 			catch (Exception x) { throw new LoadFileException(x); }
 		}
 
 		#region public methods
-		/// <summary>Processes raw data to populate the resource</summary>
-		/// <param name="raw">Raw byte data</param>
-		/// <param name="containsHeader">Whether or not <i>raw</i> contains the resource Header information</param>
-		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Text"/></exception>
+		/// <summary>Processes raw data to populate the resource.</summary>
+		/// <param name="raw">Raw byte data.</param>
+		/// <param name="containsHeader">Whether or not <paramref name="raw"/> contains the resource Header information.</param>
+		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Text"/>.</exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
 			_decodeResource(raw, containsHeader);
@@ -96,7 +102,7 @@ namespace Idmr.LfdReader
 			}
 		}
 
-		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/></summary>
+		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/>.</summary>
 		public override void EncodeResource()
 		{
 			int len = 2;
@@ -118,7 +124,7 @@ namespace Idmr.LfdReader
 		}
 		#endregion public methods
 
-		/// <summary>Gets or sets the number of strings in the resource</summary>
+		/// <summary>Gets or sets the number of strings in the resource.</summary>
 		/// <remarks><see cref="Strings"/> expands and contracts as needed. If new value is less than original, <see cref="Strings"/> will truncate with data loss.</remarks>
 		public short NumberOfStrings 
 		{ 
@@ -133,7 +139,7 @@ namespace Idmr.LfdReader
                 _isModifed = true;
 			} 
 		}
-		/// <summary>Gets or sets the strings contained within the resource</summary>
+		/// <summary>Gets or sets the strings contained within the resource.</summary>
 		public string[] Strings 
 		{ 
 			get { return _strings; }
