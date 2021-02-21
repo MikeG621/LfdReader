@@ -24,18 +24,18 @@ namespace Idmr.LfdReader
 	/// <summary>Object for "TEXT" string resources</summary>
 	/// <remarks>The Text resource holds much, although not all of the text in the game. Line breaks are denoted by the '\0' character.</remarks>
 	/// <example><h4>Raw Data definition</h4>
-	/// <code>// Pseudo-code resource structure
-	/// struct RawData
+	/// <code>
+	/// RawData
 	/// {
 	///   /* 0x00 */ short NumberOfStrings;
 	///   /* 0x02 */ LfdString[NumberOfStrings] Strings;
 	/// }
 	/// 
-	/// struct LfdString
+	/// LfdString
 	/// {
 	///   /* 0x00 */ short Length;
 	///   /* 0x02 */ string[] SubStrings;
-	///   /* 0x?? */ byte Reserved = 0x00;
+	///				 byte Reserved = 0x00;
 	/// }</code>
 	/// <para>The Text's RawData block is one of the simplest of resource types.
 	/// The first value, <see cref="NumberOfStrings"/> tells you the number of <i>LfdString</i> items contained in the resource.

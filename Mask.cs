@@ -29,18 +29,18 @@ namespace Idmr.LfdReader
 	/// Images are monochrome, white is solid and black is transparent.
 	/// Maximum dimensions are controlled by <see cref="Panl"/>.</remarks>
 	/// <example><h4>Raw Data definition</h4>
-	/// <code>// Pseudo-code resource structure
-	/// struct RawData
+	/// <code>
+	/// RawData
 	/// {
 	///   /* 0x00 */ Row[] Rows;
 	/// }
 	/// 
-	/// struct Row
+	/// Row
 	/// {
 	///   #if (first pixel is solid)
-	///     /* 0x00 */ byte FirstColor = 0xFF;	// solid
+	///     /* 0x00 */ byte FirstColor = 0xFF; // solid
 	///   #else
-	///     /* 0x00 */ byte FirstColor = 0x01;	// transparent
+	///     /* 0x00 */ byte FirstColor = 0x01; // transparent
 	///   #endif
 	///   /* 0x01 */ byte[] Lengths;
 	/// }</code>

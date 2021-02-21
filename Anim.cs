@@ -29,20 +29,20 @@ namespace Idmr.LfdReader
 	/// Like the <see cref="Delt"/>, the palette is controlled by the <see cref="Film"/> that is defining the current view.
 	/// The <see cref="Film"/> also controls the Anim's animation speed, direction and looping.</remarks>
 	/// <example><h4>Raw Data definition</h4>
-	/// <code>// Pseudo-code resource structure
-	/// struct RawData
+	/// <code>
+	/// RawData
 	/// {
 	///   /* 0x00 */ short NumberOfFrames;
 	///   /* 0x02 */ Frame[NumberOfFrames] Frames;
 	/// }
 	/// 
-	/// struct Frame
+	/// Frame
 	/// {
 	///   /* 0x00 */ int Length;
 	///   /* 0x02 */ Delt.RawData Image;
 	/// }</code>
 	/// <para>The only real unique value in the Anim is the number of frames that are stored within the resource.
-	/// The Frame struct is nothing more than a wrapper for the <see cref="Delt"/> resource with only the <i>Frame.Length</i> value which is just the size of <i>Frame.Image</i>.
+	/// The Frame object is nothing more than a wrapper for the <see cref="Delt"/> resource with only the <i>Frame.Length</i> value which is just the encoded size of <i>Frame.Image</i>.
 	/// The <see cref="Location"/> and <see cref="Size"/> properties are derived from the dimensions of the individual Frames.</para>
 	/// All Frames share the same palette.</example>
 	public partial class Anim : Resource

@@ -29,12 +29,12 @@ namespace Idmr.LfdReader
 	/// <summary>Object for "FONT" typeface resources</summary>
 	/// <remarks>The Font resource controls all of the typefaces used outside of the flight engine. Menus, briefing text, even the scrolling text during the intro.</remarks>
 	/// <example><h4>Raw Data definition</h4>
-	/// <code>// Pseudo-code resource structure
-	/// struct RawData
+	/// <code>
+	/// RawData
 	/// {
-	///   /* 0x00 */ short StartingChar;	// typically 0x20 (space)
+	///   /* 0x00 */ short StartingChar; // typically 0x20 (space)
 	///   /* 0x02 */ short NumberOfGlyphs;
-	///   /* 0x04 */ short BitsPerScanLine;	// multiple of 8
+	///   /* 0x04 */ short BitsPerScanLine; // multiple of 8
 	///   /* 0x06 */ short Height;
 	///   /* 0x08 */ short BaseLine;
 	///   /* 0x0A */ short Reserved = 0x00;
@@ -42,7 +42,7 @@ namespace Idmr.LfdReader
 	///   /* 0x0C + NumberOfGlyphs */ Glyph[NumberOfGlyphs] Glyphs;
 	/// }
 	/// 
-	/// struct Glyph
+	/// Glyph
 	/// {
 	///   /* 0x00 */ byte[BitsPerScanLine * Height / 8] Rows;
 	/// }</code>

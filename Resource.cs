@@ -36,8 +36,8 @@ namespace Idmr.LfdReader
 	/// <summary>Base class for LFD resources, also provides ability to retrieve raw data from unknown resources</summary>
 	/// <remarks>All LFD resources are derived from this class. Resource types without a defined class are left as a generic Resource and read-only.</remarks>
 	/// <example><h4>Format Definition</h4>
-	/// <code>//Pseudo-code resource structure
-	/// struct Resource
+	/// <code>
+	/// Resource
 	/// {
 	///   /* 0x00 */ char[4] Type;
 	///   /* 0x04 */ char[8] Name;

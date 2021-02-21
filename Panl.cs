@@ -30,7 +30,7 @@ namespace Idmr.LfdReader
 	/// The separate *.PNL files contain all of the individual images that make up your display and instrumentation (targeting reticule, shield indicator, etc).
 	/// The palette is defined by the controlling cockpit LFD.</remarks>
 	/// <example><h4>Raw Data definition</h4>
-	/// <code>// Pseudo-code resource structure
+	/// <code>
 	/// struct RawData
 	/// {
 	///   /* 0x00 */ Image[] Images;
@@ -39,26 +39,26 @@ namespace Idmr.LfdReader
 	/// struct Image
 	/// {
 	///   /* 0x00 */ Row[] Rows;
-	///   /* 0x?? */ byte EndImage = 0xFF;
+	/// 			 byte EndImage = 0xFF;
 	/// }
 	/// 
 	/// struct Row
 	/// {
 	///   /* 0x00 */ OpCode[] Operations;
-	///   /* 0x?? */ byte EndRow = 0xFE;
+	/// 			 byte EndRow = 0xFE;
 	/// }
 	///
 	/// struct OpCode
 	/// {
-	///	  /* 0x00 */ byte Value;
-	///	  #if (Value == 0xFD)	// repeat Type 1
-	///	    /* 0x01 */ byte NumberOfRepeats;
+	///   /* 0x00 */ byte Value;
+	///   #if (Value == 0xFD) // repeat Type 1
+	///     /* 0x01 */ byte NumberOfRepeats;
 	///     /* 0x02 */ byte ColorIndex;
-	///	  #elseif (Value == 0xFC)	// repeat Type 2
-	///	    /* 0x01 */ byte ColorIndex;
+	///   #elseif (Value == 0xFC) // repeat Type 2
+	///     /* 0x01 */ byte ColorIndex;
 	///     /* 0x02 */ byte NumberOfRepeats;
-	///   #else	// repeat Type 3 (short)
-	///	  #endif
+	///   #else // repeat Type 3 (short)
+	///   #endif
 	/// }</code>
 	/// <para>This resource is a little annoying to work with, as the thing is entirely iterative.
 	/// There are no properties aside from <i>Images</i> itself, so to decode the resource requires an iterative approach to determine the number of images and the individual image dimensions.

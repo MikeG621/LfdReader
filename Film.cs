@@ -25,8 +25,8 @@ namespace Idmr.LfdReader
 	/// regarding the colors used, when the image is shown, draw order, animation controls, etc. Many of the mouse-click regions are
 	/// defined here as well, which then activate various animations (doors, etc) or sound effects.</remarks>
 	/// <example><h4>Raw Data definition</h4>
-	/// <code>// Pseudo-code resource structure
-	/// struct RawData
+	/// <code>
+	/// RawData
 	/// {
 	///   /* 0x00 */ short FilmHeaderDataLength = 4;
 	///   /* 0x02 */ short NumberOfFrames;
@@ -34,7 +34,7 @@ namespace Idmr.LfdReader
 	///   /* 0x06 */ Block[NumberOfBlocks + 1] Blocks;
 	/// }
 	///
-	/// struct Block
+	/// Block
 	/// {
 	///   /* 0x00 */ char[4] Type;
 	///   /* 0x04 */ char[8] Name;
@@ -45,7 +45,7 @@ namespace Idmr.LfdReader
 	///   /* 0x16 */ Chunk[NumberOfChunks] Chunks;
 	/// }
 	///
-	/// struct Chunk
+	/// Chunk
 	/// {
 	///   /* 0x00 */ short Length;
 	///   /* 0x02 */ short Code;
@@ -154,6 +154,7 @@ namespace Idmr.LfdReader
 			string _name;
 
 			/// <summary>Preset Block types.</summary>
+			/// <remarks>Values are simply taken from the raw data (<b>int</b> or 4-byte ASCII <b>string</b>).</remarks>
 			public enum BlockType : int {
 				/// <summary>Default uninitialized value.</summary>
 				Undefined,

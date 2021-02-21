@@ -26,117 +26,116 @@ namespace Idmr.LfdReader
 	/// <example>
 	/// <b>*WARNING*:</b> The entire RawData is Big-endian!
 	/// <h4>Raw Data definition</h4>
-	/// <code>// Pseudo-code resource structure
-	/// struct RawData
+	/// <code>
+	/// RawData
 	/// {
-	///		0x00	SHORT	Length
-	///		0x02	BYTE NumComponents
-	///		0x03	BYTE NumShadingSets
-	///		0x04	ShadingSet[NumShadingSets]
-	///				SHORT[NumComponents]    ComponentOffsets
-	///				Component[NumComponents]
+	///   /* 0x00 */ short Length
+	///   /* 0x02 */ byte NumComponents
+	///   /* 0x03 */ byte NumShadingSets
+	///   /* 0x04 */ ShadingSet[NumShadingSets]
+	///				 short[NumComponents] ComponentOffsets
+	///				 Component[NumComponents]
 	/// }
 	/// 
-	/// struct ShadingSet (size 0x10)
+	/// ShadingSet (size 0x10)
 	/// {
-	/// 	???	// don't know what this does
+	///   ??? // don't know what this does
 	/// }
 	/// 
-	/// struct Component
+	/// Component
 	/// {
-	/// 	0x00	LodHeader[]
-	/// 			LodMesh[]
+	///   /* 0x00 */ LodHeader[]
+	/// 			 LodMesh[]
 	/// }
 	/// 
-	/// struct LodHeader (size 0x6)
+	/// LodHeader (size 0x6)
 	/// {
-	/// 	0x0 INT Distance
-	/// 	0x4 SHORT Offset
+	///   /* 0x00 */ int Distance
+	///   /* 0x04 */ short Offset
 	/// }
 	/// 
-	/// struct LodMesh
+	/// LodMesh
 	/// {
-	/// 	0x00	BYTE Signature
-	/// 	0x01	BYTE Unknown
-	/// 	0x02	BYTE NumVertices
-	/// 	0x03	BYTE Unknown
-	/// 	0x04	BYTE NumShapes
-	/// 	0x05	BYTE[NumShapes] ColorIndices
-	/// 			Vertex16 MinimumBound
-	/// 			Vertex16 MaximumBound
-	/// 			Vertex16[NumVertices] MeshVertices
-	/// 			Vertex16[NumVertices] VertexNormals
-	/// 			ShapeSettings[NumShapes]
-	/// 			Shape[NumShapes]    MeshGeometry
-	/// 			Unknown1[NumShapes]
-	/// 			SHORT NumUnk2
-	/// 			Unknown2[NumUnk2]
-	/// 			Unknown3[NumUnk2]
+	///   /* 0x00 */ byte Signature
+	///   /* 0x01 */ byte Unknown
+	///   /* 0x02 */ byte NumVertices
+	///   /* 0x03 */ byte Unknown
+	///   /* 0x04 */ byte NumShapes
+	///   /* 0x05 */ byte[NumShapes] ColorIndices
+	/// 			 Vertex16 MinimumBound
+	/// 			 Vertex16 MaximumBound
+	/// 			 Vertex16[NumVertices] MeshVertices
+	/// 			 Vertex16[NumVertices] VertexNormals
+	/// 			 ShapeSettings[NumShapes]
+	/// 			 Shape[NumShapes] MeshGeometry
+	/// 			 Unknown1[NumShapes]
+	/// 			 short NumUnk2
+	/// 			 Unknown2[NumUnk2]
+	/// 			 Unknown3[NumUnk2]
 	/// }
 	/// 
-	/// struct Vertex16 (size 0x6)
+	/// Vertex16 (size 0x6)
 	/// {
-	/// 	0x0 SHORT X
-	/// 	0x2 SHORT Y
-	/// 	0x4 SHORT Z
+	///   /* 0x00 */ short X
+	///   /* 0x02 */ short Y
+	///   /* 0x04 */ short Z
 	/// }
 	/// 
-	/// struct ShapeSettings (size 0x8)
+	/// ShapeSettings (size 0x8)
 	/// {
-	/// 	0x0 Vertex16 FaceNormal
-	/// 	0x6 SHORT Offset
+	///   /* 0x00 */ Vertex16 FaceNormal
+	///   /* 0x06 */ short Offset
 	/// }
 	/// 
-	/// struct Shape
+	/// Shape
 	/// {
-	/// 	0x0	BYTE Type
-	/// 	0x1	BYTE[] Data
+	///   /* 0x00 */ byte Type
+	///   /* 0x01 */ byte[] Data
 	/// }
 	/// 
-	/// struct Unknown1 (size 0x3)
+	/// Unknown1 (size 0x3)
 	/// {
-	/// 	0x0 BYTE
-	/// 	0x1 SHORT
+	///   /* 0x00 */ byte
+	///   /* 0x01 */ short
 	/// }
 	/// 
-	/// struct Unknown2 (size 0x3)
+	/// Unknown2 (size 0x3)
 	/// {
-	/// 	0x0 BYTE
-	/// 	0x1 SHORT Offset
+	///   /* 0x00 */ byte
+	///   /* 0x01 */ short Offset
 	/// }
 	/// 
-	/// struct Unknown3
+	/// Unknown3
 	/// {
-	/// 	0x00	BYTE Type?
-	/// 	#if Type==1
-	/// 		0x01	BYTE
-	/// 		0x02	BYTE ArraySize
-	/// 		0x03	Triplet[ArraySize]
-	/// 	#elseif Type==2
-	/// 		0x01	BYTE[16]
-	/// 	// Don't know if length is fixed
-	///		#endif
+	///   /* 0x00 */ byte Type?
+	///   #if (Type == 1)
+	///     /* 0x01 */ byte
+	///     /* 0x02 */ byte ArraySize
+	///     /* 0x03 */ Triplet[ArraySize]
+	///   #elseif (Type == 2)
+	///     /* 0x01 */ byte[16]
+	///     // Don't know if length is fixed
+	///   #endif
 	/// }
 	/// 
-	/// struct Triplet
+	/// Triplet
 	/// {
-	/// 	// Thanks to LE/BE CRFT/CPLX comparisons, these are definitely BYTE,
-	/// 	// and not a BYTE/SHORT combo
-	/// 	0x0	BYTE
-	/// 	0x1	BYTE
-	/// 	0x2	BYTE
+	///   /* 0x00 */ byte
+	///   /* 0x01 */ byte
+	///   /* 0x02 */ byte
 	/// }
 	/// </code>
-	/// <para>The first Length value is the remaining data after that SHORT, so it will always be (Resource.Length-2).</para>
-	/// <para>The ComponentsOffsets values are jump offsets from the beginning of their respective value, such that if an offset value is at location p, the component will be at(p+offset).</para>
-	/// <para>The LodHeader.Offset is a jump offset from the beginning of the LodHeader object, such that if LodHeader[i] is at location p, the Mesh will start at (p+offset).
+	/// <para>The first <i>Length</i> value is the remaining data after it, so it will always equal (<see cref="Resource.Length"/>-2).</para>
+	/// <para>The <i>ComponentsOffsets</i> values are jump offsets from the beginning of their respective value, such that if an offset value is at location p, the component will be at (p+offset).</para>
+	/// <para>The <i>LodHeader.Offset</i> is a jump offset from the beginning of the LodHeader object, such that if LodHeader[i] is at location p, the Mesh will start at (p+offset).
 	/// This also means that LodHeader[0].Offset will be the entire length of the array.
-	/// There isn't a defined length for the LOD arrays, rather the last LOD will have a Distance of 0x7FFFFFFF.</para>
-	/// <para>In LodMesh.MeshVertices, if the top byte of a value is 0x7F then it's repeating a previous vertex's value.
+	/// There isn't a defined length for the LOD arrays, rather the last LOD will have a <see cref="Crft.Lod.Distance">Distance</see> of <b>0x7FFFFFFF</b>.</para>
+	/// <para>In <i>LodMesh.MeshVertices</i>, if the top byte of a value is <b>0x7F</b> then it's repeating a previous vertex's value.
 	/// The repeat will match the sub-type (X-X, Y-Y, Z-Z) and the appropriate index is calculated with the bottom byte, right-shifted once, and subtracted from the current index.
 	/// E.g. if the current index is 5 and the Y value is 0x7F02, then it will be using MeshVertices[5 - (2 >> 1)].Y, or [4].Y.</para>
-	/// <para>ShapeSettings.Offset is a jump offset from the beginning of the ShapeSettings object, similar to LodHeader.Offset.</para>
-	/// <para>Shape.Type uses the bottom nibble for the number of vertices, top nibble for type. Data is length(3 + (numVertices* 2)).
+	/// <para><i>ShapeSettings.Offset</i> is a jump offset from the beginning of the ShapeSettings object, similar to LodHeader.Offset.</para>
+	/// <para><see cref="Crft.Lod.Shape.Type">Shape.Type</see> uses the bottom nibble for the number of vertices, top nibble for type.
+	/// <see cref="Crft.Lod.Shape.Data">Data</see> is length(3 + (numVertices* 2)).
 	/// If the number of vertices is 2, then Data has a pair of vertex indexes for a line defined in Data[2] and Data[3].
 	/// Otherwise, for each vertex there is a line, with the vertex indexes defined in Data[v * 2] and Data[(v + 1) * 2].</para>
 	/// <para>After that there's some Unknown data which is currently not read into the class.

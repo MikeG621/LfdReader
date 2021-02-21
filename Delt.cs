@@ -27,37 +27,37 @@ namespace Idmr.LfdReader
 	/// <remarks>The Delt resource is the standard 256-color bitmap format used for outside the flight engine (cutscenes, concourses, main menu).
 	/// It is the basis for the <see cref="Anim"/> resource. The <see cref="Pltt">Pltts</see> used are defined by the active <see cref="Film"/> resource.</remarks>
 	/// <example><h4>Raw Data definition</h4>
-	/// <code>// Pseudo-code resource structure
-	/// struct RawData
+	/// <code>
+	/// RawData
 	/// {
 	///   /* 0x00 */ short Left;
 	///   /* 0x02 */ short Top;
 	///   /* 0x04 */ short Right;
 	///   /* 0x06 */ short Bottom;
 	///   /* 0x08 */ short Row[] Rows;
-	///   /* 0x?? */ short Reserved = 0x0000;
+	/// 			 short Reserved = 0x0000;
 	/// }
 	/// 
-	/// struct Row
+	/// Row
 	/// {
 	///   /* 0x00 */ short Length;
 	///   /* 0x02 */ short Left;
 	///   /* 0x04 */ short Top;
-	///   // if (Length &#038; 1 == 0)	[straight read, long]
+	///   #if (Length &amp; 1 == 0)	//straight read, long
 	///     /* 0x06 */ byte[Length] ColorIndexes;
-	///   // else
+	///   #else
 	///     /* 0x06 */ OpCode[] Operations;
-	///   // endif
+	///   #endif
 	/// }
 	///
-	/// struct OpCode
+	/// OpCode
 	/// {
-	///	  /* 0x00 */ byte Value;
-	///	  // if (Value &#038; 1 == 0)	[straight read, short]
-	///	    /* 0x01 */ byte[Value / 2] ColorIndexes;
-	///	  // else	[color repeat]
-	///	    /* 0x01 */ byte ColorIndex;
-	///	  // endif
+	///   /* 0x00 */ byte Value;
+	///   #if (Value &amp; 1 == 0)	//straight read, short
+	///     /* 0x01 */ byte[Value / 2] ColorIndexes;
+	///   #else	//color repeat
+	///     /* 0x01 */ byte ColorIndex;
+	///   #endif
 	/// }</code>
 	/// <para>In the beginning of <see cref="Resource.RawData">RawData</see>, we have the four values that define the outline of the image data.
 	/// <see cref="Width"/> and <see cref="Height"/> are derived values that are the difference plus one (to get from zero-indexed to true size).</para>

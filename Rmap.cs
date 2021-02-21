@@ -24,13 +24,13 @@ namespace Idmr.LfdReader
 	/// This contains the <see cref="Resource.Type"/>, <see cref="Resource.Name"/> and <see cref="Resource.Length"/> of every Resource in the file.
 	/// Reading through the Rmap can produce a jump table for the resource.</remarks>
 	/// <example><h4>Raw Data definition</h4>
-	/// <code>// Pseudo-code resource structure
-	/// struct RawData
+	/// <code>
+	/// RawData
 	/// {
 	///   /* 0x00 */ SubHeader[Rmap.Length / 16] SubHeaders;
 	/// }
 	/// 
-	/// struct SubHeader
+	/// SubHeader
 	/// {
 	///   /* 0x00 */ char[4] Type;
 	///   /* 0x04 */ char[8] Name;

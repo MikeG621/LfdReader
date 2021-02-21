@@ -33,14 +33,14 @@ namespace Idmr.LfdReader
 	/// The resources themselves are wrappers for Creative Voice Files (*.voc).
 	/// Although the format supports other methods, it is assumed that the audio data is always uncompressed 8-bit PCM.</remarks>
 	/// <example><h4>Raw Data definition</h4>
-	/// <code>// Pseudo-code resource structure
-	/// struct RawData
+	/// <code>
+	/// RawData
 	/// {
 	///   /* 0x00 */ VocHeader Header;
-	///   /* 0x1A */ VocDataBlock[] Blocks;
+	///   /* 0x1A */ VocDataBlock[] SoundBlocks;
 	/// }
 	/// 
-	/// struct VocHeader
+	/// VocHeader
 	/// {
 	///   /* 0x00 */ char[19] Reserved = "Creative Voice File";
 	///   /* 0x13 */ byte Reserved = 0x1A;
@@ -49,26 +49,25 @@ namespace Idmr.LfdReader
 	///   /* 0x18 */ short VersionVerify = 0x1129;
 	/// }
 	///
-	/// struct VocDataBlock
+	/// VocDataBlock
 	/// {
 	///   /* 0x00 */ byte Type;
-	///   #if (Type != 0)	// 0 is EOF block
+	///   #if (Type != 0) // 0 is EOF block
 	///     /* 0x01 */ byte[3] Length;
 	///     #if (Type == 1) // Sound Data block
 	///       /* 0x04 */ byte FrequencyDivisor;
 	///       /* 0x05 */ byte Codec = 0x00;
 	///       /* 0x06 */ byte[Length-2] AudioData;
-	///     #elseif (Type == 6) // Repeat block
+	///	    #elseif (Type == 6) // Repeat block
 	///       /* 0x04 */ short NumRepeat;
 	///     #endif
 	///   #endif
 	/// }</code>
-	/// <para>For the most part, <i>Header</i> is a formality, the only way to sync it into the LFD file.
-	/// Since this is simply a pre-existing file format that has been placed into the LFD, the format is very reliable and is safe to use.
+	/// <para>Since this is simply a pre-existing file format that has been placed into the LFD, the format is very reliable and is safe to use.
 	/// <i>Header</i> is also fixed.
 	/// There is technically a possiblity of the <i>Version</i> and <i>Verify</i> values being different, but TIE sticks with the older version, so we don't have to worry about it.</para>
 	/// <h4>-- VocDataBlock --</h4>
-	/// <para>The <i>Blocks</i> array typically consists of a single Sound Data block followed by the EOF block (<c>Type == 0x00</c>), although there are cases where a resource contains two Sound Data blocks.<br/>
+	/// <para>The <see cref="SoundBlocks"/> array typically consists of a single Sound Data block followed by the EOF block (<c>Type == 0x00</c>), although there are cases where a resource contains two Sound Data blocks.<br/>
 	/// There are a handful of resources that also use the Repeat block; a NumRepeat value of <b>0xFFFF</b> (-1) is for an infinite loop, otherwise it's a zero-indexed count, so a value of <b>0</b> means 1 repeat in addition to the original, so it plays twice. 
 	/// These resources also contain the End Repeat block (<c>Type == 0x07</c>) after the Sound Data block before EOF. 
 	/// The EOF and End Repeat blocks do not contain any values aside from <i>Type</i>.

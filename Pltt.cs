@@ -25,16 +25,16 @@ namespace Idmr.LfdReader
 	/// <summary>Object for "PLTT" color palette resources</summary>
 	/// <remarks>The Pltt resource is the definition of most colors used for LFD image formats. It uses 24-bit RGB to define the colors, up to 256 colors total.</remarks>
 	/// <example><h4>Raw Data definition</h4>
-	/// <code>// Pseudo-code resource structure
-	/// struct RawData
+	/// <code>
+	/// RawData
 	/// {
 	///   /* 0x00 */ byte StartIndex;
 	///   /* 0x01 */ byte EndIndex;
 	///   /* 0x02 */ PlttColor[EndIndex - StartIndex + 1];
-	///   /* 0x?? */ byte Reserved = 0x00;
+	/// 			 byte Reserved = 0x00;
 	/// }
 	/// 
-	/// struct PlttColor
+	/// PlttColor
 	/// {
 	///   /* 0x00 */ byte Red;
 	///   /* 0x01 */ byte Green;
