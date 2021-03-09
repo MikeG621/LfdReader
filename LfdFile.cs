@@ -4,12 +4,13 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.2+
+ * Version: 2.0
  */
 
 /* CHANGE LOG
+ * v2.0, 210309
  * [UPD] cleanup
- * [ADD] Cplx, Crft to assignResource
+ * [ADD] Cplx, Crft, Ship to assignResource
  * v1.2, 160712
  * [UPD] Always zeroes out name before writing
  * [UPD] Only calls _encode on children if they report being modified
@@ -210,6 +211,7 @@ namespace Idmr.LfdReader
 		{
 			// commented out types redirect to Resource to read and capture _rawData
 			if (type == Resource.ResourceType.Anim) Resources[index] = new Anim(stream, offset);
+			//TODO: else if (type == Resource.ResourceType.Adlb) Resources[index] = new Adlb(stream, offset);
 			else if (type == Resource.ResourceType.Blas || type == Resource.ResourceType.Voic) Resources[index] = new Blas(stream, offset);
 			//TODO: else if (type == Resource.ResourceType.Bmap) Resources[index] = new Bmap(stream, offset);
 			//TODO: else if (type == Resource.ResourceType.Btmp) Resources[index] = new Btmp(stream, offset);
@@ -224,6 +226,7 @@ namespace Idmr.LfdReader
 			//TODO: else if (type == Resource.ResourceType.Mtrx) Resources[index] = new Mtrx(stream, offset);
 			else if (type == Resource.ResourceType.Panl) Resources[index] = new Panl(stream, offset);
 			else if (type == Resource.ResourceType.Pltt) Resources[index] = new Pltt(stream, offset);
+			//TODO: else if (type == Resource.ResourceType.Rlnd) Resources[index] = new Rlnd(stream, offset);
 			// skip Rmap
 			else if (type == Resource.ResourceType.Ship) Resources[index] = new Ship(stream, offset);
 			else if (type == Resource.ResourceType.Text) Resources[index] = new Text(stream, offset);

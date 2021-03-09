@@ -2,23 +2,24 @@ Idmr.LfdReader.dll
 =================
 
 Author: Michael Gaisser (mjgaisser@gmail.com)
-Version: 1.2.1
-Date: 2019.09.02
+Version: 2.0
+Date: 2021.03.09
 
 Library for editing LucasArts *.LFD resource files.
 
 =========
 Version History
 
+v2.0, 09 Mar 2021
  - (ANIM) Fixed the retrieval of Frames when RelativePosition is turned on.
  - (BLAS) Added GetWavBytes() to make audio playback easier, reformats data to .WAV.
  - (BLAS) Added Duration property to get audio length in seconds.
  - (FILM) Added ToString() to Block and Chunk.
- - (FONT) TotalChars renamed to NumberOfGlyphs.
+ - (FONT) TotalChars renamed to NumberOfGlyphs (breaking change).
  - (CRFT) New.
  - (CPLX) New.
  - (SHIP) New.
- - (Resource) Btmp, Crft, Cplx and Ship added to ResourceType.
+ - (Resource) Adlb, Btmp, Crft, Cplx, Rlnd, and Ship added to ResourceType.
  - various updates.
 
 v1.2.1, 02 Sep 2019

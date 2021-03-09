@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.2+
+ * Version: 2.0
  */
 
 /* CHANGE LOG
+ * v2.0, 210309
  * [FIX] getting the image when RelativePosition is used
  * v1.2, 160712
  * [ADD] _isModified edits

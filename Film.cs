@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.1+
+ * Version: 2.0
  */
 
 /* CHANGE LOG
+ * v2.0, 210309
  * [ADD] ToString for Block and Chunk
  * v1.1, 141215
  * [UPD] changed license to MPL

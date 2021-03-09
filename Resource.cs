@@ -13,11 +13,12 @@
  * If a copy of the MPL (MPL.txt) was not distributed with this file,
  * you can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Version: 1.2+
+ * Version: 2.0
  */
 
 /* CHANGE LOG
- * [ADD] Btmp, Crft, Cplx and Ship to ResourceType
+ * v2.0, 210309
+ * [ADD] Adlb, Btmp, Crft, Cplx, Rlnd, and Ship to ResourceType
  * [UPD] cleanup
  * v1.2, 160712
  * [ADD] _isModifed
@@ -67,6 +68,8 @@ namespace Idmr.LfdReader
 		public enum ResourceType : int {
 			/// <summary>Unknown or uninitialized.</summary>
 			Undefined,
+			/// <summary>Adlib-optimized MIDI sound.</summary>
+			Adlb = 0x424C4441,
 			/// <summary>Animation.</summary>
 			Anim = 0x4D494E41,
 			/// <summary>Sound effect.</summary>
@@ -77,7 +80,7 @@ namespace Idmr.LfdReader
 			Btmp = 0x504D5442,
 			/// <summary>Legacy mesh data (Mac port).</summary>
 			Cplx = 0x584c5043,
-			/// <summary>Legacy mesh data.</summary>
+			/// <summary>Legacy mesh data (XW).</summary>
 			Crft = 0x54465243,
 			/// <summary>Image format, similar to Delt?</summary>
 			Cust = 0x54535543,
@@ -87,7 +90,7 @@ namespace Idmr.LfdReader
 			Film = 0x4D4C4946,
 			/// <summary>Font.</summary>
 			Font = 0x544E4F46,
-			/// <summary>MIDI sound.</summary>
+			/// <summary>General MIDI sound.</summary>
 			Gmid = 0x44494D47,
 			/// <summary>Cockpit transparency.</summary>
 			Mask = 0x4B53414D,
@@ -97,15 +100,18 @@ namespace Idmr.LfdReader
 			Panl = 0x4C4E4150,
 			/// <summary>Color palette.</summary>
 			Pltt = 0x54544C50,
+			/// <summary>Roland-optimzed MIDI sound.</summary>
+			Rlnd = 0x444E4C52,
 			/// <summary>File structure map.</summary>
 			Rmap = 0x50414D52,
+			// TABL?
 			/// <summary>Mesh data.</summary>
 			Ship = 0x50494853,
 			/// <summary>Strings.</summary>
 			Text = 0x54584554,
 			/// <summary>Sound effect, typically voice data.</summary>
 			Voic = 0x43494F56,
-			/// <summary>***DEPRECATED***, ACT image forma.t</summary>
+			/// <summary>***DEPRECATED***, ACT image form.</summary>
 			Xact = 0x54434158 }
 
 		#region constructors

@@ -4,11 +4,12 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.2.2+
+ * Version: 2.0
  */
 
 /* CHANGE LOG
- * [ADD] Created
+ * v2.0, 210309
+ * [NEW] Created
  */
 
 using System;

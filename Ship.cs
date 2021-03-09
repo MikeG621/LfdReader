@@ -4,11 +4,12 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.2.2+
+ * Version: 2.0
  */
 
 /* CHANGE LOG
- * [ADD] Created
+ * v2.0, 210309
+ * [NEW] Created
  */
 
 using System;
@@ -149,39 +150,72 @@ namespace Idmr.LfdReader
 	/// Some meshes are missing the <i>Unknown1</i> array. I've noticed this in SPECIES.LFD:SHIPCONTAIN, on a <i>Signature</i>=81 LOD.</para></example>
 	public partial class Ship : Resource
 	{
+		/// <summary>Defines the functionality of the mesh in-game.</summary>
 		public enum MeshType : short
 		{
+			/// <summary>General mesh</summary>
 			Default,
+			/// <summary>Main body, no special behavior</summary>
 			MainHull,
+			/// <summary>Wing component, no special behavior</summary>
 			Wing,
+			/// <summary>Main body, no special behavior</summary>
 			Fuselage,
+			/// <summary>Destructable static gun emplacement</summary>
 			GunTurret,
+			/// <summary>Destructable static gun emplacement</summary>
 			SmallGun,
+			/// <summary>Engines</summary>
 			Engine,
+			/// <summary>Bridge, no special behavior</summary>
 			Bridge,
+			/// <summary>Shield Generator</summary>
 			ShieldGen,
+			/// <summary>Power systems, no special behavior</summary>
 			EnergyGen,
+			/// <summary>Destrucable warhead launcher</summary>
 			Launcher,
+			/// <summary>Destrucable communication system</summary>
 			CommSys,
+			/// <summary>Beam emitter</summary>
 			BeamSys,
+			/// <summary>Beam emitter</summary>
 			CommandVBeam,
+			/// <summary>External docking platform</summary>
 			DockingPlat,
+			/// <summary>External landing platform</summary>
 			LandingPlat,
+			/// <summary>Internal hangar</summary>
 			Hangar,
+			/// <summary>Cargo component</summary>
 			CargoPod,
+			/// <summary>Main body, no special behavior</summary>
 			MiscHull,
+			/// <summary>Antenna</summary>
 			Antenna,
+			/// <summary>Rotating wing, S-foils</summary>
 			RotWing,
+			/// <summary>Rotating destructable gun emplacement</summary>
 			RotGunTurret,
+			/// <summary>Rotating destructable warhead launcher</summary>
 			RotLauncher,
+			/// <summary>Rotating destructable communications system</summary>
 			RotCommSys,
+			/// <summary>Rotating beam emitter</summary>
 			RotBeamSys,
+			/// <summary>Rotating beam emitter</summary>
 			RotCommandBeam,
+			/// <summary>Unused</summary>
 			Custom1,
+			/// <summary>Unused</summary>
 			Custom2,
+			/// <summary>Unused</summary>
 			Custom3,
+			/// <summary>Unused</summary>
 			Custom4,
+			/// <summary>Unused</summary>
 			Custom5,
+			/// <summary>Unused</summary>
 			Custom6
 		}
 
