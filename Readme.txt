@@ -10,6 +10,10 @@ Library for editing LucasArts *.LFD resource files.
 =========
 Version History
 
+ - (CRFT) Can now convert wireframe data to SHIP, but not raw data
+ - (CPLX) Can now convert wireframe data to SHIP, but not raw data
+ - (CRFT, CPLX, SHIP) Now calculates the Lines in a mesh during Decode.
+
 v2.0, 09 Mar 2021
  - (ANIM) Fixed the retrieval of Frames when RelativePosition is turned on.
  - (BLAS) Added GetWavBytes() to make audio playback easier, reformats data to .WAV.

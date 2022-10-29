@@ -1,13 +1,14 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2022 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.0
+ * Version: 2.0+
  */
 
 /* CHANGE LOG
+ * [NEW] Lod.Line class, and Shape.Lines property
  * v2.0, 210309
  * [NEW] Created
  */
@@ -138,6 +139,28 @@ namespace Idmr.LfdReader
 				/// <summary>From the separate array following the Shape collection.</summary>
 				/// <remarks>Immediately follows Unknown1.</remarks>
 				public short Unknown2 { get; internal set; }
+				/// <summary>Gets the lines made up of vertex pairs from <see cref="Data"/>.</summary>
+				/// <remarks>Indices are read-only.</remarks>
+				public Indexer<Line> Lines { get; internal set; }
+			}
+
+			/// <summary>Represents a single line within a mesh</summary>
+			/// <remarks>The indices points to a <see cref="Vertex16"/> within <see cref="MeshVertices"/>.</remarks>
+			public class Line
+			{
+				/// <summary>Initialize with the indicated vertices.</summary>
+				/// <param name="vertex1">The index of the start vertex.</param>
+				/// <param name="vertex2">The index of the end vertex</param>
+				public Line (int vertex1, int vertex2)
+				{
+					Vertex1 = vertex1;
+					Vertex2 = vertex2;
+				}
+
+				/// <summary>Gets the index of the starting vertex.</summary>
+				public int Vertex1 { get; internal set; }
+				/// <summary>Gets the index of the end vertex</summary>
+				public int Vertex2 { get; internal set; }
 			}
 
 			// <summary>Represents an unknown data set at the end of the Mesh data</summary>

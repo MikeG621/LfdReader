@@ -1,13 +1,15 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2022 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.0
+ * Version: 2.0+
  */
 
 /* CHANGE LOG
+ * [NEW] operator to SHIP
+ * [NEW] creation of Lines during Decode
  * v2.0, 210309
  * [NEW] Created
  */
@@ -345,7 +347,18 @@ namespace Idmr.LfdReader
 						ArrayFunctions.TrimArray(_rawData, pos, data);
 						pos += len;
 						shapes[s].Data = new Indexer<byte>(data, readOnly);
-					}
+
+                        byte shapeVertexCount = (byte)(shapes[s].Type & 0xF);
+						Crft.Lod.Line[] lines = new Crft.Lod.Line[shapeVertexCount / 2];
+                        readOnly = new bool[lines.Length];
+                        for (int i = 0; i < readOnly.Length; i++) readOnly[i] = true;
+                        if (shapeVertexCount == 2)
+                            lines[0] = new Crft.Lod.Line(shapes[s].Data[2], shapes[s].Data[3]);
+                        else
+                            for (int ln = 0; ln < lines.Length; ln++)
+                                lines[ln] = new Crft.Lod.Line(shapes[s].Data[ln * 2], shapes[s].Data[(ln + 1) * 2]);
+                        shapes[s].Lines = new Indexer<Crft.Lod.Line>(lines, readOnly);
+                    }
 					readOnly = new bool[shapeCount];
 					for (int i = 0; i < shapeCount; i++) readOnly[i] = true;
 					try
@@ -415,5 +428,37 @@ namespace Idmr.LfdReader
 		/// <summary>Gets the shading data.</summary>
 		/// <remarks>Each set is read-only.</remarks>
 		public Indexer<Indexer<byte>> ShadingSets { get; private set; }
+
+		/// <summary>Transfers the wireframe data into a SHIP object.</summary>
+		/// <param name="craft">The CPLX wireframe data</param>
+		/// <returns>A SHIP with <u>only</u> the wireframe data in <see cref="Ship.Components"/>. <see cref="Ship.Unknown"/> is set to <b>0</b>,
+		/// <see cref="Ship.Unknowns"/> and <see cref="Ship.ShadingSets"/> are both set to <b>null</b>.</returns>
+		public static implicit operator Ship(Cplx craft)
+		{
+            var ship = new Ship
+            {
+                Name = craft.Name,
+                Unknowns = null,
+                Unknown = 0,
+                ShadingSets = null
+            };
+            byte componentCount = (byte)craft.Components.Length;
+			var components = new Ship.Component[componentCount];
+			for (int c = 0; c < componentCount; c++)
+			{
+				byte lodCount = (byte)craft.Components[c].Lods.Length;
+				components[c] = new Ship.Component(lodCount)
+				{
+					MeshType = Ship.MeshType.Default,
+					Lods = craft.Components[c].Lods
+				};
+			}
+
+            var readOnly = new bool[componentCount];
+            for (int i = 0; i < componentCount; i++) readOnly[i] = true;
+            ship.Components = new Indexer<Ship.Component>(components, readOnly);
+
+            return ship;
+		}
 	}
 }

@@ -1,13 +1,15 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2022 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.0
+ * Version: 2.0+
  */
 
 /* CHANGE LOG
+ * [UPD] Properties now have internal sets
+ * [NEW] Creation of Lines during Decode
  * v2.0, 210309
  * [NEW] Created
  */
@@ -387,7 +389,18 @@ namespace Idmr.LfdReader
 						ArrayFunctions.TrimArray(_rawData, pos, data);
 						pos += len;
 						shapes[s].Data = new Indexer<byte>(data, readOnly);
-					}
+
+                        byte shapeVertexCount = (byte)(shapes[s].Type & 0xF);
+                        Crft.Lod.Line[] lines = new Crft.Lod.Line[shapeVertexCount / 2];
+                        readOnly = new bool[lines.Length];
+                        for (int i = 0; i < readOnly.Length; i++) readOnly[i] = true;
+                        if (shapeVertexCount == 2)
+                            lines[0] = new Crft.Lod.Line(shapes[s].Data[2], shapes[s].Data[3]);
+                        else
+                            for (int ln = 0; ln < lines.Length; ln++)
+                                lines[ln] = new Crft.Lod.Line(shapes[s].Data[ln * 2], shapes[s].Data[(ln + 1) * 2]);
+                        shapes[s].Lines = new Indexer<Crft.Lod.Line>(lines, readOnly);
+                    }
 					readOnly = new bool[shapeCount];
 					//short unkCount;
 					for (int i = 0; i < shapeCount; i++) readOnly[i] = true;
@@ -456,17 +469,17 @@ namespace Idmr.LfdReader
 
 		/// <summary>Gets the components of the model.</summary>
 		/// <remarks>Each component is read-only.</remarks>
-		public Indexer<Component> Components { get; private set; }
+		public Indexer<Component> Components { get; internal set; }
 		/// <summary>Gets the shading data.</summary>
 		/// <remarks>Each set is read-only.</remarks>
-		public Indexer<Indexer<byte>> ShadingSets { get; private set; }
+		public Indexer<Indexer<byte>> ShadingSets { get; internal set; }
 
 		/// <summary>Unknown values</summary>
 		/// <remarks>Bytes 0x02 through 0x1F</remarks>
-		public Indexer<byte> Unknowns { get; private set; }
+		public Indexer<byte> Unknowns { get; internal set; }
 
 		/// <summary>Unknown value</summary>
 		/// <remarks>Byte 0x22</remarks>
-		public short Unknown { get; private set; }
+		public short Unknown { get; internal set; }
 	}
 }

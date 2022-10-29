@@ -1,13 +1,14 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2022 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.0
+ * Version: 2.0+
  */
 
 /* CHANGE LOG
+ * [UPD] Lods now has internal set
  * v2.0, 210309
  * [NEW] Created
  */
@@ -18,7 +19,6 @@ namespace Idmr.LfdReader
 {
 	public partial class Cplx : Resource
     {
-
 		/// <summary>Represents a complete mesh object.</summary>
 		public class Component
 		{
@@ -40,7 +40,7 @@ namespace Idmr.LfdReader
 
 			/// <summary>Gets the Lods.</summary>
 			/// <remarks>Each Lod is read-only.</remarks>
-			public Indexer<Lod> Lods { get; }
+			public Indexer<Lod> Lods { get; internal set; }
 		}
 
 		/// <summary>Represents a single Level of Detail (LOD) mesh.</summary>
