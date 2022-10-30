@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.0+
+ * Version: 2.1
  */
 
 /* CHANGE LOG
+ * v2.1, 221030
  * [UPD] Lods now has internal set
  * v2.0, 210309
  * [NEW] Created

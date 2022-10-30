@@ -2,14 +2,15 @@ Idmr.LfdReader.dll
 =================
 
 Author: Michael Gaisser (mjgaisser@gmail.com)
-Version: 2.0
-Date: 2021.03.09
+Version: 2.1
+Date: 2022.10.30
 
 Library for editing LucasArts *.LFD resource files.
 
 =========
 Version History
 
+v2.1, 30 Oct 2022
  - (CRFT) Can now convert wireframe data to SHIP, but not raw data
  - (CPLX) Can now convert wireframe data to SHIP, but not raw data
  - (CRFT, CPLX, SHIP) Now calculates the Lines in a mesh during Decode.
