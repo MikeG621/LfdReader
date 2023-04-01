@@ -2,13 +2,17 @@ Idmr.LfdReader.dll
 =================
 
 Author: Michael Gaisser (mjgaisser@gmail.com)
-Version: 2.1
-Date: 2022.10.30
+Version: 2.2
+Date: 2023.04.01
 
 Library for editing LucasArts *.LFD resource files.
 
 =========
 Version History
+
+v2.2, 01 Apr 2023
+ - (CRFT, CPLX, SHIP) Added the IsTwoSided and IsGouraudShaded properties to Shape per discussion in Issue #3.
+ - Minor XML updates
 
 v2.1, 30 Oct 2022
  - (CRFT) Can now convert wireframe data to SHIP, but not raw data

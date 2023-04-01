@@ -1,6 +1,6 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2022 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2023 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
@@ -23,7 +23,7 @@ namespace Idmr.LfdReader
 		{
             /// <summary>Initialize the mesh with the specified number of Lods (levels of detail).</summary>
             /// <param name="lodCount">The count to create.</param>
-            /// <remarks><see cref="Lods"/> is created with read only flags set.</remarks>
+            /// <remarks><see cref="Cplx.Component.Lods"/> is created with read only flags set.</remarks>
             public Component(int lodCount) : base(lodCount) { }
 
 			/// <summary>Gets the assignment of the Component.</summary>

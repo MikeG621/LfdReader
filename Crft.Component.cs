@@ -1,13 +1,14 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2022 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2023 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.1
+ * Version: 2.2
  */
 
 /* CHANGE LOG
+ * [NEW] Shape.IsTwoSided and Shape.IsGouraudShaded properties
  * v2.1, 221030
  * [NEW] Lod.Line class, and Shape.Lines property
  * v2.0, 210309
@@ -130,13 +131,19 @@ namespace Idmr.LfdReader
 				public Vector16 FaceNormal { get; internal set; }
 				/// <summary>Gets the Shape's Type.</summary>
 				public byte Type { get; internal set; }
-				/// <summary>Gets the data array.</summary>
-				/// <remarks>Length is (Type &amp; 0x0F)*2 + 3. The array of pairs are Vertex indices, the remaining 3 are unknown.<br/>
-				/// Each value is read-only.</remarks>
+                /// <summary>Gets the data array.</summary>
+                /// <remarks>Length is (Type &amp; 0x0F)*2 + 3. The array of pairs are Vertex indices, the remaining 3 are unknown.<br/>
+                /// Each value is read-only.</remarks>
 				public Indexer<byte> Data { get; internal set; }
-				/// <summary>From the separate array following the Shape collection.</summary>
-				/// <remarks>Looks unique among the other Shapes and can be 0 to ShapeCount, likely an ID value.</remarks>
-				public byte Unknown1 { get; internal set; }
+				/// <summary>Gets if the Shape is double-sided.</summary>
+				/// <remarks>Top bit of <see cref="Type"/>, if <b>false</b> then the shape is single-sided.</remarks>
+                public bool IsTwoSided { get { return (Type & 0x80) == 0x80; } }
+				/// <summary>Gets if the Shape uses Gouraud (interpolated) shading.</summary>
+				/// <remarks>Second bit of <see cref="Type"/>, if <b>false</b> then the shape is flat shaded.</remarks>
+				public bool IsGouraudShaded { get { return (Type & 0x40) == 0x40; } }
+                /// <summary>From the separate array following the Shape collection.</summary>
+                /// <remarks>Looks unique among the other Shapes and can be 0 to ShapeCount, likely an ID value.</remarks>
+                public byte Unknown1 { get; internal set; }
 				/// <summary>From the separate array following the Shape collection.</summary>
 				/// <remarks>Immediately follows Unknown1.</remarks>
 				public short Unknown2 { get; internal set; }
