@@ -10,6 +10,14 @@ Library for editing LucasArts *.LFD resource files.
 =========
 Version History
 
+ - (FILM) Chunk Opcodes added or renamed:
+   - SetColorRange = 0x10, new for VIEW
+   - Unknown11 is now ApplyPalette for VIEW
+   - Unknown13 is now Toggle for VOIC
+   - SetVolume = 0x15, new for VOIC
+   - Unknown16 = 0x16, new for VOIC 
+ - (PLTT) Added the newly discovered LoadModifier as read only values.
+
 v2.2, 01 Apr 2023
  - (CRFT, CPLX, SHIP) Added the IsTwoSided and IsGouraudShaded properties to Shape per discussion in Issue #3.
  - Minor XML updates

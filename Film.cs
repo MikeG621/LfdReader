@@ -1,13 +1,14 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2023 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.0
+ * Version: 2.0+
  */
 
 /* CHANGE LOG
+ * [UPD] Chunk opcode updates: SetColorRange (new), Unknown11 > ApplyPalette, Unknown13 > Toggle, SetVolume (new), Unknown16 (new)
  * v2.0, 210309
  * [ADD] ToString for Block and Chunk
  * v1.1, 141215
@@ -282,16 +283,28 @@ namespace Idmr.LfdReader
 				Orientation,
 				/// <summary>(<see cref="Block.BlockType.Pltt"/>) Marker to activate the palette.</summary>
 				Use,
-				/// <summary>(<see cref="Block.BlockType.View"/>) Unknown.</summary>
-				Unknown11 = 0x11,
+				/// <summary>(<see cref="Block.BlockType.View"/>) Doesn't appear to be used anymore, but applys an RGB color to a series of Pltt colors.</summary>
+				/// <remarks>In this case, <see cref="Vars"/> is actually a byte[5], not short[].</remarks>
+				SetColorRange,
+				/// <summary>(DEPRECATED) <see cref="ApplyPalette"/></summary>
+				Unknown11,
+				/// <summary>(<see cref="Block.BlockType.View"/>) Resets entire palette to black, then applies the Film Palette.</summary>
+				ApplyPalette = 17,
 				/// <summary>(<see cref="Block.BlockType.View"/>) Method of clearing the screen and loading the new View.</summary>
 				Transition,
-				/// <summary>(<see cref="Block.BlockType.Voic"/>) Unknown.</summary>
+				/// <summary>(DEPRECATED) <see cref="Toggle"/></summary>
 				Unknown13,
+				/// <summary>(<see cref="Block.BlockType.Voic"/>) Toggles the sound on/off state.</summary>
+				Toggle = 19,
 				/// <summary>(<see cref="Block.BlockType.Voic"/>) Appears to stop sounds interally set to repeat.</summary>
 				Loop,
+				/// <summary>(<see cref="Block.BlockType.Voic"/>) Sets the volume percentage.</summary>
+				/// <remarks><b>0</b> is 100%.</remarks>
+				SetVolume,
 				/// <summary>(<see cref="Block.BlockType.Voic"/>) Unknown.</summary>
-				Unknown17 = 0x17,
+				Unknown16,
+				/// <summary>(<see cref="Block.BlockType.Voic"/>) Unknown.</summary>
+				Unknown17,
 				/// <summary>(<see cref="Block.BlockType.Voic"/>) Possibly defines file the sound is located in.</summary>
 				Preload,
 				/// <summary>(<see cref="Block.BlockType.Voic"/>) Determines playback controls.</summary>

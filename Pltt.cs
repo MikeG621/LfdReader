@@ -1,13 +1,14 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2023 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.2
+ * Version: 1.2+
  */
 
 /* CHANGE LOG
+ * [NEW] LoadModifer
  * v1.2, 160712
  * [ADD] _isModified edits
  * v1.1, 141215
@@ -22,37 +23,49 @@ using System.IO;
 
 namespace Idmr.LfdReader
 {
-	/// <summary>Object for "PLTT" color palette resources</summary>
-	/// <remarks>The Pltt resource is the definition of most colors used for LFD image formats. It uses 24-bit RGB to define the colors, up to 256 colors total.</remarks>
-	/// <example><h4>Raw Data definition</h4>
-	/// <code>
-	/// RawData
-	/// {
-	///   /* 0x00 */ byte StartIndex;
-	///   /* 0x01 */ byte EndIndex;
-	///   /* 0x02 */ PlttColor[EndIndex - StartIndex + 1];
-	/// 			 byte Reserved = 0x00;
-	/// }
-	/// 
-	/// PlttColor
-	/// {
-	///   /* 0x00 */ byte Red;
-	///   /* 0x01 */ byte Green;
-	///   /* 0x02 */ byte Blue;
-	/// }</code>
-	/// <para>The <see cref="StartIndex"/> defines the first ColorIndex that Color values are given for.
-	/// The <see cref="EndIndex"/> likewise defines the last ColorIndex that is being defined.
-	/// For example, the palette for the Battle Selection screen is defined in TOURDESK.LFD and begins at <i>StartIndex</i> = <b>0x20</b> and runs through <i>EndIndex</i> = <b>0xFF</b>.
-	/// Within the program Pltts are loaded sequentially to create the working palette (hence <see cref="ConvertToPalette"/>).
-	/// ColorIndexes in reality are called from the working palette, not from the individual Pltts.</para>
-	/// <para>The Color values are simply RGB values ranging from <b>0x00-0xFF</b>.</para>
-	/// <para>The typical values for the beginning range appear to be the standard 16 colors for <b>0x00-0x0F</b>, with greyscale values for <b>0x10-0x1F</b> as defined in EMPIRE.LFD:PLTTstandard.</para></example>
-	public partial class Pltt : Resource
+    /// <summary>Object for "PLTT" color palette resources</summary>
+    /// <remarks>The Pltt resource is the definition of most colors used for LFD image formats. It uses 24-bit RGB to define the colors, up to 256 colors total.</remarks>
+    /// <example><h4>Raw Data definition</h4>
+    /// <code>
+    /// RawData
+    /// {
+    ///   /* 0x00 */ byte StartIndex;
+    ///   /* 0x01 */ byte EndIndex;
+    ///   /* 0x02 */ PlttColor[EndIndex - StartIndex + 1];
+    ///				 byte ModifierCount;
+    ///				 LoadModifier[ModifierCount]
+    /// }
+    /// 
+    /// PlttColor
+    /// {
+    ///   /* 0x00 */ byte Red;
+    ///   /* 0x01 */ byte Green;
+    ///   /* 0x02 */ byte Blue;
+    /// }
+    /// 
+    /// LoadModifer
+    /// {
+    ///   /* 0x00 */ short CheckValue?
+    ///   /* 0x02 */ byte StartIndex
+    ///   /* 0x03 */ byte EndIndex
+    /// }
+    /// </code>
+    /// <para>The <see cref="StartIndex"/> defines the first ColorIndex that Color values are given for.
+    /// The <see cref="EndIndex"/> likewise defines the last ColorIndex that is being defined.
+    /// For example, the palette for the Battle Selection screen is defined in TOURDESK.LFD and begins at <i>StartIndex</i> = <b>0x20</b> and runs through <i>EndIndex</i> = <b>0xFF</b>.
+    /// Within the program Pltts are loaded sequentially to create the working palette (hence <see cref="ConvertToPalette"/>).
+    /// ColorIndexes in reality are called from the working palette, not from the individual Pltts.</para>
+    /// <para>The Color values are simply RGB values ranging from <b>0x00-0xFF</b>.</para>
+    /// <para>The typical values for the beginning range appear to be the standard 16 colors for <b>0x00-0x0F</b>, with greyscale values for <b>0x10-0x1F</b> as defined in EMPIRE.LFD:PLTTstandard.</para>
+    /// <para>The LoadModifier is a rarely used functionality that still isn't 100% understood. The CheckValue appears to control if this is active in a particular view and the index values limit the range of colors that are loaded at that time.</para></example>
+
+    public partial class Pltt : Resource
 	{
 		byte _startIndex = 0;
 		byte _endIndex = 0;
 		readonly Color[] _entries = new Color[256];
 		ColorIndexer _colorIndexer;
+		LoadModifier[] _modifiers;
 
 		#region constructors
 		/// <summary>Blank constructor.</summary>
@@ -107,12 +120,26 @@ namespace Idmr.LfdReader
 			for (int i = _startIndex; i <= _endIndex; i++, offset += 3) _entries[i] = Color.FromArgb(_rawData[offset], _rawData[offset + 1], _rawData[offset + 2]);
 			for (int i = _endIndex + 1; i < 256; i++) _entries[i] = Color.Transparent;
 			_colorIndexer = new ColorIndexer(this);
+			ModifierCount = _rawData[offset++];
+			if (ModifierCount > 0)
+			{
+				_modifiers = new LoadModifier[ModifierCount];
+				for (int i = 0; i < _modifiers.Length; i++)
+				{
+					_modifiers[i] = new LoadModifier();
+					_modifiers[i].CheckValue = BitConverter.ToInt16(_rawData, offset);
+					offset += 2;
+					_modifiers[i].StartIndex = _rawData[offset++];
+					_modifiers[i].EndIndex = _rawData[offset++];
+				}
+			}
+			else _modifiers = null;
 		}
 
 		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/>.</summary>
 		public override void EncodeResource()
 		{
-			byte[] raw = new byte[_entries.Length * 3 + 3];
+			byte[] raw = new byte[_entries.Length * 3 + 3 + 4 * ModifierCount];
 			raw[0] = _startIndex;
 			raw[1] = _endIndex;
 			int offset = 2;
@@ -122,6 +149,8 @@ namespace Idmr.LfdReader
 				raw[offset + 1] = _entries[i].G;
 				raw[offset + 2] = _entries[i].B;
 			}
+			raw[offset++] = ModifierCount;
+			for (int i = 0; i < ModifierCount; i++, offset += 4) Common.ArrayFunctions.WriteToArray(_modifiers[i].getBytes(), raw, offset);
 			_rawData = raw;
 		}
 		
@@ -178,7 +207,7 @@ namespace Idmr.LfdReader
 		/// <summary>Gets the indexer for the colors.</summary>
 		/// <remarks>Unused colors are <see cref="Color.Transparent"/>.</remarks>
 		public ColorIndexer Entries { get { return _colorIndexer; } }
-		/// <summary>Gets the ColorPalette reprenstation of the resource.</summary>
+		/// <summary>Gets the ColorPalette representation of the resource.</summary>
 		/// <remarks>Indexes not used by the resource are <see cref="Color.Transparent"/>.</remarks>
 		public ColorPalette Palette
 		{
@@ -191,6 +220,31 @@ namespace Idmr.LfdReader
 				return pal;
 			}
 		}
+
+		/// <summary>Gets the number of <see cref="LoadModifier"/> entries defined in the resource</summary>
+		/// <remarks>This is almost always zero.</remarks>
+		public byte ModifierCount { get; private set; }
 		#endregion public properties
+
+		/// <summary>Object that limits the colors loaded under certain conditions.</summary>
+		/// <remarks>This still isn't 100% understood.</remarks>
+		public struct LoadModifier
+		{
+			/// <summary>Gets if the modifier is used loaded at a particular view and time.</summary>
+			public short CheckValue { get; internal set; }
+			/// <summary>Gets the starting index of the loaded colors.</summary>
+			public byte StartIndex { get; internal set; }
+			/// <summary>Gets the ending index of the loaded colors.</summary>
+            public byte EndIndex { get; internal set; }
+
+			internal byte[] getBytes()
+			{
+				byte[] bytes = new byte[4];
+				Common.ArrayFunctions.WriteToArray(CheckValue, bytes, 0);
+				bytes[2] = StartIndex;
+				bytes[3] = EndIndex;
+				return bytes;
+			}
+        }
 	}
 }
