@@ -57,7 +57,7 @@ namespace Idmr.LfdReader
     /// ColorIndexes in reality are called from the working palette, not from the individual Pltts.</para>
     /// <para>The Color values are simply RGB values ranging from <b>0x00-0xFF</b>.</para>
     /// <para>The typical values for the beginning range appear to be the standard 16 colors for <b>0x00-0x0F</b>, with greyscale values for <b>0x10-0x1F</b> as defined in EMPIRE.LFD:PLTTstandard.</para>
-    /// <para>The LoadModifier is a rarely used functionality that still isn't 100% understood. The CheckValue appears to control if this is active in a particular view and the index values limit the range of colors that are loaded at that time.</para></example>
+    /// <para>The <see cref="IndexRotator"/> is a rarely used functionality that cycles the defined color range at a given frequency. The <see cref="IndexRotator.FrameDivider"/> is such that (0x1333 / <i>FrameDivider</i> = n), where the cycle increments every "nth" frame.The indexes wrap around, so a starting range of {1 2 3} goes to {2 3 1}, {3 1 2}, then back to {1 2 3}. The Index values naturally define the range. Right now the only known use is in CITY.LFD, it's visible as the blinking red aerial indicators and the yellow twinkling window lights.</para></example>
 
     public partial class Pltt : Resource
 	{
