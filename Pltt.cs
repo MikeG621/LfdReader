@@ -8,7 +8,7 @@
  */
 
 /* CHANGE LOG
- * [NEW] LoadModifer
+ * [NEW] IndexRotator
  * v1.2, 160712
  * [ADD] _isModified edits
  * v1.1, 141215
@@ -65,7 +65,7 @@ namespace Idmr.LfdReader
 		byte _endIndex = 0;
 		readonly Color[] _entries = new Color[256];
 		ColorIndexer _colorIndexer;
-		LoadModifier[] _modifiers;
+		IndexRotator[] _modifiers;
 
 		#region constructors
 		/// <summary>Blank constructor.</summary>
@@ -120,14 +120,14 @@ namespace Idmr.LfdReader
 			for (int i = _startIndex; i <= _endIndex; i++, offset += 3) _entries[i] = Color.FromArgb(_rawData[offset], _rawData[offset + 1], _rawData[offset + 2]);
 			for (int i = _endIndex + 1; i < 256; i++) _entries[i] = Color.Transparent;
 			_colorIndexer = new ColorIndexer(this);
-			ModifierCount = _rawData[offset++];
-			if (ModifierCount > 0)
+			RotatorCount = _rawData[offset++];
+			if (RotatorCount > 0)
 			{
-				_modifiers = new LoadModifier[ModifierCount];
+				_modifiers = new IndexRotator[RotatorCount];
 				for (int i = 0; i < _modifiers.Length; i++)
 				{
-					_modifiers[i] = new LoadModifier();
-					_modifiers[i].CheckValue = BitConverter.ToInt16(_rawData, offset);
+					_modifiers[i] = new IndexRotator();
+					_modifiers[i].FrameDivider = BitConverter.ToInt16(_rawData, offset);
 					offset += 2;
 					_modifiers[i].StartIndex = _rawData[offset++];
 					_modifiers[i].EndIndex = _rawData[offset++];
@@ -139,7 +139,7 @@ namespace Idmr.LfdReader
 		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/>.</summary>
 		public override void EncodeResource()
 		{
-			byte[] raw = new byte[_entries.Length * 3 + 3 + 4 * ModifierCount];
+			byte[] raw = new byte[_entries.Length * 3 + 3 + 4 * RotatorCount];
 			raw[0] = _startIndex;
 			raw[1] = _endIndex;
 			int offset = 2;
@@ -149,8 +149,8 @@ namespace Idmr.LfdReader
 				raw[offset + 1] = _entries[i].G;
 				raw[offset + 2] = _entries[i].B;
 			}
-			raw[offset++] = ModifierCount;
-			for (int i = 0; i < ModifierCount; i++, offset += 4) Common.ArrayFunctions.WriteToArray(_modifiers[i].getBytes(), raw, offset);
+			raw[offset++] = RotatorCount;
+			for (int i = 0; i < RotatorCount; i++, offset += 4) Common.ArrayFunctions.WriteToArray(_modifiers[i].getBytes(), raw, offset);
 			_rawData = raw;
 		}
 		
@@ -221,26 +221,27 @@ namespace Idmr.LfdReader
 			}
 		}
 
-		/// <summary>Gets the number of <see cref="LoadModifier"/> entries defined in the resource</summary>
-		/// <remarks>This is almost always zero.</remarks>
-		public byte ModifierCount { get; private set; }
+		/// <summary>Gets the number of <see cref="IndexRotator"/> entries defined in the resource.</summary>
+		/// <remarks>This is almost always zero, but is used in CITY.LFD.</remarks>
+		public byte RotatorCount { get; private set; }
 		#endregion public properties
 
-		/// <summary>Object that limits the colors loaded under certain conditions.</summary>
-		/// <remarks>This still isn't 100% understood.</remarks>
-		public struct LoadModifier
+		/// <summary>Defines a section of Colors that rotate through their indexes during view updates.</summary>
+		/// <remarks>Used for blinking or twinkling effects. The color indexes wrap around as they advance, so it goes 1 2 3, 2 3 1, 3 1 2, 1 2 3.</remarks>
+		public struct IndexRotator
 		{
-			/// <summary>Gets if the modifier is used loaded at a particular view and time.</summary>
-			public short CheckValue { get; internal set; }
-			/// <summary>Gets the starting index of the loaded colors.</summary>
+			/// <summary>Determine how often the colors are cycled.</summary>
+			/// <remarks>Value is such that (0x1333 / FrameDivider = n), where every nth frame cycles.</remarks>
+			public short FrameDivider { get; internal set; }
+			/// <summary>Gets the starting index of the rotated colors.</summary>
 			public byte StartIndex { get; internal set; }
-			/// <summary>Gets the ending index of the loaded colors.</summary>
+			/// <summary>Gets the ending index of the rotated colors.</summary>
             public byte EndIndex { get; internal set; }
 
 			internal byte[] getBytes()
 			{
 				byte[] bytes = new byte[4];
-				Common.ArrayFunctions.WriteToArray(CheckValue, bytes, 0);
+				Common.ArrayFunctions.WriteToArray(FrameDivider, bytes, 0);
 				bytes[2] = StartIndex;
 				bytes[3] = EndIndex;
 				return bytes;
