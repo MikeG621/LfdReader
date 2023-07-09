@@ -65,7 +65,7 @@ namespace Idmr.LfdReader
 		byte _endIndex = 0;
 		readonly Color[] _entries = new Color[256];
 		ColorIndexer _colorIndexer;
-		IndexRotator[] _modifiers;
+		IndexRotator[] _rotators;
 
 		#region constructors
 		/// <summary>Blank constructor.</summary>
@@ -123,17 +123,18 @@ namespace Idmr.LfdReader
 			RotatorCount = _rawData[offset++];
 			if (RotatorCount > 0)
 			{
-				_modifiers = new IndexRotator[RotatorCount];
-				for (int i = 0; i < _modifiers.Length; i++)
+				_rotators = new IndexRotator[RotatorCount];
+				for (int i = 0; i < _rotators.Length; i++)
 				{
-					_modifiers[i] = new IndexRotator();
-					_modifiers[i].FrameDivider = BitConverter.ToInt16(_rawData, offset);
+					_rotators[i] = new IndexRotator();
+					_rotators[i].FrameDivider = BitConverter.ToInt16(_rawData, offset);
 					offset += 2;
-					_modifiers[i].StartIndex = _rawData[offset++];
-					_modifiers[i].EndIndex = _rawData[offset++];
+					_rotators[i].StartIndex = _rawData[offset++];
+					_rotators[i].EndIndex = _rawData[offset++];
+					_rotators[i].initializeColors(this);
 				}
 			}
-			else _modifiers = null;
+			else _rotators = null;
 		}
 
 		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/>.</summary>
@@ -150,7 +151,7 @@ namespace Idmr.LfdReader
 				raw[offset + 2] = _entries[i].B;
 			}
 			raw[offset++] = RotatorCount;
-			for (int i = 0; i < RotatorCount; i++, offset += 4) Common.ArrayFunctions.WriteToArray(_modifiers[i].getBytes(), raw, offset);
+			for (int i = 0; i < RotatorCount; i++, offset += 4) Common.ArrayFunctions.WriteToArray(_rotators[i].getBytes(), raw, offset);
 			_rawData = raw;
 		}
 		
@@ -224,6 +225,9 @@ namespace Idmr.LfdReader
 		/// <summary>Gets the number of <see cref="IndexRotator"/> entries defined in the resource.</summary>
 		/// <remarks>This is almost always zero, but is used in CITY.LFD.</remarks>
 		public byte RotatorCount { get; private set; }
+
+		/// <summary>Gets the defined rotators.</summary>
+		public IndexRotator[] Rotators => _rotators;
 		#endregion public properties
 
 		/// <summary>Defines a section of Colors that rotate through their indexes during view updates.</summary>
@@ -245,6 +249,28 @@ namespace Idmr.LfdReader
 				bytes[2] = StartIndex;
 				bytes[3] = EndIndex;
 				return bytes;
+			}
+
+			/// <summary>Gets the number of frames between cycle events.</summary>
+			public short CycleFrequency => (short)(0x1333 / FrameDivider);
+
+			/// <summary>Gets the range of affected colors.</summary>
+			public Color[] RotatedColors { get; private set; }
+
+			internal void initializeColors(Pltt pltt)
+			{
+                RotatedColors = new Color[EndIndex - StartIndex + 1];
+                for (int c = 0; c < RotatedColors.Length; c++)
+                    RotatedColors[c] = pltt.Entries[StartIndex + c];
+            }
+
+			/// <summary>Cycles the affected colors.</summary>
+			public void RotateColors()
+			{
+				var old = (Color[])RotatedColors.Clone();
+				for (int c = 0; c < RotatedColors.Length - 1; c++)
+					RotatedColors[c] = old[c + 1];
+				RotatedColors[RotatedColors.Length - 1] = old[0];
 			}
         }
 	}
