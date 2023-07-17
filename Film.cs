@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.0+
+ * Version: 2.3
  */
 
 /* CHANGE LOG
+ * v2.3, 230716
  * [UPD] Chunk opcode updates: SetColorRange (new), Unknown11 > ApplyPalette, Unknown13 > Toggle, SetVolume (new), Unknown16 (new)
  * v2.0, 210309
  * [ADD] ToString for Block and Chunk

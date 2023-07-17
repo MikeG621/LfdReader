@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.2+
+ * Version: 2.3
  */
 
 /* CHANGE LOG
+ * v2.3, 230716
  * [NEW] IndexRotator
  * v1.2, 160712
  * [ADD] _isModified edits
@@ -32,8 +33,8 @@ namespace Idmr.LfdReader
     ///   /* 0x00 */ byte StartIndex;
     ///   /* 0x01 */ byte EndIndex;
     ///   /* 0x02 */ PlttColor[EndIndex - StartIndex + 1];
-    ///				 byte ModifierCount;
-    ///				 LoadModifier[ModifierCount]
+    ///				 byte RotatorCount;
+    ///				 IndexRotator[RotatorCount]
     /// }
     /// 
     /// PlttColor
@@ -43,9 +44,9 @@ namespace Idmr.LfdReader
     ///   /* 0x02 */ byte Blue;
     /// }
     /// 
-    /// LoadModifer
+    /// IndexRotator
     /// {
-    ///   /* 0x00 */ short CheckValue?
+    ///   /* 0x00 */ short FrameDivider
     ///   /* 0x02 */ byte StartIndex
     ///   /* 0x03 */ byte EndIndex
     /// }
@@ -57,7 +58,7 @@ namespace Idmr.LfdReader
     /// ColorIndexes in reality are called from the working palette, not from the individual Pltts.</para>
     /// <para>The Color values are simply RGB values ranging from <b>0x00-0xFF</b>.</para>
     /// <para>The typical values for the beginning range appear to be the standard 16 colors for <b>0x00-0x0F</b>, with greyscale values for <b>0x10-0x1F</b> as defined in EMPIRE.LFD:PLTTstandard.</para>
-    /// <para>The <see cref="IndexRotator"/> is a rarely used functionality that cycles the defined color range at a given frequency. The <see cref="IndexRotator.FrameDivider"/> is such that (0x1333 / <i>FrameDivider</i> = n), where the cycle increments every "nth" frame.The indexes wrap around, so a starting range of {1 2 3} goes to {2 3 1}, {3 1 2}, then back to {1 2 3}. The Index values naturally define the range. Right now the only known use is in CITY.LFD, it's visible as the blinking red aerial indicators and the yellow twinkling window lights.</para></example>
+    /// <para>The <see cref="IndexRotator"/> is a rarely used functionality that cycles the defined color range at a given frequency. The <see cref="IndexRotator.FrameDivider"/> is such that (0x1333 / <i>FrameDivider</i> = n), where the cycle increments every "nth" frame.The indexes wrap around, so a starting range of {1 2 3} goes to {2 3 1}, {3 1 2}, then back to {1 2 3}. The Index values define the range. Right now the only known use is in CITY.LFD, it's visible as the blinking red aerial indicators and the yellow twinkling window lights.</para></example>
 
     public partial class Pltt : Resource
 	{
@@ -126,12 +127,14 @@ namespace Idmr.LfdReader
 				_rotators = new IndexRotator[RotatorCount];
 				for (int i = 0; i < _rotators.Length; i++)
 				{
-					_rotators[i] = new IndexRotator();
-					_rotators[i].FrameDivider = BitConverter.ToInt16(_rawData, offset);
-					offset += 2;
-					_rotators[i].StartIndex = _rawData[offset++];
-					_rotators[i].EndIndex = _rawData[offset++];
-					_rotators[i].initializeColors(this);
+                    _rotators[i] = new IndexRotator
+                    {
+                        FrameDivider = BitConverter.ToInt16(_rawData, offset++),
+                        StartIndex = _rawData[++offset],
+                        EndIndex = _rawData[++offset]
+                    };
+                    _rotators[i].initializeColors(this);
+					offset++;
 				}
 			}
 			else _rotators = null;
