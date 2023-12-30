@@ -10,6 +10,8 @@ Library for editing LucasArts *.LFD resource files.
 =========
 Version History
 
+ - (PANL) Fixed processing the FC Opcode to properly modify the ColorIndex
+
 v2.3, 16 Jul 2023
  - (FILM) Chunk Opcodes added or renamed:
    - SetColorRange = 0x10, new for VIEW

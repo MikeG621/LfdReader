@@ -1,13 +1,14 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2023 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.1
+ * Version: 1.1+
  */
 
 /* CHANGE LOG
+ * [FIX] Fixed the FC opcode
  * v1.1, 141215
  * [UPD] changed license to MPL
  * v1.0
@@ -71,10 +72,9 @@ namespace Idmr.LfdReader
 	/// <h4>-- OpCode --</h4>
 	/// <para>The <i>Operations</i> array contains the information for a full row of pixels, starting from the top left.
 	/// The OpCodes in the Panl resource are all different forms of repeat codes.
-	/// Type 1 and Type 2 are effectively the same thing, except the value order is reversed, I don't know why.
-	/// I learned to stop questioning why they did things like this, I just shake my head and move on. <see cref="EncodeResource"/> does not use Type 2.<br/>
-	/// The important thing about <i>NumberOfRepeats</i> is that it is zero-indexed (hence <u>Repeats</u> instead of <u>Pixels</u>).
-	/// A value of <b>0x00</b> means the pixel occurs once, <b>0x01</b> is twice, etc.</para>
+	/// The important thing about <i>NumberOfRepeats</i> is that it is zero-indexed (hence <u>Repeats</u> instead of <u>Pixels</u>). A value of <b>0x00</b> means the pixel occurs once, <b>0x01</b> is twice, etc.<br/>
+	/// Type 1 is a simple repeat with no processing. The ColorIndex is used as-is, so <b>"03 50"</b> results in <b>"50 50 50 50"</b>.<br/>
+	/// Type 2 modifies the ColorIndex by adding <b>1</b> to every other pixel. So <b>"50 03"</b> results in <b>"50 51 50 51"</b>. This appears to be mostly in short bursts, helping around transitions. <see cref="EncodeResource"/> does not use Type 2.</para>
 	/// <para>For the Type 3 or Short code, it has a fixed Shift value of <b>0x02</b> (Shift is used primarily for the *.ACT/XACT and *.DAT image formats). What this means is that <i>Value</i> combines the <i>NumberOfRepeats</i> and <i>ColorIndex</i> values into a single byte using two bits for <i>NumberOfRepeats</i> and the remaining six for the <i>ColorIndex</i>.<br/>
 	/// <code>
 	/// Value = 0x93;	// b10010011
@@ -82,7 +82,7 @@ namespace Idmr.LfdReader
 	/// NumberOfRepeats = (Value &#038; 3);	// b00000011
 	/// ColorIndex = (Value >> 2);	// b00100100</code></para>
 	/// <para>Because of the Shift value, a <i>ColorIndex</i> of <b>0x3F</b> (b11111100) or higher cannot be used for Type 3 codes.
-	/// <b>0x3F</b> would cause false OpCodes to be detected while <b>0x40</b> and higher uses more than six bits.</para></example>
+	/// <b>0x3F</b> would cause false OpCodes to be detected while <b>0x40</b> and higher uses more than six bits. There are special cases in-game that applies an additional shift to <i>ColorIndex</i>, which is how the shield arcs change color.</para></example>
 	public partial class Panl : Resource
 	{
 		ColorPalette _palette = null;
@@ -181,6 +181,7 @@ namespace Idmr.LfdReader
 				}
 				else
 				{
+					if (rawData[i] == 0xFB) System.Diagnostics.Debug.WriteLine("OpCode FB detected!");
 					width += (short)((rawData[i] & 3) + 1);
 					i++;
 				}
@@ -224,12 +225,13 @@ namespace Idmr.LfdReader
 					}
 					else if (rawData[pos] == 0xFC)
 					{
-						for (int i=0; i<=rawData[pos+2]; i++, px++) pi.PixelData[px] = rawData[pos+1];
+						for (int i=0; i<=rawData[pos+2]; i++, px++) pi.PixelData[px] = (byte)(rawData[pos+1] + (i % 2 == 1 ? 1 : 0));
 						x += rawData[pos+2] + 1;
 						pos += 2;
 					}
 					else
 					{
+						if (rawData[pos] == 0xFB) System.Diagnostics.Debug.WriteLine("OpCode FB detected!");
 						byte p = (byte)(rawData[pos] >> 2);
 						for (int i=0; i<=(rawData[pos]&3); i++, px++) pi.PixelData[px] = p;
 						x += (rawData[pos] & 3) + 1;

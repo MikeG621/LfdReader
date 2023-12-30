@@ -53,8 +53,8 @@ namespace Idmr.LfdReader
 				set
 				{
 					if (!_parent._isPnl) index = 0;
-					if (value.Width > Panl.MaximumWidth) throw new BoundaryException("image.Width", Panl.MaximumWidth + "px max");
-					if (value.Height > Panl.MaximumHeight) throw new BoundaryException("image.Height", Panl.MaximumHeight + "px max");
+					if (value.Width > MaximumWidth) throw new BoundaryException("image.Width", MaximumWidth + "px max");
+					if (value.Height > MaximumHeight) throw new BoundaryException("image.Height", MaximumHeight + "px max");
 					Bitmap temp = _items[index];
 					try { _items[index] = GraphicsFunctions.ConvertTo8bpp(value, _parent._palette); }
 					catch (Exception x) { _items[index] = temp; throw x; }

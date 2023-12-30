@@ -99,7 +99,7 @@ namespace Idmr.LfdReader
 		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Mask(FileStream stream, long filePosition, short width, short height)
 		{
-			if (width > Panl.MaximumWidth || height > Panl.MaximumHeight) throw new Common.BoundaryException("dimensions", Panl.MaximumWidth + "x" + Panl.MaximumHeight);
+			if (width > Panl.MaximumWidth || height > Panl.MaximumHeight) throw new BoundaryException("dimensions", Panl.MaximumWidth + "x" + Panl.MaximumHeight);
 			Width = width;
 			Height = height;
 			read(stream, filePosition);
@@ -113,7 +113,7 @@ namespace Idmr.LfdReader
 		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Mask(string path, long filePosition, short width, short height)
 		{
-			if (width > Panl.MaximumWidth || height > Panl.MaximumHeight) throw new Common.BoundaryException("dimensions", Panl.MaximumWidth + "x" + Panl.MaximumHeight);
+			if (width > Panl.MaximumWidth || height > Panl.MaximumHeight) throw new BoundaryException("dimensions", Panl.MaximumWidth + "x" + Panl.MaximumHeight);
 			Width = width;
 			Height = height;
 			FileStream stream = File.OpenRead(path);
@@ -128,7 +128,7 @@ namespace Idmr.LfdReader
 		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Mask(FileStream stream, long filePosition, Size dimensions)
 		{
-			if (dimensions.Width > Panl.MaximumWidth || dimensions.Height > Panl.MaximumHeight) throw new Common.BoundaryException("dimensions", Panl.MaximumWidth + "x" + Panl.MaximumHeight);
+			if (dimensions.Width > Panl.MaximumWidth || dimensions.Height > Panl.MaximumHeight) throw new BoundaryException("dimensions", Panl.MaximumWidth + "x" + Panl.MaximumHeight);
 			Width = (short)dimensions.Width;
 			Height = (short)dimensions.Height;
 			read(stream, filePosition);
@@ -141,7 +141,7 @@ namespace Idmr.LfdReader
 		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
 		public Mask(string path, long filePosition, Size dimensions)
 		{
-			if (dimensions.Width > Panl.MaximumWidth || dimensions.Height > Panl.MaximumHeight) throw new Common.BoundaryException("dimensions", Panl.MaximumWidth + "x" + Panl.MaximumHeight);
+			if (dimensions.Width > Panl.MaximumWidth || dimensions.Height > Panl.MaximumHeight) throw new BoundaryException("dimensions", Panl.MaximumWidth + "x" + Panl.MaximumHeight);
 			Width = (short)dimensions.Width;
 			Height = (short)dimensions.Height;
 			FileStream stream = File.OpenRead(path);
