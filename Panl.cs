@@ -82,7 +82,9 @@ namespace Idmr.LfdReader
 	/// NumberOfRepeats = (Value &#038; 3);	// b00000011
 	/// ColorIndex = (Value >> 2);	// b00100100</code></para>
 	/// <para>Because of the Shift value, a <i>ColorIndex</i> of <b>0x3F</b> (b11111100) or higher cannot be used for Type 3 codes.
-	/// <b>0x3F</b> would cause false OpCodes to be detected while <b>0x40</b> and higher uses more than six bits. There are special cases in-game that applies an additional shift to <i>ColorIndex</i>, which is how the shield arcs change color.</para></example>
+	/// <b>0x3F</b> would cause false OpCodes to be detected while <b>0x40</b> and higher uses more than six bits. There are special cases in-game that applies an additional shift to <i>ColorIndex</i>, which is how the shield arcs change color.</para>
+	/// <para><b>Special note:</b> There is also a <b>FB</b> OpCode, which applies an offset to the ColorIndex. This is the same as the .ACT image format, however I haven't found it being used in PANLs.
+	/// Due to how PANL is implemented in TIE95, </para></example>
 	public partial class Panl : Resource
 	{
 		ColorPalette _palette = null;
@@ -181,7 +183,6 @@ namespace Idmr.LfdReader
 				}
 				else
 				{
-					if (rawData[i] == 0xFB) System.Diagnostics.Debug.WriteLine("OpCode FB detected!");
 					width += (short)((rawData[i] & 3) + 1);
 					i++;
 				}
@@ -251,7 +252,7 @@ namespace Idmr.LfdReader
 		/// <param name="raw">Raw byte data.</param>
 		/// <param name="containsHeader">Whether or not <paramref name="raw"/> contains the resource Header information.</param>
 		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> from the LFD is not <see cref="Resource.ResourceType.Panl"/>.</exception>
-		/// <remarks>If resource was created from a *.PNL file, <i>containsHeader</i> is ignored.</remarks>
+		/// <remarks>If resource was created from a *.PNL file, <paramref name="containsHeader"/> is ignored.</remarks>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
 			if (!_isPnl)
@@ -328,10 +329,10 @@ namespace Idmr.LfdReader
 
 		#region public properties
 		/// <summary>Gets the indexer for the images.</summary>
-		public ImageIndexer Images { get { return _imageIndexer; } }
-		
+		public ImageIndexer Images => _imageIndexer;
+
 		/// <summary>Gets the number of images contained within the resource.</summary>
-		public int NumberOfImages { get { return _images.Length; } }
+		public int NumberOfImages => _images.Length;
 
 		/// <summary>Maximum allowable image width.</summary>
 		/// <remarks>Value is <b>640</b>.</remarks>

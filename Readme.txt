@@ -10,6 +10,8 @@ Library for editing LucasArts *.LFD resource files.
 =========
 Version History
 
+ - (MASK) Fixed the Height calculation
+ - (MASK) Fixed the 00 processing and corner cases
  - (PANL) Fixed processing the FC Opcode to properly modify the ColorIndex
 
 v2.3, 16 Jul 2023

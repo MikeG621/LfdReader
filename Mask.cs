@@ -1,13 +1,15 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2023 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.2
+ * Version: 1.2+
  */
 
 /* CHANGE LOG
+ * [FIX] Height calculation
+ * [FIX] Fixed the 00 processing and corner cases
  * v1.2, 160712
  * [ADD] _isModified edits
  * v1.1, 141215
@@ -51,15 +53,15 @@ namespace Idmr.LfdReader
 	/// Quickly iterating through <i>Rows</i> using the width value until the end of RawData or until a Row starts with <b>0x00</b> will determine the height.
 	/// Of course, if you know the dimensions beforehand, that would be for the best and is almost definitely how the program operates.</para>
 	/// <para>The <i>FirstColor</i> for the Row is a marker that defines the starting color.
-	/// After that point, it simple alternates solid/transparent <i>Lengths</i> until it reaches the end of the Row.
+	/// After that point, it simplly alternates solid/transparent <i>Lengths</i> until it reaches the end of the Row.
 	/// The <i>Lengths</i> values are one-indexed, so a value of <b>0x01</b> is one pixel.
 	/// For values larger than <b>0xFF</b>, <b>0x00</b> is used as 256 pixels and must be followed by a "closing" value, as it will not switch pixel states.<br/>
 	/// For example, a row of <c>0xFF 0x00 0x0C 0x0A 0x00 0x6A</c> starts solid with 268 pixels (256 + 12), followed by 10 transparent pixels and 362 solid pixels (256 + 106).
-	/// To make a row over 512 pixels, simply repeat the <b>0x00</b> value.
-	/// So a full-length 640-pixel solid row would be <c>0xFF 0x00 0x00 0x80</c>.</para>
-	/// <para>Because the closing value is required, lengths of 256 or 512 pixels cannot be used in a row.
-	/// The exception to this rule is at the end of the row, where the closing pixel would be off the screen.
-	/// In this case there's a "throw-away" pixel, usually <b>0x01</b>, so the <i>Row</i> actually defines 641 pixels instead of 640.
+	/// To make a length over 512 pixels, simply repeat the <b>0x00</b> value.</para>
+	/// <para>Lengths of exactly 256 or 512 are more complicated. Both are <c>00 00</c>, so the first one is 256, but the second may or may not be the closing value.
+	/// If a second 256 would overflow the width, then it's a closing pixel for a total of 256, and the pixel state switches. Both <c>FF 40 00 00</c> and <c>FF 11 00 00 0F</c> are 256 lengths.<br/>
+	/// In <c>FF 00 80 00 01</c> both are 256, but the second one requires an extra value to close it. The resulting width is 641, but will be trimmed.<br/>
+	/// For lines of 512, it will always require a closing value and can really only exist at the end of the row so the excess will be trimmed; <c>FF 80 00 00 01</c>.
 	/// One of the Gunbboat views does this and TIEEdit does not account for it properly and displays the view corrupted.</para></example>
 	public class Mask : Resource
 	{
@@ -166,21 +168,39 @@ namespace Idmr.LfdReader
 			_decodeResource(raw, containsHeader);
 			if (_type != ResourceType.Mask) throw new ArgumentException("Raw header is not for a Mask resource");
 			if (Width == 0)
-				for (int i = 1; ; i++)	// get mask width
+				for (int i = 1; ; i++)  // get mask width
 				{
-					// TODO: check all MASK resources, check size
 					if (_rawData[i] == 0) Width += 0x100;
-					else if (_rawData[i] == _rawData[0]) break;	// TODO: currently assumes there's no 1px or 255px lengths in the top row, try to account for it
+					else if (_rawData[i] == _rawData[0] || _rawData[i] == 0xFF) break;  // TODO: currently assumes there's no 1px or 255px lengths in the top row, try to account for it
 					else Width += _rawData[i];
 				}
 			int pos = 0, x, y;
 			if (Height == 0)
-				for (Height = 0; pos < _rawData.Length; Height++)	// get mask height
+				for (Height = 0; pos < _rawData.Length - 2; Height++)   // get mask height
 				{
-					if (_rawData[pos] == 0) break;
+					if (_rawData[pos++] == 0) break;
 					for (x = 0; x < Width; pos++)
 					{
-						if (_rawData[pos] == 0) { x += 0x100; if (x == Width) pos++; }	// won't end on 00, so there's an extra pixel
+						if (_rawData[pos] == 0)
+						{
+							bool closed = false;
+							// this is annoying...
+							// first 00 counts as 256, next one is conditional
+							x += 0x100;
+							if (_rawData[pos + 1] == 0)
+							{
+								// for small Widths, 00 00 will be 256 and the 2nd 00 closes it
+								// for larger Widths, 00 00 can be 512 and remain open
+								if (x + 0x100 <= Width) x += 0x100;
+								else closed = true;
+								pos++;
+								if (x == Width && !closed) pos++; // this gets the ending 512 case, need to close it
+							}
+							else if (x == Width) pos++;	// this gets the ending 256 case, close it
+							// rows ending with a line of 256 or 512 need a bonus value since it's open
+							// if it ends as 00 00, should be taken care of above where the second 00 is really a bonus pixel
+							// else if it ends as 00 01, skip the bonus pixel
+						}
 						else x += _rawData[pos];
 					}
 				}
@@ -197,8 +217,21 @@ namespace Idmr.LfdReader
 				int w = bd.Stride * y;
 				for (x = 0; x < Width; pos++)
 				{
-					if (_rawData[pos] == 0) { len += 0x100; continue; }
-					len += _rawData[pos];
+					if (_rawData[pos] == 0)
+					{
+						bool closed = false;
+						len += 0x100;
+						if (_rawData[pos + 1] == 0)
+						{
+							if (x + len + 0x100 <= Width) len += 0x100;
+							else closed = true;
+							pos++;
+						}
+						else if (x + len == Width) { pos++; closed = true; }
+						if (x + len < Width && !closed) continue;
+						else if (x + len == Width && !closed) pos++;
+					}
+					else len += _rawData[pos];
 					if (draw)
 					{
 						for (int x0 = x; x < x0 + len - 1; x++) pixels[w + x / 8] |= (byte)(0x80 >> (x & 7));
@@ -321,10 +354,10 @@ namespace Idmr.LfdReader
 			catch (Exception x) { _image = temp; throw x; }
 		}
 		#endregion public methods
-		
+
 		#region public properties
 		/// <summary>Gets the monochrome mask image.</summary>
-		public Bitmap Image { get { return _image; } }
+		public Bitmap Image => _image;
 		/// <summary>Gets the width of the Mask image.</summary>
 		public short Width { get; internal set; }
 		/// <summary>Gets the height of the Mask image.</summary>
