@@ -94,7 +94,7 @@ namespace Idmr.LfdReader
 			Gmid = 0x44494D47,
 			/// <summary>Cockpit transparency.</summary>
 			Mask = 0x4B53414D,
-			/// <summary>Has something to do with flight mechanics?</summary>
+			/// <summary>Transform data to display OPTs when not in-flight.</summary>
 			Mtrx = 0x5852544D,
 			/// <summary>Cockpit component images.</summary>
 			Panl = 0x4C4E4150,

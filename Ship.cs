@@ -210,16 +210,22 @@ namespace Idmr.LfdReader
 			/// <summary>Rotating beam emitter</summary>
 			RotCommandBeam,
 			/// <summary>Unused</summary>
+			/// <remarks>Hatch</remarks>
 			Custom1,
 			/// <summary>Unused</summary>
+			/// <remarks>Custom</remarks>
 			Custom2,
 			/// <summary>Unused</summary>
+			/// <remarks>WeapSys1</remarks>
 			Custom3,
 			/// <summary>Unused</summary>
+			/// <remarks>WeapSys2</remarks>
 			Custom4,
 			/// <summary>Unused</summary>
+			/// <remarks>PowerReg</remarks>
 			Custom5,
 			/// <summary>Unused</summary>
+			/// <remarks>Reactor</remarks>
 			Custom6
 		}
 
