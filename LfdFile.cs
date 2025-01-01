@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.0
+ * Version: 2.0+
  */
 
 /* CHANGE LOG
+ * [ADD] Enabled Mtrx
  * v2.0, 210309
  * [UPD] cleanup
  * [ADD] Cplx, Crft, Ship to assignResource
@@ -223,7 +224,7 @@ namespace Idmr.LfdReader
 			else if (type == Resource.ResourceType.Font) Resources[index] = new Font(stream, offset);
 			//TODO: else if (type == Resource.ResourceType.Gmid) Resources[index] = new Gmid(stream, offset);
 			else if (type == Resource.ResourceType.Mask) Resources[index] = new Mask(stream, offset);
-			//TODO: else if (type == Resource.ResourceType.Mtrx) Resources[index] = new Mtrx(stream, offset);
+			else if (type == Resource.ResourceType.Mtrx) Resources[index] = new Mtrx(stream, offset);
 			else if (type == Resource.ResourceType.Panl) Resources[index] = new Panl(stream, offset);
 			else if (type == Resource.ResourceType.Pltt) Resources[index] = new Pltt(stream, offset);
 			//TODO: else if (type == Resource.ResourceType.Rlnd) Resources[index] = new Rlnd(stream, offset);

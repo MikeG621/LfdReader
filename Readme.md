@@ -22,6 +22,7 @@ Library for editing LucasArts *.LFD resource files.
 - (MASK) Fixed the Height calculation
 - (MASK) Fixed the 00 processing and corner cases
 - (PANL) Fixed processing the FC Opcode to properly modify the ColorIndex
+- (MTRX) Enabled, though still don't know how to use most of the data.
 
 ### Additional Information
 
