@@ -1,6 +1,6 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2025 Michael Gaisser (mjgaisser@gmail.com)
  * 
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the Mozilla Public License; either version 2.0 of the
@@ -13,10 +13,11 @@
  * If a copy of the MPL (MPL.txt) was not distributed with this file,
  * you can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Version: 2.0
+ * Version: 2.0+
  */
 
 /* CHANGE LOG
+ * [ADD] Dirty()
  * v2.0, 210309
  * [ADD] Adlb, Btmp, Crft, Cplx, Rlnd, and Ship to ResourceType
  * [UPD] cleanup
@@ -94,7 +95,7 @@ namespace Idmr.LfdReader
 			Gmid = 0x44494D47,
 			/// <summary>Cockpit transparency.</summary>
 			Mask = 0x4B53414D,
-			/// <summary>Transform data to display OPTs when not in-flight.</summary>
+			/// <summary>Replay data to display OPTs when not in-flight.</summary>
 			Mtrx = 0x5852544D,
 			/// <summary>Cockpit component images.</summary>
 			Panl = 0x4C4E4150,
@@ -149,7 +150,11 @@ namespace Idmr.LfdReader
 		{
 			_decodeResource(raw, containsHeader);
 		}
-		
+
+		/// <summary>Marks the resource as modified.</summary>
+		/// <remarks>To be used when making modifications that otherwise aren't detected, such as values of a simple array.</remarks>
+		public void Dirty() => _isModifed = true;
+
 		/// <summary>Prepares the resource for writing and updates <see cref="RawData"/>.</summary>
 		/// <remarks>For generic Resources, does nothing as <see cref="RawData"/> is the only property.</remarks>
 		public virtual void EncodeResource()
@@ -269,17 +274,14 @@ namespace Idmr.LfdReader
 
 		/// <summary>Gets a representative string of the Resource.</summary>
 		/// <returns>Resource in the format <see cref="Type">TYPE</see> <see cref="Name"/>.</returns>
-		public override string ToString()
-		{
-			return _type.ToString().ToUpper() + _name;
-		}
+		public override string ToString() => _type.ToString().ToUpper() + _name;
 		#endregion
-		
+
 		#region public properties
 		/// <summary>Gets the full path to the LFD file.</summary>
-		public string FileName { get { return _fileName; } }
+		public string FileName => _fileName;
 		/// <summary>Gets the offset of the beginning of the Resource.</summary>
-		public long Offset { get { return _offset; } }
+		public long Offset => _offset;
 		/// <summary>Gets or sets the name of the Resource.</summary>
 		/// <remarks>Truncated to 8 characters, null characters trimmed.</remarks>
 		public string Name
@@ -292,11 +294,11 @@ namespace Idmr.LfdReader
             }
 		}
 		/// <summary>Gets the length of the raw byte data, not including header.</summary>
-		public int Length { get { return (_rawData != null ? _rawData.Length : 0); } }
+		public int Length => (_rawData != null ? _rawData.Length : 0);
 		/// <summary>Gets the Resource type.</summary>
-		public ResourceType Type { get { return _type; } }
+		public ResourceType Type => _type;
 		/// <summary>Gets a copy of the raw byte data.</summary>
-		public byte[] RawData { get { return (byte[])_rawData.Clone(); } }
+		public byte[] RawData => (byte[])_rawData.Clone();
 		/// <summary>Gets or sets the object that contains user-defined information.</summary>
 		public object Tag { get; set; }
 		
@@ -317,7 +319,7 @@ namespace Idmr.LfdReader
 		void read(FileStream stream, long filePosition)
 		{
 			try { _process(stream, filePosition); }
-			catch (Exception x) { throw new Common.LoadFileException(x); }
+			catch (Exception x) { throw new LoadFileException(x); }
 		}
 		
 		#region protected methods

@@ -18,7 +18,7 @@ using System.IO;
 namespace Idmr.LfdReader
 {
 	/// <summary>Object for "MTRX" OPT transforms.</summary>
-	/// <remarks>The Matrix resource controls the orientation of a craft OPT when not in-flight, namely the Training selection, Combat selection, and the Tech Room.</remarks>
+	/// <remarks>The Matrix resource contains the replay information for the orientation of a craft OPT when not in-flight, specifically the main screen demo in the Training and Combat chambers.</remarks>
 	/// <example><h4>Raw Data definition</h4>
 	/// <code>
 	/// RawData
