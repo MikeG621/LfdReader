@@ -267,7 +267,7 @@ namespace Idmr.LfdReader
 			catch
 			{
 				string typeText = ArrayFunctions.ReadStringFromArray(BitConverter.GetBytes(type), 0, 4);
-				System.Diagnostics.Debug.WriteLine("ResourceType Parse failure: " + typeText + "(0x" + type.ToString("X") + ")");
+				System.Diagnostics.Debug.WriteLine($"ResourceType Parse failure: {typeText}(0x{type:X})");
 				return ResourceType.Undefined;
 			}
 		}
@@ -286,12 +286,12 @@ namespace Idmr.LfdReader
 		/// <remarks>Truncated to 8 characters, null characters trimmed.</remarks>
 		public string Name
 		{
-			get { return _name; }
+			get => _name;
 			set
-            {
-                _name = StringFunctions.GetTrimmed(value, 8);
-                _isModifed = true;
-            }
+			{
+				_name = StringFunctions.GetTrimmed(value, 8);
+				_isModifed = true;
+			}
 		}
 		/// <summary>Gets the length of the raw byte data, not including header.</summary>
 		public int Length => (_rawData != null ? _rawData.Length : 0);
@@ -331,16 +331,15 @@ namespace Idmr.LfdReader
 		/// <remarks>To be used during individual Write functions. Looks for <paramref name="type"/> and <paramref name="name"/> within the Rmap if it exists, updates <paramref name="length"/>.</remarks>
 		protected static void _updateRmap(FileStream stream, ResourceType type, string name, int length)
 		{
-			if (GetType(stream, 0) == ResourceType.Rmap)
-			{
-				for (int i=1;i<=(GetLength(stream, 0)/HeaderLength);i++)
-					if ((GetType(stream, i*HeaderLength) == type) && (GetName(stream, i*HeaderLength) == name))
-					{
-						stream.Position = i*HeaderLength + LengthOffset;
-						new BinaryWriter(stream).Write(length);
-						break;
-					}
-			}
+			if (GetType(stream, 0) != ResourceType.Rmap) return;
+			
+			for (int i = 1; i <= (GetLength(stream, 0) / HeaderLength); i++)
+				if ((GetType(stream, i * HeaderLength) == type) && (GetName(stream, i * HeaderLength) == name))
+				{
+					stream.Position = i * HeaderLength + LengthOffset;
+					new BinaryWriter(stream).Write(length);
+					break;
+				}
 		}
 
 		/// <summary>Processes the LFD and initializes the object.</summary>

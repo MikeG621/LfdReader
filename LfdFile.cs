@@ -1,6 +1,6 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2025 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
@@ -75,6 +75,7 @@ namespace Idmr.LfdReader
 		public void CreateRmap()
 		{
 			if (_lfdCategory == LfdCategory.Cockpit) throw new ArgumentException(_cockpitRmapErrorMessage);
+
 			string name = null;
 			if (_rmp != null) name = _rmp.Name;
 			encodeResources();
@@ -133,7 +134,7 @@ namespace Idmr.LfdReader
 			catch (Exception x)
 			{
 				System.Diagnostics.Debug.WriteLine("Write failure");
-				if (stream != null) stream.Close();
+				stream?.Close();
 				if (File.Exists(_tempPath)) File.Copy(_tempPath, FilePath);	// restore backup if it exists
 				File.Delete(_tempPath);	// delete backup if it exists
 				throw new Common.SaveFileException(x);
@@ -149,14 +150,14 @@ namespace Idmr.LfdReader
 		/// <summary>Gets the full path to the file.</summary>
 		public string FilePath { get; private set; } = "resource.lfd";
 		/// <summary>Gets the file name and extension of the file.</summary>
-		public string FileName { get { return Common.StringFunctions.GetFileName(FilePath); } }
+		public string FileName => Common.StringFunctions.GetFileName(FilePath);
 		/// <summary>Gets if <see cref="Rmap"/> is defined.</summary>
-		public bool HasRmap { get { return (_rmp != null); } }
+		public bool HasRmap => (_rmp != null);
 		/// <summary>Gets or sets the Rmap resource for the file.</summary>
 		/// <exception cref="ArgumentException">Cannot set if file is defined by the <see cref="LfdCategory.Cockpit"/> preset.</exception>
 		public Rmap Rmap
 		{
-			get { return _rmp; }
+			get => _rmp;
 			set
 			{
 				if (_lfdCategory == LfdCategory.Cockpit) throw new ArgumentException(_cockpitRmapErrorMessage);
@@ -164,26 +165,20 @@ namespace Idmr.LfdReader
 			}
 		}
 		#endregion public properties
-		
+
 		#region private methods
 		/// <summary>Loops through Resources and calls the individual EncodeResource() functions.</summary>
-		void encodeResources()
-		{
-			for (int i = 0; i < Resources.Count; i++) if (Resources[i]._isModifed) Resources[i].EncodeResource();
-		}
+		void encodeResources() { for (int i = 0; i < Resources.Count; i++) if (Resources[i]._isModifed) Resources[i].EncodeResource(); }
 
 		void read(FileStream stream)
 		{
 			FilePath = stream.Name;
-			//System.Diagnostics.Debug.WriteLine("Creating " + FileName);
 			if (Resource.GetType(stream, 0) == Resource.ResourceType.Rmap)
 			{
 				_rmp = new Rmap(stream);
-				//System.Diagnostics.Debug.WriteLine("Rmap created");
 				Resources = new ResourceCollection(_rmp.NumberOfHeaders);
 				for (int i = 0; i < Resources.Count; i++)
 				{
-					//System.Diagnostics.Debug.WriteLine("Create " + _rmp.SubHeaders[i].Type.ToString() + " " + _rmp.SubHeaders[i].Name + " (" + (i+1) + "/" + _rmp.NumberOfHeaders + ")");
 					assignResource(i, _rmp.SubHeaders[i].Type, stream, _rmp.SubHeaders[i].Offset);
 				}
 				if (Resources.Count == 2 && Resources[0].Name.StartsWith("battle") && Resources[1].Name.EndsWith("gal"))
@@ -191,7 +186,6 @@ namespace Idmr.LfdReader
 			}
 			else if (Resource.GetType(stream, 0) == Resource.ResourceType.Panl)
 			{
-				//System.Diagnostics.Debug.WriteLine("cockpit LFD");
 				_lfdCategory = LfdCategory.Cockpit;
 				Resources = new ResourceCollection(3)
 				{
@@ -204,7 +198,6 @@ namespace Idmr.LfdReader
 			{
 				Resources = new ResourceCollection(1);
 				assignResource(0, Resource.GetType(stream, 0), stream, 0);
-				//System.Diagnostics.Debug.WriteLine("Solo resource " + _resources[0].Type + " " + _resources[0].Name);
 			}
 		}
 
