@@ -1,13 +1,14 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2023 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2025 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.2+
+ * Version: 2.4
  */
 
 /* CHANGE LOG
+ * v2.4, 250202
  * [FIX] Height calculation
  * [FIX] Fixed the 00 processing and corner cases
  * v1.2, 160712
