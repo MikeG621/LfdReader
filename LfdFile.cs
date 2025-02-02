@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.0+
+ * Version: 2.4
  */
 
 /* CHANGE LOG
+ * v2.4, 250202
  * [ADD] Enabled Mtrx
  * v2.0, 210309
  * [UPD] cleanup
@@ -31,7 +32,7 @@ namespace Idmr.LfdReader
 		Rmap _rmp = null;
 		static readonly string _cockpitRmapErrorMessage = "Cockpit LFDs do not contain RMAPs";
 
-		string _tempPath { get { return FilePath + ".tmp"; } }
+		string _tempPath => FilePath + ".tmp";
 		LfdCategory _lfdCategory = LfdCategory.Normal;
 
 		/// <summary>Preset Lfd structures.</summary>
@@ -168,7 +169,7 @@ namespace Idmr.LfdReader
 
 		#region private methods
 		/// <summary>Loops through Resources and calls the individual EncodeResource() functions.</summary>
-		void encodeResources() { for (int i = 0; i < Resources.Count; i++) if (Resources[i]._isModifed) Resources[i].EncodeResource(); }
+		void encodeResources() { for (int i = 0; i < Resources.Count; i++) if (Resources[i]._isModified) Resources[i].EncodeResource(); }
 
 		void read(FileStream stream)
 		{
@@ -178,9 +179,7 @@ namespace Idmr.LfdReader
 				_rmp = new Rmap(stream);
 				Resources = new ResourceCollection(_rmp.NumberOfHeaders);
 				for (int i = 0; i < Resources.Count; i++)
-				{
 					assignResource(i, _rmp.SubHeaders[i].Type, stream, _rmp.SubHeaders[i].Offset);
-				}
 				if (Resources.Count == 2 && Resources[0].Name.StartsWith("battle") && Resources[1].Name.EndsWith("gal"))
 					_lfdCategory = LfdCategory.Battle;
 			}
@@ -235,7 +234,7 @@ namespace Idmr.LfdReader
             get
             {
                 for (int i = 0; i < Resources.Count; i++)
-                    if (Resources[i]._isModifed) return true;
+                    if (Resources[i]._isModified) return true;
 
                 return false;
             }

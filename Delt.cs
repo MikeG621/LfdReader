@@ -366,7 +366,7 @@ namespace Idmr.LfdReader
 				if (value < 0 || value >= (MaximumWidth - _image.Width)) throw new BoundaryException("Left", "0-" + (MaximumWidth-_image.Width));
 				_left = value;
 				_right = (short)(Left + _image.Width - 1);
-                _isModifed = true;
+                _isModified = true;
 			}
 		}
 
@@ -382,7 +382,7 @@ namespace Idmr.LfdReader
 				if (value < 0 || value >= (MaximumHeight - _image.Width)) throw new BoundaryException("Top", "0-" + (MaximumHeight-_image.Width));
 				_top = value;
 				_bottom = (short)(Top + _image.Height - 1);
-                _isModifed = true;
+                _isModified = true;
 			}
 		}
 		
@@ -414,7 +414,7 @@ namespace Idmr.LfdReader
 				catch (Exception x) { _image = temp; throw new ArgumentException("Could not convert image to 8bpp", "Image", x); }
 				_right = (short)(Left + _image.Width - 1);
 				_bottom = (short)(Top + _image.Height - 1);
-                _isModifed = true;
+                _isModified = true;
 			}
 		}
 

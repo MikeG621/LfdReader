@@ -13,10 +13,11 @@
  * If a copy of the MPL (MPL.txt) was not distributed with this file,
  * you can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Version: 2.0+
+ * Version: 2.4
  */
 
 /* CHANGE LOG
+ * v2.4, 250202
  * [ADD] Dirty()
  * v2.0, 210309
  * [ADD] Adlb, Btmp, Crft, Cplx, Rlnd, and Ship to ResourceType
@@ -62,7 +63,7 @@ namespace Idmr.LfdReader
 		/// <summary>Resource raw byte data.</summary>
 		protected byte[] _rawData = null;
         /// <summary>Flag to denote if resource must be encoded before writing.</summary>
-        internal bool _isModifed = false;
+        internal bool _isModified = false;
 
 		/// <summary>Enumeration of all known LFD Resource Types.</summary>
 		/// <remarks>Values are simply taken from the raw data (<b>int</b> or 4-byte ASCII <b>string</b>).</remarks>
@@ -153,7 +154,7 @@ namespace Idmr.LfdReader
 
 		/// <summary>Marks the resource as modified.</summary>
 		/// <remarks>To be used when making modifications that otherwise aren't detected, such as values of a simple array.</remarks>
-		public void Dirty() => _isModifed = true;
+		public void Dirty() => _isModified = true;
 
 		/// <summary>Prepares the resource for writing and updates <see cref="RawData"/>.</summary>
 		/// <remarks>For generic Resources, does nothing as <see cref="RawData"/> is the only property.</remarks>
@@ -290,7 +291,7 @@ namespace Idmr.LfdReader
 			set
 			{
 				_name = StringFunctions.GetTrimmed(value, 8);
-				_isModifed = true;
+				_isModified = true;
 			}
 		}
 		/// <summary>Gets the length of the raw byte data, not including header.</summary>

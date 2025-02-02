@@ -53,7 +53,7 @@ namespace Idmr.LfdReader
 						throw new BoundaryException("Left", _parent._left + "-" + (_parent._left + _parent._width - Width));
 					_delt.Left = value;
 					_parent.recalculateDimensions();
-                    _parent._isModifed = true;
+                    _parent._isModified = true;
 				}
 			}
 			
@@ -70,7 +70,7 @@ namespace Idmr.LfdReader
 						throw new BoundaryException("Top", _parent._top + "-" + (_parent._top + _parent._height - Height));
 					_delt.Top = value;
 					_parent.recalculateDimensions();
-                    _parent._isModifed = true;
+                    _parent._isModified = true;
 				}
 			}
 			

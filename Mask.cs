@@ -349,7 +349,7 @@ namespace Idmr.LfdReader
 				_image.UnlockBits(bd1);
 				Width = (short)_image.Width;
 				Height = (short)_image.Height;
-                _isModifed = true;
+                _isModified = true;
 			}
 			catch (Exception x) { _image = temp; throw x; }
 		}

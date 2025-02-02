@@ -187,7 +187,7 @@ namespace Idmr.LfdReader
 				if (value < _startIndex) for (int i = value; i < _startIndex; i++) _entries[i] = Color.Black;
 				else for (int i = _startIndex; i < value; i++) _entries[i] = Color.Transparent;
 				_startIndex = value;
-                _isModifed = true;
+                _isModified = true;
 			}
 		}
 		/// <summary>Gets or sets the ending index of the color definitions.</summary>
@@ -203,7 +203,7 @@ namespace Idmr.LfdReader
 				if (value > _endIndex) for (int i = _endIndex + 1; i <= value; i++) _entries[i] = Color.Black;
 				else for (int i = value + 1; i <= _endIndex; i++) _entries[i] = Color.Transparent;
 				_endIndex = value;
-                _isModifed = true;
+                _isModified = true;
 			}
 		}
 		/// <summary>Gets the total number of colors defined in the resource.</summary>

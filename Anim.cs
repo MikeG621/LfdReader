@@ -213,7 +213,7 @@ namespace Idmr.LfdReader
 				short diff = (short)(value - _left);
 				for (int f = 0; f < NumberOfFrames; f++) _frames[f].Left += diff;
 				_left = value;
-                _isModifed = true;
+                _isModified = true;
 			}
 		}
 		/// <summary>Gets or sets the Top screen location of the resource.</summary>
@@ -229,7 +229,7 @@ namespace Idmr.LfdReader
 				short diff = (short)(value - _top);
 				for (int f = 0; f < NumberOfFrames; f++) _frames[f].Top += diff;
 				_top = value;
-                _isModifed = true;
+                _isModified = true;
 			}
 		}
 		/// <summary>Gets the maximum width occupied by the resource.</summary>

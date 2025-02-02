@@ -8,21 +8,12 @@ Author: [Michael Gaisser](mailto:mjgaisser@gmail.com)
 Library for editing LucasArts *.LFD resource files.
 
 ## Latest Release
-#### v2.3, 16 Jul 2023
-- (FILM) Chunk Opcodes added or renamed:
-  - SetColorRange = 0x10, new for VIEW
-  - Unknown11 is now ApplyPalette for VIEW
-  - Unknown13 is now Toggle for VOIC
-  - SetVolume = 0x15, new for VOIC
-  - Unknown16 = 0x16, new for VOIC
-    - Renames left originals in place as Depcrecated, not a breaking change.
-- (PLTT) Added the newly discovered IndexRotator as read only values, discussed in Issue #4.
-
-#### WIP
+#### v2.4, 02 Feb 2025
+- (Resource) Added Dirty() to allow manual setting of internal modified flag.
 - (MASK) Fixed the Height calculation
 - (MASK) Fixed the 00 processing and corner cases
 - (PANL) Fixed processing the FC Opcode to properly modify the ColorIndex
-- (MTRX) Enabled, though still don't know how to use most of the data.
+- (MTRX) Initial pass created. Full Frame details aren't broken out yet, though structure is prety much known.
 
 ### Additional Information
 
@@ -35,6 +26,16 @@ File structure information per resource is found in the individual class files.
 Programmer's reference can be found in the [help file](help/Idmr.LfdReader.chm).
 
 ### Version History
+#### v2.3, 16 Jul 2023
+- (FILM) Chunk Opcodes added or renamed:
+  - SetColorRange = 0x10, new for VIEW
+  - Unknown11 is now ApplyPalette for VIEW
+  - Unknown13 is now Toggle for VOIC
+  - SetVolume = 0x15, new for VOIC
+  - Unknown16 = 0x16, new for VOIC
+    - Renames left originals in place as Depcrecated, not a breaking change.
+- (PLTT) Added the newly discovered IndexRotator as read only values, discussed in Issue #4.
+ 
 #### v2.2, 01 Apr 2023
 - (CRFT, CPLX, SHIP) Added the IsTwoSided and IsGouraudShaded properties to Shape per discussion in Issue #3.
 - Minor XML updates
@@ -78,7 +79,7 @@ Programmer's reference can be found in the [help file](help/Idmr.LfdReader.chm).
 ---
 #### Copyright Information
 
-Copyright © 2009-2021 Michael Gaisser  
+Copyright © 2009-2025 Michael Gaisser  
 This library file and related files are licensed under the Mozilla Public License
 v2.0 or later.  See [License.txt](License.txt) for further details.
 

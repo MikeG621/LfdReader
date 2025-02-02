@@ -136,7 +136,7 @@ namespace Idmr.LfdReader
 				_strings = new string[value];
 				for (int i = 0; i < (value > _numberOfStrings ? _numberOfStrings : value); i++) _strings[i] = temp[i];
 				_numberOfStrings = value;
-                _isModifed = true;
+                _isModified = true;
 			} 
 		}
 		/// <summary>Gets or sets the strings contained within the resource.</summary>
@@ -147,7 +147,7 @@ namespace Idmr.LfdReader
             {
                 _numberOfStrings = (short)value.Length;
                 _strings = value;
-                _isModifed = true;
+                _isModified = true;
             }
 		}
 	}

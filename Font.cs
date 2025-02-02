@@ -247,7 +247,7 @@ namespace Idmr.LfdReader
 			{
 				if ((value % 8) != 0 || value <= 0) throw new ArgumentException("Value must be a positive multiple of 8", "value");
 				_bitsPerScanLine = value;
-                _isModifed = true;
+                _isModified = true;
 			}	// this is left as write-enabled to allow wider characters
 		}
 		/// <summary>Gets the total height of the font, also number of ScanLines.</summary>
@@ -260,7 +260,7 @@ namespace Idmr.LfdReader
             set
             {
                 _baseLine = value;
-                _isModifed = true;
+                _isModified = true;
             }
         }
 		#endregion public properties

@@ -97,7 +97,7 @@ namespace Idmr.LfdReader
 			set
             {
                 _act.Frames = value;
-                _isModifed = true;
+                _isModified = true;
             }
 		}
 
@@ -110,7 +110,7 @@ namespace Idmr.LfdReader
 			set
             {
                 _act.Center = value;
-                _isModifed = true;
+                _isModified = true;
             }
 		}
 		

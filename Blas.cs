@@ -254,7 +254,7 @@ namespace Idmr.LfdReader
 			{
 				if (value < 10000 || value > 12000) throw new ArgumentOutOfRangeException("value must be 10-12 kHz");
 				_frequency = value;
-                _isModifed = true;
+                _isModified = true;
 			}
 		}
 

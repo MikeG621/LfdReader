@@ -50,7 +50,7 @@ namespace Idmr.LfdReader
 					if (value.Height != _parent._height) throw new ArgumentException("New image not required height (" + _parent._height + "px)", "value");
 					if (value.Width > _parent._bitsPerScanLine) throw new BoundaryException("value.Width", _parent._bitsPerScanLine.ToString());
 					_items[index] = GraphicsFunctions.ConvertTo1bpp(value);
-					_parent._isModifed = true;
+					_parent._isModified = true;
 				}
 			}
 		}
