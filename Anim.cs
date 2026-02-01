@@ -1,13 +1,14 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2026 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.2
+ * Version: 1.2+
  */
 
 /* CHANGE LOG
+ * [UPD] FrameCollection ctors now use numFrames, blank ANIM still inits to 50
  * v1.2, 160712
  * [ADD] _isModified edits
  * [DEL] removed old code duplicating DELT data
@@ -56,10 +57,11 @@ namespace Idmr.LfdReader
 
 		#region constructors
 		/// <summary>Creates a blank resource.</summary>
+		/// <remarks><see cref="NumberOfFrames"/> is set to a limit of <b>50</b>.</remarks>
 		public Anim()
 		{
 			_type = ResourceType.Anim;
-			_frames = new FrameCollection(this);
+			_frames = new FrameCollection(this, 50);
 		}
 		/// <summary>Creates a new instance from an existing opened file with default 8bpp Palette.</summary>
 		/// <param name="stream">The opened LFD file.</param>
@@ -139,16 +141,22 @@ namespace Idmr.LfdReader
 		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Anim"/>.</exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
+#if DEBUG
+			System.Diagnostics.Debug.WriteLine("ANIM" + _name);
+#endif
 			_decodeResource(raw, containsHeader);
 			if (_type != ResourceType.Anim) throw new ArgumentException("Raw header is not for an Anim resource");
 			short numberOfFrames = BitConverter.ToInt16(_rawData, 0);
-			_frames = new FrameCollection(this);
+			_frames = new FrameCollection(this, numberOfFrames);
 			for (int i = 0; i < numberOfFrames; i++) _frames.Add(new Frame(this));
 			int frameLength;
 			int offset = 2;
 			for (int i = 0; i < NumberOfFrames; i++)
 			{
-                frameLength = BitConverter.ToInt32(_rawData, offset);
+#if DEBUG
+				System.Diagnostics.Debug.WriteLine("Frame " + i);
+#endif
+				frameLength = BitConverter.ToInt32(_rawData, offset);
 				byte[] delt = new byte[frameLength];
 				ArrayFunctions.TrimArray(_rawData, offset + 4, delt);
 				_frames[i]._delt.DecodeResource(delt, false);

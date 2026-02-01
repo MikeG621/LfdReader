@@ -1,13 +1,14 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2026 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.1
+ * Version: 1.1+
  */
 
 /* CHANGE LOG
+ * [UPD] ctor now takes numFrames, allowing high-frames like PLAYER:ANIMicons*
  * v1.1, 141215
  * [UPD] changed license to MPL
  * [NEW] implemented SetCount
@@ -23,17 +24,16 @@ namespace Idmr.LfdReader
 	public partial class Anim : Resource
 	{
 		/// <summary>Object to maintain Anim image <see cref="Frame">Frames</see>.</summary>
-		/// <remarks><see cref="ResizableCollection{T}.ItemLimit"/> is set to <b>50</b>.</remarks>
 		public class FrameCollection : ResizableCollection<Frame>
 		{
 			internal Anim _parent;
 			
 			#region constructors
 			/// <summary>Creates an empty Collection.</summary>
-			internal FrameCollection(Anim parent)
+			internal FrameCollection(Anim parent, short numFrames)
 			{
 				_parent = parent;
-				_itemLimit = 50;
+				_itemLimit = numFrames;
 				_items = new List<Frame>(_itemLimit);
 			}
 			#endregion constructors

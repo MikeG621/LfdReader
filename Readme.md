@@ -8,6 +8,11 @@ Author: [Michael Gaisser](mailto:mjgaisser@gmail.com)
 Library for editing LucasArts *.LFD resource files.
 
 ## Latest Release
+#### WIP
+- (DELT) DecodeImage now checks for negative width/height validation directly to avoid overhead of catching an Exception.
+- (DELT) Fixed DecodeImage not processing the final rows if there's skips/blanks.
+- (ANIM) FrameCollection now takes the number of frames as an argument.
+
 #### v2.4, 02 Feb 2025
 - (Resource) Added Dirty() to allow manual setting of internal modified flag.
 - (MASK) Fixed the Height calculation

@@ -1,13 +1,15 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2026 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.2
+ * Version: 1.2+
  */
 
 /* CHANGE LOG
+ * [FIX] direct width/height validation instead of using try/catch
+ * [FIX] final Row in DecodeImage wasn't processing all codes
  * v1.2, 160712
  * [ADD] _isModified edits
  * v1.1, 141215
@@ -62,7 +64,7 @@ namespace Idmr.LfdReader
 	/// <para>In the beginning of <see cref="Resource.RawData">RawData</see>, we have the four values that define the outline of the image data.
 	/// <see cref="Width"/> and <see cref="Height"/> are derived values that are the difference plus one (to get from zero-indexed to true size).</para>
 	/// <h4>-- Row --</h4>
-	/// <para>Rows read from the top down, left to right.
+	/// <para>Rows read from the top down, left to right, though technically the read algorithm used allows for Rows to be defined in any order. Pixels are always left to right.<br/>
 	/// The first value for a given row is <i>Length</i>, which gives the number of pixels defined in that row, which can be defined in two different ways.
 	/// If <i>Length</i> is even, then the entire set of row definitions are simply uncompressed indexed values (long read).
 	/// If <i>Length</i> is odd, then the <i>Operations</i> array and everything after this paragraph applies.
@@ -220,21 +222,28 @@ namespace Idmr.LfdReader
 		/// <returns>256-color indexed Bitmap with default palette, <see cref="ErrorImage"/> on error</returns>
 		public static Bitmap DecodeImage(short left, short top, short width, short height, byte[] rawData)
 		{
-			//System.Diagnostics.Debug.WriteLine("Image LTWH: " + left + ", " + top + ", " + width + ", " + height);
+#if DEBUG
+			System.Diagnostics.Debug.WriteLine("DELT Image LTWH: " + left + ", " + top + ", " + width + ", " + height);
+#endif
+			if (width < 1 || height < 1) return ErrorImage;	// EMPIRE:ANIMcursors known to have a bad frame, so skip the exception
+
 			try
 			{
 				int w = (width % 4 == 0 ? width : width + (4 - width % 4));	// w has to be a multiple of 4, round up
 				byte[] pixels = new byte[w * height];
-				for (int y = 0, pos = 0; y < height - 1; )
+				int pos = 0;
+				int rowCode = BitConverter.ToInt16(rawData, pos);
+				pos += 2;
+				while (rowCode != 0)	// instead of x/y check, this aligns with the in-game algorithim
 				{
-					int l = BitConverter.ToInt16(rawData, pos); pos += 2;		// row data value
-					bool compressed = Convert.ToBoolean(l % 2);	// get storage type
-					l >>= 1;		// number of pixels in row
-					if (l == 0) { l++; continue; }	// if we wind up at the end, try next row
+					bool compressed = Convert.ToBoolean(rowCode % 2);	// get storage type
+					int l = rowCode >> 1;        // length of pixels in row
 					int x = BitConverter.ToInt16(rawData, pos) - left; pos += 2;	// row starting column
-					y = BitConverter.ToInt16(rawData, pos) - top; pos += 2;	// starting row
-					if (y < 0 || y >= height) System.Diagnostics.Debug.WriteLine("r " + y.ToString());
-					if (x < 0 || x >= width) System.Diagnostics.Debug.WriteLine("c " + x.ToString());
+					int y = BitConverter.ToInt16(rawData, pos) - top; pos += 2; // starting row
+#if DEBUG
+					if (y < 0 || y >= height) System.Diagnostics.Debug.WriteLine("bad y: " + y.ToString());
+					if (x < 0 || x >= width) System.Diagnostics.Debug.WriteLine("bad x: " + x.ToString());
+#endif
 					int startCol = x;
 					for (; x < l + startCol; )
 					{
@@ -256,6 +265,8 @@ namespace Idmr.LfdReader
 							for (int k = 0; k < b; k++, x++) pixels[y * w + x] = rawData[pos++];
 						}
 					}
+					rowCode = BitConverter.ToInt16(rawData, pos);
+					pos += 2;
 				}
 				Bitmap image = new Bitmap(width, height, PixelFormat.Format8bppIndexed);
 				BitmapData bmdata = GraphicsFunctions.GetBitmapData(image);
@@ -263,7 +274,7 @@ namespace Idmr.LfdReader
 				image.UnlockBits(bmdata);
 				return image;
 			}
-			catch { return Delt.ErrorImage; }
+			catch { return ErrorImage; }
 		}
 		
 		/// <summary>Converts image to compressed DELT data</summary>
