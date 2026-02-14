@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.2+
+ * Version: 2.5
  */
 
 /* CHANGE LOG
+ * v2.5, 260214
  * [FIX] direct width/height validation instead of using try/catch
  * [FIX] final Row in DecodeImage wasn't processing all codes
  * v1.2, 160712

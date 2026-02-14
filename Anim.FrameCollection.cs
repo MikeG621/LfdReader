@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.1+
+ * Version: 2.5
  */
 
 /* CHANGE LOG
+ * v2.5, 260214
  * [UPD] ctor now takes numFrames, allowing high-frames like PLAYER:ANIMicons*
  * v1.1, 141215
  * [UPD] changed license to MPL

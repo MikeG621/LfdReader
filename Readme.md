@@ -8,17 +8,10 @@ Author: [Michael Gaisser](mailto:mjgaisser@gmail.com)
 Library for editing LucasArts *.LFD resource files.
 
 ## Latest Release
-#### WIP
+#### v2.5, 14 Feb 2026
 - (DELT) DecodeImage now checks for negative width/height validation directly to avoid overhead of catching an Exception.
 - (DELT) Fixed DecodeImage not processing the final rows if there's skips/blanks.
 - (ANIM) FrameCollection now takes the number of frames as an argument.
-
-#### v2.4, 02 Feb 2025
-- (Resource) Added Dirty() to allow manual setting of internal modified flag.
-- (MASK) Fixed the Height calculation
-- (MASK) Fixed the 00 processing and corner cases
-- (PANL) Fixed processing the FC Opcode to properly modify the ColorIndex
-- (MTRX) Initial pass created. Full Frame details aren't broken out yet, though structure is prety much known.
 
 ### Additional Information
 
@@ -31,6 +24,13 @@ File structure information per resource is found in the individual class files.
 Programmer's reference can be found in the [help file](help/Idmr.LfdReader.chm).
 
 ### Version History
+#### v2.4, 02 Feb 2025
+- (Resource) Added Dirty() to allow manual setting of internal modified flag.
+- (MASK) Fixed the Height calculation
+- (MASK) Fixed the 00 processing and corner cases
+- (PANL) Fixed processing the FC Opcode to properly modify the ColorIndex
+- (MTRX) Initial pass created. Full Frame details aren't broken out yet, though structure is prety much known.
+
 #### v2.3, 16 Jul 2023
 - (FILM) Chunk Opcodes added or renamed:
   - SetColorRange = 0x10, new for VIEW

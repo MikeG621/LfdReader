@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.2+
+ * Version: 2.5
  */
 
 /* CHANGE LOG
+ * v2.5, 260214
  * [UPD] FrameCollection ctors now use numFrames, blank ANIM still inits to 50
  * v1.2, 160712
  * [ADD] _isModified edits
