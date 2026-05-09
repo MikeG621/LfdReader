@@ -1,13 +1,14 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2026 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.0
+ * Version: 2.0+
  */
 
 /* CHANGE LOG
+ * [FIX] Encode error, [TSE #1]
  * v2.0, 210309
  * [ADD] Duration
  * [ADD] GetWaveBytes()
@@ -178,9 +179,9 @@ namespace Idmr.LfdReader
 					ArrayFunctions.WriteToArray((int)0x206, raw, ref offset);	// Type=0x06, Length=0x000002
 					ArrayFunctions.WriteToArray(sdb.NumberOfRepeats, raw, ref offset);
 				}
-				ArrayFunctions.WriteToArray((int)((sdb.Data.Length + 2) << 1 + 1), raw, offset);	// Type=0x01, Length=(_data.Length+2)
+				ArrayFunctions.WriteToArray((sdb.Data.Length + 2 << 8) + 1, raw, offset);   // Type=0x01, Length=(_data.Length+2)
 				raw[offset + 4] = (byte)Math.Round((decimal)(256 - (1000000 / _frequency)));
-				// raw[offset+5] = 0, Codec
+				//raw[offset + 5] = 0; // Codec
 				ArrayFunctions.WriteToArray(sdb.Data, raw, offset + 6);
 				if (sdb.DoesRepeat) raw[offset + 6 + sdb.Data.Length] = 7;	// EndBlock.Type
 				offset += len + 4 + (sdb.DoesRepeat ? 4 : 0);	// prep offset for next block
