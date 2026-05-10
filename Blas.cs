@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.0+
+ * Version: 2.5.1
  */
 
 /* CHANGE LOG
+ * v2.5.1, 260510
  * [FIX] Encode error, [TSE #1]
  * v2.0, 210309
  * [ADD] Duration
@@ -176,7 +177,7 @@ namespace Idmr.LfdReader
 				if (sdb.Data == null) break;
 				if (sdb.DoesRepeat)
 				{
-					ArrayFunctions.WriteToArray((int)0x206, raw, ref offset);	// Type=0x06, Length=0x000002
+					ArrayFunctions.WriteToArray(0x206, raw, ref offset);	// Type=0x06, Length=0x000002
 					ArrayFunctions.WriteToArray(sdb.NumberOfRepeats, raw, ref offset);
 				}
 				ArrayFunctions.WriteToArray((sdb.Data.Length + 2 << 8) + 1, raw, offset);   // Type=0x01, Length=(_data.Length+2)

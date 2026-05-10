@@ -8,10 +8,8 @@ Author: [Michael Gaisser](mailto:mjgaisser@gmail.com)
 Library for editing LucasArts *.LFD resource files.
 
 ## Latest Release
-#### v2.5, 14 Feb 2026
-- (DELT) DecodeImage now checks for negative width/height validation directly to avoid overhead of catching an Exception.
-- (DELT) Fixed DecodeImage not processing the final rows if there's skips/blanks.
-- (ANIM) FrameCollection now takes the number of frames as an argument.
+#### v2.5.1, 10 May 2026
+- (BLAS) Fixed an error in EncodeResource() when importing new sound data. [Issue [TSE #1](https://github.com/MikeG621/TieSoundEditor/issues/1)].
 
 ### Additional Information
 
@@ -24,6 +22,11 @@ File structure information per resource is found in the individual class files.
 Programmer's reference can be found in the [help file](help/Idmr.LfdReader.chm).
 
 ### Version History
+#### v2.5, 14 Feb 2026
+- (DELT) DecodeImage now checks for negative width/height validation directly to avoid overhead of catching an Exception.
+- (DELT) Fixed DecodeImage not processing the final rows if there's skips/blanks.
+- (ANIM) FrameCollection now takes the number of frames as an argument.
+
 #### v2.4, 02 Feb 2025
 - (Resource) Added Dirty() to allow manual setting of internal modified flag.
 - (MASK) Fixed the Height calculation
@@ -39,10 +42,10 @@ Programmer's reference can be found in the [help file](help/Idmr.LfdReader.chm).
   - SetVolume = 0x15, new for VOIC
   - Unknown16 = 0x16, new for VOIC
     - Renames left originals in place as Depcrecated, not a breaking change.
-- (PLTT) Added the newly discovered IndexRotator as read only values, discussed in Issue #4.
+- (PLTT) Added the newly discovered IndexRotator as read only values, discussed in [Issue #4](https://github.com/MikeG621/LfdReader/issues/4).
  
 #### v2.2, 01 Apr 2023
-- (CRFT, CPLX, SHIP) Added the IsTwoSided and IsGouraudShaded properties to Shape per discussion in Issue #3.
+- (CRFT, CPLX, SHIP) Added the IsTwoSided and IsGouraudShaded properties to Shape per discussion in [Issue #3](https://github.com/MikeG621/LfdReader/issues/3).
 - Minor XML updates
 
 #### v2.1, 30 Oct 2022
@@ -55,7 +58,7 @@ Programmer's reference can be found in the [help file](help/Idmr.LfdReader.chm).
 - (BLAS) Added GetWavBytes() to make audio playback easier, reformats data to .WAV.
 - (BLAS) Added Duration property to get audio length in seconds.
 - (FILM) Added ToString() to Block and Chunk.
-- (FONT) TotalChars renamed to NumberOfGlyphs (breaking change).
+- (FONT) TotalChars renamed to NumberOfGlyphs, ***BREAKING CHANGE***.
 - (CRFT) New.
 - (CPLX) New.
 - (SHIP) New.
@@ -63,7 +66,7 @@ Programmer's reference can be found in the [help file](help/Idmr.LfdReader.chm).
 - various updates.
 
 #### v1.2.1, 02 Sep 2019
-- (BLAS) Fixed a crash that occur during Decode for VOIC types. [Issue #1]
+- (BLAS) Fixed a crash that occur during Decode for VOIC types. [[Issue #1](https://github.com/MikeG621/LfdReader/issues/1)]
 
 #### v1.2, 12 Jul 2016
 - _isModifed edits.
