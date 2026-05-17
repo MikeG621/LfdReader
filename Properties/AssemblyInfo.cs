@@ -31,6 +31,6 @@ using System.Reflection;
 //      Revision
 //
 
-[assembly: AssemblyVersion("2.5.1.*")]
-[assembly: AssemblyFileVersion("2.5.1.0")]
-[assembly: AssemblyInformationalVersion("2.5.1 final")]
+[assembly: AssemblyVersion("2.5.2.*")]
+[assembly: AssemblyFileVersion("2.5.2.0")]
+[assembly: AssemblyInformationalVersion("2.5.2 final")]

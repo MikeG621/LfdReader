@@ -1,13 +1,15 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2025 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2026 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.4
+ * Version: 2.5.2
  */
 
 /* CHANGE LOG
+ * v2.5.2, 260517
+ * [UPD] Updated the example comments
  * v2.4, 250202
  * [FIX] Height calculation
  * [FIX] Fixed the 00 processing and corner cases
@@ -47,23 +49,30 @@ namespace Idmr.LfdReader
 	///   #endif
 	///   /* 0x01 */ byte[] Lengths;
 	/// }</code>
-	/// <para>If you know the dimensions of the Mask before you start, that's great. If not, it can be determined iteratively, however there is some degree of error.</para>
+	/// <para>If you know the dimensions of the Mask before you start, that's great. If not, it can be determined iteratively, however there is some degree of error.
+	/// The platforms are fed the height and width when processing the mask data, since they're being applied to camera views where the dimensions are already known.</para>
 	/// <para>The iterative method currently used by <see cref="DecodeResource"/> when the dimensions are unknown assumes the first two rows start with the same state (solid/transparent) and the top row does not have any Length values that equal <i>FirstColor</i>.
 	/// It's not perfect, but it seems to work fine with the stock cockpits.
 	/// Results may vary with custom cockpits.<br/>
 	/// Quickly iterating through <i>Rows</i> using the width value until the end of RawData or until a Row starts with <b>0x00</b> will determine the height.
-	/// Of course, if you know the dimensions beforehand, that would be for the best and is almost definitely how the program operates.</para>
+	/// Again, preferably you'd already have the dimensions.</para>
 	/// <para>The <i>FirstColor</i> for the Row is a marker that defines the starting color.
-	/// After that point, it simplly alternates solid/transparent <i>Lengths</i> until it reaches the end of the Row.
+	/// After that point, it simply alternates solid/transparent <i>Lengths</i> until it reaches the end of the Row.
 	/// The <i>Lengths</i> values are one-indexed, so a value of <b>0x01</b> is one pixel.
-	/// For values larger than <b>0xFF</b>, <b>0x00</b> is used as 256 pixels and must be followed by a "closing" value, as it will not switch pixel states.<br/>
-	/// For example, a row of <c>0xFF 0x00 0x0C 0x0A 0x00 0x6A</c> starts solid with 268 pixels (256 + 12), followed by 10 transparent pixels and 362 solid pixels (256 + 106).
-	/// To make a length over 512 pixels, simply repeat the <b>0x00</b> value.</para>
+	/// For values larger than <b>0xFF</b>, <b>0x00</b> is used as 256 pixels and must be followed by a "closing" value, as it will not switch pixel states by itself.<br/>
+	/// For example, a row of <c>FF 00 0C 0A 00 6A</c> starts solid with 268 pixels (256 + 12), followed by 10 transparent pixels and 362 solid pixels (256 + 106).</para>
+	/// <para>If the screen width isn't 320 (i.e., 640 or 3D) then a length over 512 pixels is possible by using a second <b>0x00</b> value. The third value is then used for closing.</para>
 	/// <para>Lengths of exactly 256 or 512 are more complicated. Both are <c>00 00</c>, so the first one is 256, but the second may or may not be the closing value.
-	/// If a second 256 would overflow the width, then it's a closing pixel for a total of 256, and the pixel state switches. Both <c>FF 40 00 00</c> and <c>FF 11 00 00 0F</c> are 256 lengths.<br/>
-	/// In <c>FF 00 80 00 01</c> both are 256, but the second one requires an extra value to close it. The resulting width is 641, but will be trimmed.<br/>
-	/// For lines of 512, it will always require a closing value and can really only exist at the end of the row so the excess will be trimmed; <c>FF 80 00 00 01</c>.
-	/// One of the Gunbboat views does this and TIEEdit does not account for it properly and displays the view corrupted.</para></example>
+	/// This again relies on the screen width as an input. For the sake of the decoding method used here, if a second 256 would overflow the width,
+	/// then it's treated as a closing pixel for a total of 256, and the pixel state switches. Both <c>FF 40 00 00</c> and <c>FF 11 00 00 2F</c> are 256 lengths.<br/>
+	/// In <c>FF 00 80 00 01</c> the second <b>0x00</b> requires an extra value to close it. The resulting width is 641, but will be trimmed.<br/>
+	/// For lines of exactly 512, it will always require a closing value and usually exist at the end of the row so the excess will be trimmed; <c>FF 80 00 00 01</c>.
+	/// One of the Gunbboat views does this and TIEEdit does not account for it properly and displays the view corrupted.
+	/// It should however be possible to have <c>00 00 00</c> to denote 512 in the middle of a row, similar to how 256 is encoded for 320px images.</para>
+	/// <para>This behavior with the closing pixel is because behind the scenes, the first <b>0x00</b> is really counted as 255 and a follow-up value is required and that next value is increased by 1,
+	/// getting us to 256 plus the second value. So for a 320-wide image, <c>00 00</c> is really (255 + 0 + 1).<br/>
+	/// For the 640 images, <c>00 00</c> is really 511px and the 3rd required value has 1 added to it to get (511 + value + 1).
+	/// This also means that lines of 256 are not possible in 640 images except at the end of the row with a bonus pixel, since as we've established <c>00 00</c> is for 512+, and <c>00 01</c> would result in 257px.</para></example>
 	public class Mask : Resource
 	{
 		Bitmap _image = null;

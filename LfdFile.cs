@@ -1,13 +1,15 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2025 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2026 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.4
+ * Version: 2.5.2
  */
 
 /* CHANGE LOG
+ * v2.5.2, 260517
+ * [FIX] Resource modified flag reset during Write
  * v2.4, 250202
  * [ADD] Enabled Mtrx
  * v2.0, 210309
@@ -115,6 +117,7 @@ namespace Idmr.LfdReader
 					stream.Position = Resource.LengthOffset;
 					bw.Write(_rmp.Length);
 					bw.Write(_rmp.RawData);
+					_rmp._isModified = false;
 				}
 				for(int i=0;i<Resources.Count;i++)
 				{
@@ -126,6 +129,7 @@ namespace Idmr.LfdReader
 					stream.Position = pos + Resource.LengthOffset;
 					bw.Write(Resources[i].Length);
 					bw.Write(Resources[i].RawData);
+					Resources[i]._isModified = false;
 				}
 				stream.SetLength(stream.Position);
 				stream.Close();

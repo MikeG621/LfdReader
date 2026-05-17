@@ -8,8 +8,9 @@ Author: [Michael Gaisser](mailto:mjgaisser@gmail.com)
 Library for editing LucasArts *.LFD resource files.
 
 ## Latest Release
-#### v2.5.1, 10 May 2026
-- (BLAS) Fixed an error in EncodeResource() when importing new sound data. [Issue [TSE #1](https://github.com/MikeG621/TieSoundEditor/issues/1)].
+#### 2.5.2, 17 May 2026
+- (MASK) No code changes, just updated the XML example for the help file.
+- (LfdFile) The per-resource modified flag now resets during Write().
 
 ### Additional Information
 
@@ -22,6 +23,9 @@ File structure information per resource is found in the individual class files.
 Programmer's reference can be found in the [help file](help/Idmr.LfdReader.chm).
 
 ### Version History
+#### v2.5.1, 10 May 2026
+- (BLAS) Fixed an error in EncodeResource() when importing new sound data. [Issue [TSE #1](https://github.com/MikeG621/TieSoundEditor/issues/1)].
+
 #### v2.5, 14 Feb 2026
 - (DELT) DecodeImage now checks for negative width/height validation directly to avoid overhead of catching an Exception.
 - (DELT) Fixed DecodeImage not processing the final rows if there's skips/blanks.
