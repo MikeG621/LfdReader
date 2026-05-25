@@ -1,13 +1,14 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2026 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.0
+ * Version: 2.0+
  */
 
 /* CHANGE LOG
+ * [FIX] Missing type assignment in general ctors
  * v2.0, 210309
  * [UPD] TotalChars renamed to NumberOfGlyphs
  * v1.2, 160712
@@ -90,6 +91,7 @@ namespace Idmr.LfdReader
 		/// (<see cref="BitsPerScanLine"/>, <see cref="Height"/>) in size.</remarks>
 		public Font(short startChar, short numberOfChars, short height)
 		{
+			_type = ResourceType.Font;
 			_startingChar = startChar;
 			_height = height;
 			BaseLine = (short)Math.Ceiling((double)_height * .67);
@@ -110,6 +112,7 @@ namespace Idmr.LfdReader
 		/// <see cref="StartingChar"/> defaults to <b>32</b>.</remarks>
 		public Font(short numberOfChars, short height)
 		{
+			_type = ResourceType.Font;
 			_startingChar = 32;
 			_height = height;
 			BaseLine = (short)Math.Ceiling((double)_height * .67);

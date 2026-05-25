@@ -8,6 +8,9 @@ Author: [Michael Gaisser](mailto:mjgaisser@gmail.com)
 Library for editing LucasArts *.LFD resource files.
 
 ## Latest Release
+#### WIP
+- (FONT) Fixed missing type assignment in the generic constructors.
+
 #### 2.5.2, 17 May 2026
 - (MASK) No code changes, just updated the XML example for the help file.
 - (LfdFile) The per-resource modified flag now resets during Write().
