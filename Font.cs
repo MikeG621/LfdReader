@@ -8,6 +8,7 @@
  */
 
 /* CHANGE LOG
+ * [UPD] Height now write-enabled
  * [FIX] Missing type assignment in general ctors
  * v2.0, 210309
  * [UPD] TotalChars renamed to NumberOfGlyphs
@@ -236,7 +237,7 @@ namespace Idmr.LfdReader
 		/// <summary>Gets the indexer for the glyphs.</summary>
 		public GlyphIndexer Glyphs { get { return _glyphIndexer; } }
 		/// <summary>Gets the ASCII value of the first character within the resource.</summary>
-		/// <remarks>Typically <b>32</b> (space).</remarks>
+		/// <remarks>Realistically should always be <b>32</b> (space).</remarks>
 		public short StartingChar {	get { return _startingChar; } }
 		/// <summary>Gets the number of characters contained within the resource.</summary>
 		public short NumberOfGlyphs { get { return (short)_glyphs.Length; } }
@@ -253,8 +254,26 @@ namespace Idmr.LfdReader
                 _isModified = true;
 			}	// this is left as write-enabled to allow wider characters
 		}
-		/// <summary>Gets the total height of the font, also number of ScanLines.</summary>
-		public short Height { get { return _height; } }
+		/// <summary>Gets or sets the total height of the font, also number of ScanLines.</summary>
+		/// <remarks>Does replace all images due to the global height change.</remarks>
+		public short Height
+		{
+			get { return _height; }
+			set
+			{
+				_height = value;
+				Bitmap newGlyph;
+				Graphics g;
+				for (int i = 0; i < NumberOfGlyphs; i++)
+				{
+					newGlyph = new Bitmap(Glyphs[i].Width, _height);
+					g = Graphics.FromImage(newGlyph);
+					g.Clear(Color.Black);
+					g.DrawImageUnscaled(Glyphs[i], 0, 0);
+					Glyphs[i] = newGlyph;
+				}
+			}
+		}
 		/// <summary>Gets or sets the zero-indexed ScanLine that is used as the "bottom" of the font.</summary>
 		/// <remarks>Characters such as 'j' typically drop below this line. Is typically 2/3 to 3/4 the value of <see cref="Height"/>.</remarks>
 		public short BaseLine

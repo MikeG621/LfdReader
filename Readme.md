@@ -10,6 +10,7 @@ Library for editing LucasArts *.LFD resource files.
 ## Latest Release
 #### WIP
 - (FONT) Fixed missing type assignment in the generic constructors.
+- (FONT) Height now write-enabled.
 
 #### 2.5.2, 17 May 2026
 - (MASK) No code changes, just updated the XML example for the help file.
