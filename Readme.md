@@ -10,7 +10,8 @@ Library for editing LucasArts *.LFD resource files.
 ## Latest Release
 #### WIP
 - (FONT) Fixed missing type assignment in the generic constructors.
-- (FONT) Height now write-enabled.
+- (FONT) Height and NumberOfGlyphs now write-enabled.
+- (FONT) Internally reworked the glyphs to be a collection instead of an array, no external changes.
 
 #### 2.5.2, 17 May 2026
 - (MASK) No code changes, just updated the XML example for the help file.

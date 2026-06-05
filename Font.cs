@@ -8,7 +8,8 @@
  */
 
 /* CHANGE LOG
- * [UPD] Height now write-enabled
+ * [UPD] redid _glyphs as a List instead of an Array
+ * [UPD] Height and NumberOfGlyphs now write-enabled
  * [FIX] Missing type assignment in general ctors
  * v2.0, 210309
  * [UPD] TotalChars renamed to NumberOfGlyphs
@@ -21,11 +22,12 @@
  * v1.0
  */
 
+using Idmr.Common;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using Idmr.Common;
 
 namespace Idmr.LfdReader
 {
@@ -76,7 +78,7 @@ namespace Idmr.LfdReader
 		short _bitsPerScanLine;
 		short _height;
         short _baseLine;
-		Bitmap[] _glyphs;
+		readonly List<Bitmap> _glyphs = new List<Bitmap>();
 		GlyphIndexer _glyphIndexer;
 
 		#region constructors
@@ -97,8 +99,8 @@ namespace Idmr.LfdReader
 			_height = height;
 			BaseLine = (short)Math.Ceiling((double)_height * .67);
 			_bitsPerScanLine = (short)(_height + (_height % 8 == 0 ? 0 : 8 - (_height % 8)));
-			_glyphs = new Bitmap[numberOfChars];
-			for (int i = 0; i < _glyphs.Length; i++) _glyphs[i] = new Bitmap(_bitsPerScanLine, _height, PixelFormat.Format1bppIndexed);
+			_glyphs.Capacity = numberOfChars;
+			for (int i = 0; i < numberOfChars; i++) _glyphs.Add(new Bitmap(_bitsPerScanLine, _height, PixelFormat.Format1bppIndexed));
 			_glyphIndexer = new GlyphIndexer(this);
 		}
 		/// <summary>Creates a new instance and prepares for a new character set starting from ASCII 32 (space).</summary>
@@ -111,25 +113,12 @@ namespace Idmr.LfdReader
 		/// All images in <see cref="Glyphs"/> are initialized to blank <see cref="PixelFormat.Format1bppIndexed"/> images,
 		/// (<see cref="BitsPerScanLine"/>, <see cref="Height"/>) in size.<br/>
 		/// <see cref="StartingChar"/> defaults to <b>32</b>.</remarks>
-		public Font(short numberOfChars, short height)
-		{
-			_type = ResourceType.Font;
-			_startingChar = 32;
-			_height = height;
-			BaseLine = (short)Math.Ceiling((double)_height * .67);
-			_bitsPerScanLine = (short)(_height + (_height % 8 == 0 ? 0 : 8 - (_height % 8)));
-			_glyphs = new Bitmap[numberOfChars];
-			for (int i = 0; i < _glyphs.Length; i++) _glyphs[i] = new Bitmap(_bitsPerScanLine, _height, PixelFormat.Format1bppIndexed);
-			_glyphIndexer = new GlyphIndexer(this);
-		}
+		public Font(short numberOfChars, short height) : this(32, numberOfChars, height) { }
 		/// <summary>Creates a new instance from an existing opened file.</summary>
 		/// <param name="stream">The opened LFD file.</param>
 		/// <param name="filePosition">The offset of the beginning of the resource.</param>
 		/// <exception cref="LoadFileException">Typically due to file corruption.</exception>
-		public Font(FileStream stream, long filePosition)
-		{
-			read(stream, filePosition);
-		}
+		public Font(FileStream stream, long filePosition) => read(stream, filePosition);
 		/// <summary>Creates a new instance from an exsiting file.</summary>
 		/// <param name="path">The full path to the unopened LFD file.</param>
 		/// <param name="filePosition">The offset of the beginning of the resource.</param>
@@ -157,24 +146,26 @@ namespace Idmr.LfdReader
 		{
 			_decodeResource(raw, containsHeader);
 			if (_type != ResourceType.Font) throw new ArgumentException("Raw header is not for a Font resource");
+
 			int offset = 0;
 			_startingChar = BitConverter.ToInt16(_rawData, offset);
-			_glyphs = new Bitmap[BitConverter.ToInt16(_rawData, offset + 2)];
+			_glyphs.Clear();
+			_glyphs.Capacity = BitConverter.ToInt16(_rawData, offset + 2);
 			_bitsPerScanLine = BitConverter.ToInt16(_rawData, offset + 4);
 			_height = BitConverter.ToInt16(_rawData, offset + 6);
 			_baseLine = BitConverter.ToInt16(_rawData, offset + 8);
 			offset += 12;
-			for (int i = 0; i < _glyphs.Length; i++)
-				_glyphs[i] = new Bitmap(_rawData[offset++], _height, PixelFormat.Format1bppIndexed);
-			for (int i = 0; i < _glyphs.Length; i++)
+			for (int i = 0; i < _glyphs.Capacity; i++)
+				_glyphs.Add(new Bitmap(_rawData[offset++], _height, PixelFormat.Format1bppIndexed));
+			foreach (var g in _glyphs)
 			{
-				BitmapData bd1 = GraphicsFunctions.GetBitmapData(_glyphs[i]);
+				BitmapData bd1 = GraphicsFunctions.GetBitmapData(g);
 				byte[] pix1 = new byte[bd1.Stride * bd1.Height];
 				for (int y = 0; y < _height; y++)
 					for (int s = 0; s < (_bitsPerScanLine / 8); s++)
 						pix1[y * bd1.Stride + s] = _rawData[offset++];
 				GraphicsFunctions.CopyBytesToImage(pix1, bd1);
-				_glyphs[i].UnlockBits(bd1);
+				g.UnlockBits(bd1);
 			}
 			_glyphIndexer = new GlyphIndexer(this);
 		}
@@ -182,15 +173,15 @@ namespace Idmr.LfdReader
 		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/>.</summary>
 		public override void EncodeResource()
 		{
-			System.Diagnostics.Debug.WriteLine("bit width: " + _bitsPerScanLine + ", height: " + _height + "num glyphs: " + _glyphs.Length);
-			byte[] raw = new byte[12 + (_bitsPerScanLine / 8 * _height + 1) * _glyphs.Length];
+			System.Diagnostics.Debug.WriteLine("bit width: " + _bitsPerScanLine + ", height: " + _height + "num glyphs: " + _glyphs.Count);
+			byte[] raw = new byte[12 + (_bitsPerScanLine / 8 * _height + 1) * _glyphs.Count];
 			ArrayFunctions.WriteToArray(_startingChar, raw, 0);
-			ArrayFunctions.WriteToArray((short)_glyphs.Length, raw, 2);
+			ArrayFunctions.WriteToArray((short)_glyphs.Count, raw, 2);
 			ArrayFunctions.WriteToArray(_bitsPerScanLine, raw, 4);
 			ArrayFunctions.WriteToArray(_height, raw, 6);
 			ArrayFunctions.WriteToArray(BaseLine, raw, 8);
-			for (int i = 0; i < _glyphs.Length; i++) raw[12 + i] = (byte)_glyphs[i].Width;
-			for (int i = 0, offset = 12 + _glyphs.Length; i < _glyphs.Length; i++)
+			for (int i = 0; i < _glyphs.Count; i++) raw[12 + i] = (byte)_glyphs[i].Width;
+			for (int i = 0, offset = 12 + _glyphs.Count; i < _glyphs.Count; i++)
 			{
 				BitmapData bd1 = GraphicsFunctions.GetBitmapData(_glyphs[i]);
 				byte[] pix1 = new byte[bd1.Stride * bd1.Height];
@@ -211,7 +202,7 @@ namespace Idmr.LfdReader
 		/// <param name="glyphColor">The new font color.</param>
 		/// <remarks>Background color will be <see cref="Color.Transparent"/>.<br/>
 		/// These colors are for display purposes only and do not affect the data.</remarks>
-		public void SetColor(Color glyphColor) { SetColor(glyphColor, true); }
+		public void SetColor(Color glyphColor) => SetColor(glyphColor, true);
 
 		/// <summary>Changes the primary color of the font.</summary>
 		/// <param name="glyphColor">The new font color.</param>
@@ -229,36 +220,46 @@ namespace Idmr.LfdReader
 				else newpal.Entries[0] = Color.Black;
 			}
 			newpal.Entries[1] = glyphColor;
-			for (int i = 0; i < _glyphs.Length; i++) _glyphs[i].Palette = newpal;
+			foreach (var g in _glyphs) g.Palette = newpal;
 		}
 		#endregion public methods
 
 		#region public properties
 		/// <summary>Gets the indexer for the glyphs.</summary>
-		public GlyphIndexer Glyphs { get { return _glyphIndexer; } }
+		public GlyphIndexer Glyphs => _glyphIndexer;
 		/// <summary>Gets the ASCII value of the first character within the resource.</summary>
 		/// <remarks>Realistically should always be <b>32</b> (space).</remarks>
-		public short StartingChar {	get { return _startingChar; } }
+		public short StartingChar => _startingChar;
 		/// <summary>Gets the number of characters contained within the resource.</summary>
-		public short NumberOfGlyphs { get { return (short)_glyphs.Length; } }
+		public short NumberOfGlyphs
+		{
+			get => (short)_glyphs.Count;
+			set
+			{
+				// only one of these will fire
+				for (int i = _glyphs.Count; i < value; i++) _glyphs.Add(new Bitmap(_bitsPerScanLine, _height, PixelFormat.Format1bppIndexed));
+				for (int i = _glyphs.Count; i > value; i--) _glyphs.RemoveAt(i - 1);
+				_isModified = true;
+			}
+		}
 		/// <summary>Gets or sets the length of bits required per scanline.</summary>
 		/// <remarks>Must be a multiple of <b>8</b>.</remarks>
 		/// <exception cref="ArgumentException"><i>value</i> is not a positive multiple of 8.</exception>
 		public short BitsPerScanLine
 		{
-			get { return _bitsPerScanLine; }
-			set 
+			get => _bitsPerScanLine;
+			set
 			{
 				if ((value % 8) != 0 || value <= 0) throw new ArgumentException("Value must be a positive multiple of 8", "value");
 				_bitsPerScanLine = value;
-                _isModified = true;
-			}	// this is left as write-enabled to allow wider characters
+				_isModified = true;
+			}   // this is left as write-enabled to allow wider characters
 		}
 		/// <summary>Gets or sets the total height of the font, also number of ScanLines.</summary>
 		/// <remarks>Does replace all images due to the global height change.</remarks>
 		public short Height
 		{
-			get { return _height; }
+			get => _height;
 			set
 			{
 				_height = value;
@@ -266,11 +267,12 @@ namespace Idmr.LfdReader
 				Graphics g;
 				for (int i = 0; i < NumberOfGlyphs; i++)
 				{
-					newGlyph = new Bitmap(Glyphs[i].Width, _height);
+					newGlyph = new Bitmap(_glyphs[i].Width, _height);
 					g = Graphics.FromImage(newGlyph);
 					g.Clear(Color.Black);
-					g.DrawImageUnscaled(Glyphs[i], 0, 0);
-					Glyphs[i] = newGlyph;
+					g.DrawImageUnscaled(_glyphs[i], 0, 0);
+					_glyphs[i] = newGlyph;
+					// that ^ sets _isModified
 				}
 			}
 		}
@@ -278,7 +280,7 @@ namespace Idmr.LfdReader
 		/// <remarks>Characters such as 'j' typically drop below this line. Is typically 2/3 to 3/4 the value of <see cref="Height"/>.</remarks>
 		public short BaseLine
         {
-            get { return _baseLine; }
+            get => _baseLine;
             set
             {
                 _baseLine = value;
