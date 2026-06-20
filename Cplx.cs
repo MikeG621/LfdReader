@@ -182,6 +182,21 @@ namespace Idmr.LfdReader
 			catch (Exception x) { throw new LoadFileException(x); }
 		}
 
+		/// <summary>Clean up any resources being used.</summary>
+		/// <param name="disposing"><see langword="true"/> if managed resources should be disposed; otherwise, <see langword="false"/>.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+
+			if (disposing)
+			{
+				//TODO: proper dispose
+			}
+			Components = null;
+			ShadingSets = null;
+			base.Dispose(disposing);
+		}
+
 		/// <summary>Swaps the endianess of the given value.</summary>
 		/// <param name="original">The original value.</param>
 		/// <returns>The opposite endianess, can go either way.</returns>
@@ -433,7 +448,7 @@ namespace Idmr.LfdReader
 		/// <summary>Transfers the wireframe data into a SHIP object.</summary>
 		/// <param name="craft">The CPLX wireframe data</param>
 		/// <returns>A SHIP with <u>only</u> the wireframe data in <see cref="Ship.Components"/>. <see cref="Ship.Unknown"/> is set to <b>0</b>,
-		/// <see cref="Ship.Unknowns"/> and <see cref="Ship.ShadingSets"/> are both set to <b>null</b>.</returns>
+		/// <see cref="Ship.Unknowns"/> and <see cref="Ship.ShadingSets"/> are both set to <see langword="null"/>.</returns>
 		public static implicit operator Ship(Cplx craft)
 		{
             var ship = new Ship

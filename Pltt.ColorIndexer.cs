@@ -1,30 +1,33 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2026 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.1
+ * Version: 1.1+
  */
 
 /* CHANGE LOG
+ * [UPD] Removed Indexer inheritance, IEnumerable implemented directly
  * v1.1, 141215
  * [UPD] changed license to MPL
  * v1.0
  */
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Drawing;
-using Idmr.Common;
 
 namespace Idmr.LfdReader
 {
 	public partial class Pltt : Resource
 	{
 		/// <summary>Object to provide array access to individual colors in the Pltt.</summary>
-		public class ColorIndexer : Indexer<Color>
+		public class ColorIndexer : IEnumerable<Color>
 		{
 			readonly Pltt _parent;
+			readonly Color[] _items;
 			
 			/// <summary>Initializes the indexer.</summary>
 			/// <param name="parent">The parent resource.</param>
@@ -39,21 +42,36 @@ namespace Idmr.LfdReader
 			/// <returns>Indicated color.</returns>
 			/// <exception cref="ArgumentOutOfRangeException">Invalid <paramref name="index"/> value.</exception>
 			/// <remarks>Valid <paramref name="index"/> values are determined by the parent <see cref="StartIndex"/> and <see cref="EndIndex"/> properties.</remarks>
-			public override Color this[int index]
+			public Color this[int index]
 			{
 				get
 				{
 					if (index > _parent.EndIndex || index < _parent.StartIndex)
-						throw new ArgumentOutOfRangeException("Index must be " + _parent.StartIndex + "-" + _parent.EndIndex);
+						throw new ArgumentOutOfRangeException($"Index must be {_parent.StartIndex}-{_parent.EndIndex}");
+
 					return _items[index];
 				}
 				set
 				{
 					if (index > _parent.EndIndex || index < _parent.StartIndex)
-						throw new ArgumentOutOfRangeException("Index must be " + _parent.StartIndex + "-" + _parent.EndIndex);
+						throw new ArgumentOutOfRangeException($"Index must be {_parent.StartIndex}-{_parent.EndIndex}");
+
 					_items[index] = value;
+					_parent.Dirty();
 				}
 			}
+
+			#region IEnumerable members
+			public IEnumerator<Color> GetEnumerator()
+			{
+				return ((IEnumerable<Color>)_items).GetEnumerator();
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return ((IEnumerable)_items).GetEnumerator();
+			}
+			#endregion
 		}
 	}
 }

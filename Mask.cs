@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.5.2
+ * Version: 2.5.2+
  */
 
 /* CHANGE LOG
+ * [ADD] Dispose
  * v2.5.2, 260517
  * [UPD] Updated the example comments
  * v2.4, 250202
@@ -79,7 +80,7 @@ namespace Idmr.LfdReader
 
 		#region constructors
 		/// <summary>Blank constructor.</summary>
-		/// <remarks><see cref="Image"/> is <b>null</b>.</remarks>
+		/// <remarks><see cref="Image"/> is <see langword="null"/>.</remarks>
 		public Mask()
 		{
 			_type = ResourceType.Mask;
@@ -166,6 +167,17 @@ namespace Idmr.LfdReader
 		{
 			try { _process(stream, filePosition); }
 			catch (Exception x) { throw new LoadFileException(x); }
+		}
+
+		/// <summary>Clean up any resources being used.</summary>
+		/// <param name="disposing"><see langword="true"/> if managed resources should be disposed; otherwise, <see langword="false"/>.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+
+			if (disposing) _image.Dispose();
+			_image = null;
+			base.Dispose(disposing);
 		}
 
 		#region public methods
@@ -255,6 +267,7 @@ namespace Idmr.LfdReader
 			}
 			GraphicsFunctions.CopyBytesToImage(pixels, bd);
 			_image.UnlockBits(bd);
+			_isModified = false;
 		}
 		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/>.</summary>
 		public override void EncodeResource()
@@ -311,10 +324,7 @@ namespace Idmr.LfdReader
 		/// <remarks>The MASK format cannot handle the 256 or 512px lengths in the middle of the image. It can however do that at the end of the image, via "throw away" pixels.<br/>
 		/// Maximum size is defined by <see cref="Panl.MaximumWidth"/> and <see cref="Panl.MaximumHeight"/>.<br/>
 		/// Black is used as the transparecny color.</remarks>
-		public void SetMask(Bitmap image)
-		{
-			SetMask(image, Color.FromArgb(0,0,0));
-		}
+		public void SetMask(Bitmap image) => SetMask(image, Color.FromArgb(0, 0, 0));
 		/// <summary>Sets the transparency mask.</summary>
 		/// <param name="image">New image mask. Converts to <see cref="PixelFormat.Format1bppIndexed"/>, must be <b>640x480</b> or smaller.</param>
 		/// <param name="transparentColor">The Color to be used as transparent.</param>

@@ -8,7 +8,7 @@
  */
 
 /* CHANGE LOG
- * [UPD] Removed Indexer inheritance, implemented directly
+ * [UPD] Removed Indexer inheritance, IEnumerable implemented directly
  * v1.2, 160712
  * [ADD] _isModified edits
  * v1.1, 141215
@@ -18,6 +18,7 @@
 
 using Idmr.Common;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 
@@ -26,7 +27,7 @@ namespace Idmr.LfdReader
     public partial class Font : Resource
 	{
 		/// <summary>Object to provide array access to the character glyphs.</summary>
-		public class GlyphIndexer
+		public class GlyphIndexer : IEnumerable<Bitmap>
 		{
 			readonly Font _parent;
 			readonly List<Bitmap> _items;
@@ -38,13 +39,13 @@ namespace Idmr.LfdReader
 				_parent = parent;
 				_items = parent._glyphs;
 			}
-			
+
 			/// <summary>Gets or sets the individual images.</summary>
 			/// <param name="index">Array index.</param>
 			/// <returns><see cref="System.Drawing.Imaging.PixelFormat.Format1bppIndexed"/> Bitmap.</returns>
 			/// <exception cref="ArgumentException">Image Height is incorrect.</exception>
 			/// <exception cref="BoundaryException">Maximum character width is exceeded.</exception>
-			/// <exception cref="IndexOutOfRangeException">Invalid <paramref name="index"/> value.</exception>
+			/// <exception cref="ArgumentOutOfRangeException">Invalid <paramref name="index"/> value.</exception>
 			public Bitmap this[int index]
 			{
 				get => _items[index];
@@ -52,10 +53,23 @@ namespace Idmr.LfdReader
 				{
 					if (value.Height != _parent._height) throw new ArgumentException($"New image not required height ({_parent._height}px)", "value");
 					if (value.Width > _parent._bitsPerScanLine) throw new BoundaryException("value.Width", _parent._bitsPerScanLine.ToString());
+
 					_items[index] = GraphicsFunctions.ConvertTo1bpp(value);
-					_parent._isModified = true;
+					_parent.Dirty();
 				}
 			}
+
+			#region IEnumerable members
+			public IEnumerator<Bitmap> GetEnumerator()
+			{
+				return ((IEnumerable<Bitmap>)_items).GetEnumerator();
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return ((IEnumerable)_items).GetEnumerator();
+			}
+			#endregion
 		}
 	}
 }

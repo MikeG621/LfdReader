@@ -143,7 +143,7 @@ namespace Idmr.LfdReader
 	/// The Offset within Unknown2 points to the Unknown3 struct, measured from Unknown2 start position.</para></example>
 	public partial class Crft : Resource
 	{
-		bool _isCft { get { return _fileName.ToUpper().EndsWith(".CFT"); } }
+		bool _isCft => _fileName.EndsWith(".CFT", StringComparison.OrdinalIgnoreCase);
 
 		#region constructors
 		/// <summary>Blank constructor.</summary>
@@ -188,6 +188,21 @@ namespace Idmr.LfdReader
 				}
 			}
 			catch (Exception x) { throw new LoadFileException(x); }
+		}
+
+		/// <summary>Clean up any resources being used.</summary>
+		/// <param name="disposing"><see langword="true"/> if managed resources should be disposed; otherwise, <see langword="false"/>.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+
+			if (disposing)
+			{
+				//TODO: proper dispose
+			}
+			Components = null;
+			ShadingSets = null;
+			base.Dispose(disposing);
 		}
 
 		#region public methods
@@ -392,6 +407,7 @@ namespace Idmr.LfdReader
 		}
 		#endregion public methods
 
+		//TODO: these should really be redone as proper IEnumerables
 		/// <summary>Gets the components of the model.</summary>
 		/// <remarks>Each component is read-only.</remarks>
 		public Indexer<Component> Components { get; private set; }
@@ -402,8 +418,8 @@ namespace Idmr.LfdReader
         /// <summary>Transfers the wireframe data into a SHIP object.</summary>
         /// <param name="craft">The CRFT wireframe data</param>
         /// <returns>A SHIP with <u>only</u> the wireframe data from <see cref="Components"/>. <see cref="Ship.Unknown"/> is set to <b>0</b>,
-        /// <see cref="Ship.Unknowns"/> and <see cref="Ship.ShadingSets"/> are both set to <b>null</b>.
-		/// Each <see cref="Cplx.Lod.VertexNormals"/> will be also be set to <b>null</b>.</returns>
+        /// <see cref="Ship.Unknowns"/> and <see cref="Ship.ShadingSets"/> are both set to <see langword="null"/>.
+		/// Each <see cref="Cplx.Lod.VertexNormals"/> will be also be set to <see langword="null"/>.</returns>
         public static implicit operator Ship(Crft craft)
         {
 			var ship = new Ship

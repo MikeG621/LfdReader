@@ -8,6 +8,7 @@
  */
 
 /* CHANGE LOG
+ * [ADD] Dispose
  * [UPD] redid _glyphs as a List instead of an Array
  * [UPD] Height and NumberOfGlyphs now write-enabled
  * [FIX] Missing type assignment in general ctors
@@ -78,7 +79,7 @@ namespace Idmr.LfdReader
 		short _bitsPerScanLine;
 		short _height;
         short _baseLine;
-		readonly List<Bitmap> _glyphs = new List<Bitmap>();
+		List<Bitmap> _glyphs = new List<Bitmap>();
 		GlyphIndexer _glyphIndexer;
 
 		#region constructors
@@ -137,6 +138,21 @@ namespace Idmr.LfdReader
 			catch (Exception x) { throw new LoadFileException(x); }
 		}
 
+		/// <summary>Clean up any resources being used.</summary>
+		/// <param name="disposing"><see langword="true"/> if managed resources should be disposed; otherwise, <see langword="false"/>.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+
+			if (disposing)
+			{
+				for (int i = 0; i < _glyphs.Count; i++) _glyphs[i].Dispose();
+				_glyphs.Clear();
+			}
+			_glyphs = null;
+			_glyphIndexer = null;
+			base.Dispose(disposing);
+		}
 		#region public methods
 		/// <summary>Processes raw data to populate the resource.</summary>
 		/// <param name="raw">Raw byte data.</param>
@@ -168,6 +184,7 @@ namespace Idmr.LfdReader
 				g.UnlockBits(bd1);
 			}
 			_glyphIndexer = new GlyphIndexer(this);
+			_isModified = false;
 		}
 
 		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/>.</summary>
@@ -207,7 +224,7 @@ namespace Idmr.LfdReader
 		/// <summary>Changes the primary color of the font.</summary>
 		/// <param name="glyphColor">The new font color.</param>
 		/// <param name="transparent">If the background will be <see cref="Color.Transparent"/>.</param>
-		/// <remarks>If <paramref name="transparent"/> is <b>false</b>, the background color will be <see cref="Color.Black"/>.<br/>
+		/// <remarks>If <paramref name="transparent"/> is <see langword="false"/>, the background color will be <see cref="Color.Black"/>.<br/>
 		/// If <paramref name="glyphColor"/> is Black, then the background will be <see cref="Color.White"/>.<br/>
 		/// These colors are for display purposes only and do not affect the data.</remarks>
 		public void SetColor(Color glyphColor, bool transparent)
@@ -251,6 +268,7 @@ namespace Idmr.LfdReader
 			set
 			{
 				if ((value % 8) != 0 || value <= 0) throw new ArgumentException("Value must be a positive multiple of 8", "value");
+
 				_bitsPerScanLine = value;
 				_isModified = true;
 			}   // this is left as write-enabled to allow wider characters

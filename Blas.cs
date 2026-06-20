@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.5.1
+ * Version: 2.5.1+
  */
 
 /* CHANGE LOG
+ * [ADD] Dispose
  * v2.5.1, 260510
  * [FIX] Encode error, [TSE #1]
  * v2.0, 210309
@@ -92,7 +93,9 @@ namespace Idmr.LfdReader
 		{
 			_type = ResourceType.Blas;
 			SoundBlocks[0].DoesRepeat = false;
+			SoundBlocks[0]._parent = this;
 			SoundBlocks[1].DoesRepeat = false;
+			SoundBlocks[1]._parent = this;
 		}
 		/// <summary>Creates a new instance from an existing opened file.</summary>
 		/// <param name="stream">The opened LFD file.</param>
@@ -120,6 +123,23 @@ namespace Idmr.LfdReader
 			catch (Exception x) { throw new LoadFileException(x); }
 		}
 
+		/// <summary>Clean up any resources being used.</summary>
+		/// <param name="disposing"><see langword="true"/> if managed resources should be disposed; otherwise, <see langword="false"/>.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+
+			if (disposing)
+			{
+				SoundBlocks[0].Data = null;
+				SoundBlocks[0]._parent = null;
+				SoundBlocks[1].Data = null;
+				SoundBlocks[1]._parent = null;
+			}
+			SoundBlocks = null;
+			base.Dispose(disposing);
+		}
+
 		#region public methods
 		/// <summary>Processes raw data to populate the resource.</summary>
 		/// <param name="raw">Raw byte data.</param>
@@ -133,6 +153,7 @@ namespace Idmr.LfdReader
 			SoundBlocks = new SoundDataBlock[2];	// maximum number of Sound blocks observed in TIE
 			for (int i = 0; i < SoundBlocks.Length; i++)
 			{
+				SoundBlocks[i]._parent = this;
 				if (_rawData[offset] == 6)
 				{
 					SoundBlocks[i].NumberOfRepeats = BitConverter.ToInt16(_rawData, offset + 1);
@@ -156,6 +177,7 @@ namespace Idmr.LfdReader
 					break;
 				}
 			}
+			_isModified = false;
 		}
 
 		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/>.</summary>
@@ -194,7 +216,7 @@ namespace Idmr.LfdReader
 		/// <summary>Gets the raw audio data and reformats it to be ready for playback.</summary>
 		/// <param name="withRepeats">Whether or not to include repeats in the audio data.</param>
 		/// <returns>The data in .WAV file format, with repeats if applicable.<br/>
-		/// If <see cref="SoundDataBlock.NumberOfRepeats"/> is infinite and <paramref name="withRepeats"/> is <b>true</b>, will include <b>4</b> repeats.</returns>
+		/// If <see cref="SoundDataBlock.NumberOfRepeats"/> is infinite and <paramref name="withRepeats"/> is <see langword="true"/>, will include <b>4</b> repeats.</returns>
 		public byte[] GetWavBytes(bool withRepeats)
 		{
 			MemoryStream s = new MemoryStream();
@@ -239,19 +261,16 @@ namespace Idmr.LfdReader
 		/// <summary>Gets the raw audio data and reformats it to be ready for playback.</summary>
 		/// <returns>The data in .WAV file format, with repeats if applicable.<br/>
 		/// If <see cref="SoundDataBlock.NumberOfRepeats"/> is infinite, will include <b>4</b> repeats.</returns>
-		public byte[] GetWavBytes()
-		{
-			return GetWavBytes(true);
-		}
+		public byte[] GetWavBytes() => GetWavBytes(true);
 		#endregion public methods
-		
+
 		#region public properties
 		/// <summary>Gets or sets the frequency in Hertz of the audio data.</summary>
 		/// <remarks><i>value</i> must be <b>10-12 kHz</b> (10000-12000). Defaults to <b>12000</b>.</remarks>
 		/// <exception cref="ArgumentOutOfRangeException"><i>value</i> is outside the required range.</exception>
 		public int Frequency
 		{
-			get { return _frequency; }
+			get => _frequency;
 			set
 			{
 				if (value < 10000 || value > 12000) throw new ArgumentOutOfRangeException("value must be 10-12 kHz");
@@ -285,31 +304,49 @@ namespace Idmr.LfdReader
 		/// <summary>Container for audio data and repeat information.</summary>
 		public struct SoundDataBlock
 		{
+			internal Blas _parent;
 			// FrequencyDivisor is left global, Codec is ignored and always 00
 			byte[] _data;
+			short _numberOfRepeats;
 
 			/// <summary>Gets or sets the raw 8-bit PCM audio data.</summary>
 			/// <remarks><i>value</i>.Length is restricted to <b>0xFFFFFD</b>.</remarks>
 			/// <exception cref="ArgumentException"><i>value</i> length exceeds limits.</exception>
 			public byte[] Data
 			{
-				get { return _data; }
+				get => _data;
 				set
 				{
 					if (value.Length > 0xFFFFFD) throw new ArgumentException("Audio array is too long");
 					_data = value;
+					_parent.Dirty();
 				}
 			}
 
 			/// <summary>Gets or sets the number of repeats.</summary>
 			/// <remarks>Values <b>-1</b> (infinite repeat) and higher activate repeat flag, <b>-2</b> and lower deactivate.</remarks>
-			public short NumberOfRepeats { get; set; }
+			public short NumberOfRepeats
+			{
+				get => _numberOfRepeats;
+				set
+				{
+					_numberOfRepeats = value;
+					_parent.Dirty();
+				}
+			}
 
 			/// <summary>Gets or sets the repeat flag.</summary>
 			public bool DoesRepeat
 			{
-				get { return NumberOfRepeats > -2; }
-				set { if (!value) NumberOfRepeats = -2; }
+				get => NumberOfRepeats > -2;
+				set
+				{
+					if (!value)
+					{
+						NumberOfRepeats = -2;
+						_parent.Dirty();
+					}
+				}
 			}
 		}
 	}

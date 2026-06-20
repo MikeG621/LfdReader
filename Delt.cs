@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.5
+ * Version: 2.5+
  */
 
 /* CHANGE LOG
+ * [ADD] Dispose
  * v2.5, 260214
  * [FIX] direct width/height validation instead of using try/catch
  * [FIX] final Row in DecodeImage wasn't processing all codes
@@ -110,7 +111,7 @@ namespace Idmr.LfdReader
 		/// <summary>Creates a new instance from an existing opened file with default 8bpp Palette</summary>
 		/// <param name="stream">The opened LFD file</param>
 		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <exception cref="LoadFileException">Typically due to file corruption</exception>
 		public Delt(FileStream stream, long filePosition)
 		{
 			read(stream, filePosition);
@@ -119,7 +120,7 @@ namespace Idmr.LfdReader
 		/// <param name="stream">The opened LFD file</param>
 		/// <param name="filePosition">The offset of the beginning of the resource</param>
 		/// <param name="palette">The colors used for the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <exception cref="LoadFileException">Typically due to file corruption</exception>
 		public Delt(FileStream stream, long filePosition, ColorPalette palette)
 		{
 			_palette = palette;
@@ -129,16 +130,12 @@ namespace Idmr.LfdReader
 		/// <param name="stream">The opened LFD file</param>
 		/// <param name="filePosition">The offset of the beginning of the resource</param>
 		/// <param name="palettes">The colors used for the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
-		public Delt(FileStream stream, long filePosition, Pltt[] palettes)
-		{
-			_palette = Pltt.ConvertToPalette(palettes);
-			read(stream, filePosition);
-		}
+		/// <exception cref="LoadFileException">Typically due to file corruption</exception>
+		public Delt(FileStream stream, long filePosition, Pltt[] palettes) : this(stream, filePosition, Pltt.ConvertToPalette(palettes)) { }
 		/// <summary>Creates a new instance from an existing file with default 8bpp Palette</summary>
 		/// <param name="path">The full path to the unopened LFD file</param>
 		/// <param name="filePosition">The offset of the beginning of the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <exception cref="LoadFileException">Typically due to file corruption</exception>
 		public Delt(string path, long filePosition)
 		{
 			FileStream stream = File.OpenRead(path);
@@ -149,7 +146,7 @@ namespace Idmr.LfdReader
 		/// <param name="path">The full path to the unopened LFD file</param>
 		/// <param name="filePosition">The offset of the beginning of the resource</param>
 		/// <param name="palette">The colors used for the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
+		/// <exception cref="LoadFileException">Typically due to file corruption</exception>
 		public Delt(string path, long filePosition, ColorPalette palette)
 		{
 			_palette = palette;
@@ -161,20 +158,27 @@ namespace Idmr.LfdReader
 		/// <param name="path">The full path to the unopened LFD file</param>
 		/// <param name="filePosition">The offset of the beginning of the resource</param>
 		/// <param name="palettes">The colors used for the resource</param>
-		/// <exception cref="Idmr.Common.LoadFileException">Typically due to file corruption</exception>
-		public Delt(string path, long filePosition, Pltt[] palettes)
-		{
-			_palette = Pltt.ConvertToPalette(palettes);
-			FileStream stream = File.OpenRead(path);
-			read(stream, filePosition);
-			stream.Close();
-		}
+		/// <exception cref="LoadFileException">Typically due to file corruption</exception>
+		public Delt(string path, long filePosition, Pltt[] palettes) : this(path, filePosition, Pltt.ConvertToPalette(palettes)) { }
 		#endregion constructors
 
 		void read(FileStream stream, long filePosition)
 		{
 			try { _process(stream, filePosition); }
 			catch (Exception x) { throw new LoadFileException(x); }
+		}
+
+		/// <summary>Clean up any resources being used.</summary>
+		/// <param name="disposing"><see langword="true"/> if managed resources should be disposed; otherwise, <see langword="false"/>.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+
+			if (disposing) _image?.Dispose();
+			_image = null;
+			_palette = null;
+
+			base.Dispose(disposing);
 		}
 
 		#region public methods
@@ -186,11 +190,11 @@ namespace Idmr.LfdReader
 		{
 			_decodeResource(raw, containsHeader);
 			if (_type != ResourceType.Delt) throw new ArgumentException("Raw header is not for a Delt resource");
+
 			_left = BitConverter.ToInt16(_rawData, 0);
 			_top = BitConverter.ToInt16(_rawData, 2);
 			_right = BitConverter.ToInt16(_rawData, 4);
 			_bottom = BitConverter.ToInt16(_rawData, 6);
-			//System.Diagnostics.Debug.WriteLine("Image LTRBWH: " + _left + ", " + _top + ", " + _right + ", " + _bottom + ", " + Width + ", " + Height);
 			byte[] imageData = new byte[_rawData.Length - 8];
 			ArrayFunctions.TrimArray(_rawData, 8, imageData);
 			try
@@ -199,6 +203,7 @@ namespace Idmr.LfdReader
 				if (HasDefinedPalette) _image.Palette = _palette;
 			}
 			catch { _image = ErrorImage; throw; }
+			_isModified = false;
 		}
 
 		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/></summary>
@@ -215,17 +220,14 @@ namespace Idmr.LfdReader
 		}
 
 		/// <summary>Reads raw Delt-encoded image data and converts to a 256-color Bitmap.</summary>
-		/// <param name="left"><see cref="Delt.Left"/> or <see cref="Anim.Frame.Left"/>.</param>
-		/// <param name="top"><see cref="Delt.Top"/> or <see cref="Anim.Frame.Top"/>.</param>
-		/// <param name="width"><see cref="Delt.Width"/> or <see cref="Anim.Frame.Width"/>.</param>
-		/// <param name="height"><see cref="Delt.Height"/> or <see cref="Anim.Frame.Height"/>.</param>
+		/// <param name="left"><see cref="Left"/> or <see cref="Anim.Frame.Left"/>.</param>
+		/// <param name="top"><see cref="Top"/> or <see cref="Anim.Frame.Top"/>.</param>
+		/// <param name="width"><see cref="Width"/> or <see cref="Anim.Frame.Width"/>.</param>
+		/// <param name="height"><see cref="Height"/> or <see cref="Anim.Frame.Height"/>.</param>
 		/// <param name="rawData">Encoded pixel data from the LFD</param>
 		/// <returns>256-color indexed Bitmap with default palette, <see cref="ErrorImage"/> on error</returns>
 		public static Bitmap DecodeImage(short left, short top, short width, short height, byte[] rawData)
 		{
-#if DEBUG
-			System.Diagnostics.Debug.WriteLine("DELT Image LTWH: " + left + ", " + top + ", " + width + ", " + height);
-#endif
 			if (width < 1 || height < 1) return ErrorImage;	// EMPIRE:ANIMcursors known to have a bad frame, so skip the exception
 
 			try
@@ -241,10 +243,6 @@ namespace Idmr.LfdReader
 					int l = rowCode >> 1;        // length of pixels in row
 					int x = BitConverter.ToInt16(rawData, pos) - left; pos += 2;	// row starting column
 					int y = BitConverter.ToInt16(rawData, pos) - top; pos += 2; // starting row
-#if DEBUG
-					if (y < 0 || y >= height) System.Diagnostics.Debug.WriteLine("bad y: " + y.ToString());
-					if (x < 0 || x >= width) System.Diagnostics.Debug.WriteLine("bad x: " + x.ToString());
-#endif
 					int startCol = x;
 					for (; x < l + startCol; )
 					{
@@ -277,11 +275,11 @@ namespace Idmr.LfdReader
 			}
 			catch { return ErrorImage; }
 		}
-		
+
 		/// <summary>Converts image to compressed DELT data</summary>
 		/// <param name="image">Bitmap to be encoded</param>
-		/// <param name="left"><see cref="Delt.Left"/> or <see cref="Anim.Frame.Left"/>.</param>
-		/// <param name="top"><see cref="Delt.Top"/> or <see cref="Anim.Frame.Top"/>.</param>
+		/// <param name="left"><see cref="Left"/> or <see cref="Anim.Frame.Left"/>.</param>
+		/// <param name="top"><see cref="Top"/> or <see cref="Anim.Frame.Top"/>.</param>
 		/// <exception cref="ArgumentException"><paramref name="image"/> is not <see cref="PixelFormat.Format8bppIndexed"/>.</exception>
 		/// <returns>Encoded byte array of raw data ready to be written to file.</returns>
 		/// <remarks><paramref name="image"/> must be <see cref="PixelFormat.Format8bppIndexed"/>.</remarks>
@@ -343,16 +341,13 @@ namespace Idmr.LfdReader
 		}
 		/// <summary>Converts the provided image to 256-colors using the given palette before converting to compressed DELT data.</summary>
 		/// <param name="image">Bitmap to be encoded.</param>
-		/// <param name="left"><see cref="Delt.Left"/> or <see cref="Anim.Frame.Left"/>.</param>
-		/// <param name="top"><see cref="Delt.Top"/> or <see cref="Anim.Frame.Top"/>.</param>
+		/// <param name="left"><see cref="Left"/> or <see cref="Anim.Frame.Left"/>.</param>
+		/// <param name="top"><see cref="Top"/> or <see cref="Anim.Frame.Top"/>.</param>
 		/// <param name="palette">ColorPalette to be used.</param>
 		/// <returns>Encoded byte array of raw data ready to be written to file.</returns>
-		public static byte[] EncodeImage(Bitmap image, short left, short top, ColorPalette palette)
-		{
-			return EncodeImage(GraphicsFunctions.ConvertTo8bpp(image, palette), left, top);
-		}
+		public static byte[] EncodeImage(Bitmap image, short left, short top, ColorPalette palette) => EncodeImage(GraphicsFunctions.ConvertTo8bpp(image, palette), left, top);
 		#endregion public methods
-		
+
 		#region public properties
 		/// <summary>Gets the standard error image placeholder.</summary>
 		public static Bitmap ErrorImage
@@ -371,11 +366,12 @@ namespace Idmr.LfdReader
 		/// <exception cref="BoundaryException"><i>value</i> results in portions of the image being located off-screen.</exception>
 		public short Left
 		{
-			get { return _left; }
+			get => _left;
 			set
 			{
 				if (EnforceLocation) throw new InvalidOperationException("Value is currently read-only");
 				if (value < 0 || value >= (MaximumWidth - _image.Width)) throw new BoundaryException("Left", "0-" + (MaximumWidth-_image.Width));
+
 				_left = value;
 				_right = (short)(Left + _image.Width - 1);
                 _isModified = true;
@@ -387,53 +383,57 @@ namespace Idmr.LfdReader
 		/// <exception cref="BoundaryException"><i>value</i> results in portions of the image being located off-screen.</exception>
 		public short Top
 		{
-			get { return _top; }
+			get => _top;
 			set
 			{
 				if (EnforceLocation) throw new InvalidOperationException("Value is currently read-only");
-				if (value < 0 || value >= (MaximumHeight - _image.Width)) throw new BoundaryException("Top", "0-" + (MaximumHeight-_image.Width));
+				if (value < 0 || value >= (MaximumHeight - _image.Width)) throw new BoundaryException("Top", "0-" + (MaximumHeight - _image.Width));
+
 				_top = value;
 				_bottom = (short)(Top + _image.Height - 1);
-                _isModified = true;
+				_isModified = true;
 			}
 		}
-		
+
 		/// <summary>Gets the image width.</summary>
-		public short Width { get { return (short)(_right - _left + 1); } }
+		public short Width => (short)(_right - _left + 1);
 		/// <summary>Gets the image height.</summary>
-		public short Height { get { return (short)(_bottom - _top + 1); } }
+		public short Height => (short)(_bottom - _top + 1);
 
 		/// <summary>Gets if <see cref="Palette"/> has been defined.</summary>
-		public bool HasDefinedPalette { get { return _palette != null; } }
+		public bool HasDefinedPalette => _palette != null;
 
 		/// <summary>Gets or sets the <see cref="PixelFormat.Format8bppIndexed"/> image.</summary>
-		/// <exception cref="BoundaryException"><see cref="EnforceImageSize"/> is <b>true</b> and <i>value</i> does not meet size requirements.</exception>
+		/// <exception cref="BoundaryException"><see cref="EnforceImageSize"/> is <see langword="true"/> and <i>value</i> does not meet size requirements.</exception>
 		/// <exception cref="InvalidOperationException"><i>value</i> is not <see cref="PixelFormat.Format8bppIndexed"/> and <see cref="Palette"/> is undefined.</exception>
 		/// <exception cref="ArgumentException"><i>value</i> could not be converted to <see cref="PixelFormat.Format8bppIndexed"/>.</exception>
 		/// <remarks><see cref="Image.Size"/> must be <b>640x480</b> or smaller.</remarks>
 		public Bitmap Image
 		{
-			get { return _image; }
+			get => _image;
 			set
 			{
 				if (EnforceImageSize && value.Size != _image.Size) throw new BoundaryException("New image size must match existing image size");
 				if (Left + value.Width > MaximumWidth || Top + value.Height > MaximumHeight)
 					throw new BoundaryException("Image.Size", (MaximumWidth - Left) + "x" + (MaximumHeight - Top) + " max");
+
 				if (value.PixelFormat == PixelFormat.Format8bppIndexed && !HasDefinedPalette) _palette = value.Palette;
 				if (!HasDefinedPalette) throw new InvalidOperationException("Image is not Format8bppIndexed and Palette is undefined");
+
 				Bitmap temp = _image;
 				try { _image = GraphicsFunctions.ConvertTo8bpp(value, _palette); }
 				catch (Exception x) { _image = temp; throw new ArgumentException("Could not convert image to 8bpp", "Image", x); }
+
 				_right = (short)(Left + _image.Width - 1);
 				_bottom = (short)(Top + _image.Height - 1);
-                _isModified = true;
+				_isModified = true;
 			}
 		}
 
 		/// <summary>Gets or sets the palette for the Delt.</summary>
 		public ColorPalette Palette
 		{
-			get { return _palette; }
+			get => _palette;
 			set
 			{
 				_palette = value;
@@ -441,11 +441,11 @@ namespace Idmr.LfdReader
 			}
 		}
 		/// <summary>Fixes <see cref="Width"/> and <see cref="Height"/>.</summary>
-		/// <remarks>Defaults to <b>false</b>.</remarks>
+		/// <remarks>Defaults to <see langword="false"/>.</remarks>
 		public bool EnforceImageSize { get; set; }
 
 		/// <summary>Sets <see cref="Left"/> and <see cref="Top"/> properties to read-only.</summary>
-		/// <remarks>Defaults to <b>false</b>.</remarks>
+		/// <remarks>Defaults to <see langword="false"/>.</remarks>
 		public bool EnforceLocation { get; set; }
 
 		/// <summary>Maximum allowable width of the image.</summary>

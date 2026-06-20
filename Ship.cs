@@ -264,6 +264,22 @@ namespace Idmr.LfdReader
 			catch (Exception x) { throw new LoadFileException(x); }
 		}
 
+		/// <summary>Clean up any resources being used.</summary>
+		/// <param name="disposing"><see langword="true"/> if managed resources should be disposed; otherwise, <see langword="false"/>.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+
+			if (disposing)
+			{
+				//TODO: proper dispose
+			}
+			Components = null;
+			ShadingSets = null;
+			Unknowns = null;
+			base.Dispose(disposing);
+		}
+
 		/// <summary>Processes raw data to populate the resource.</summary>
 		/// <param name="raw">Raw byte data.</param>
 		/// <param name="containsHeader">Whether or not <paramref name="raw"/> contains the resource Header information.</param>

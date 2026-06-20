@@ -1,13 +1,15 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2025 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2026 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.4
+ * Version: 2.4+
  */
 
 /* CHANGE LOG
+ * [UPD] changed _images to List<>
+ * [ADD] Dispose
  * v2.4, 250202
  * [FIX] Fixed the FC opcode
  * v1.1, 141215
@@ -16,6 +18,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -89,18 +92,18 @@ namespace Idmr.LfdReader
 	public partial class Panl : Resource
 	{
 		ColorPalette _palette = null;
-		Bitmap[] _images;
+		List<Bitmap> _images = new List<Bitmap>();
 		ImageIndexer _imageIndexer;
-		bool _isPnl { get { return _fileName.ToUpper().EndsWith(".PNL"); } }
+		bool _isPnl => _fileName.ToUpper().EndsWith(".PNL");
 
 		#region constructors
 		/// <summary>Blank constructor.</summary>
-		/// <param name="forLfd">If <b>true</b> the Panl is meant to be in stored in a LFD file, otherwise a standalone .PNL file.</param>
+		/// <param name="forLfd">If <see langword="true"/> the Panl is meant to be in stored in a LFD file, otherwise a standalone .PNL file.</param>
 		public Panl(bool forLfd)
 		{
 			_type = ResourceType.Panl;
-			if (forLfd) _images = new Bitmap[1];
-			else _images = new Bitmap[104];
+			if (forLfd) _images.Add(new Bitmap(1, 1));
+			else for (int i = 0; i < 104; i++)_images.Add(new Bitmap(1, 1));	// I don't like this, but kinda need the pre-population
 			_imageIndexer = new ImageIndexer(this);
 		}
 		/// <summary>Creates a new instance from an existing opened file with default 256 color Palette.</summary>
@@ -165,7 +168,7 @@ namespace Idmr.LfdReader
 			_imageIndexer = new ImageIndexer(this);
 		}
 
-		PanlInfo decodeImage(byte[] rawData, int imageIndex)
+		PanlInfo decodeImage(byte[] rawData)
 		{
 			PanlInfo pi;
 			short width = 0, height;
@@ -240,12 +243,30 @@ namespace Idmr.LfdReader
 					}
 				}
 			}
-			_images[imageIndex] = new Bitmap(width, height, PixelFormat.Format8bppIndexed);
-			if (_palette != null) _images[imageIndex].Palette = _palette;
-			BitmapData bmdata = GraphicsFunctions.GetBitmapData(_images[imageIndex]);
+			_images.Add(new Bitmap(width, height, PixelFormat.Format8bppIndexed));
+			var img = _images[_images.Count - 1];
+			if (_palette != null) img.Palette = _palette;
+			BitmapData bmdata = GraphicsFunctions.GetBitmapData(img);
 			GraphicsFunctions.CopyBytesToImage(pi.PixelData, bmdata);
-			_images[imageIndex].UnlockBits(bmdata);
+			img.UnlockBits(bmdata);
 			return pi;
+		}
+
+		/// <summary>Clean up any resources being used.</summary>
+		/// <param name="disposing"><see langword="true"/> if managed resources should be disposed; otherwise, <see langword="false"/>.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+
+			if (disposing)
+			{
+				for (int i = 0; i < _images.Count; i++) _images[i].Dispose();
+				_images.Clear();
+			}
+			_palette = null;
+			_images = null;
+			_imageIndexer = null;
+			base.Dispose(disposing);
 		}
 		
 		#region public methods
@@ -256,29 +277,30 @@ namespace Idmr.LfdReader
 		/// <remarks>If resource was created from a *.PNL file, <paramref name="containsHeader"/> is ignored.</remarks>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
+			_images.Clear();
 			if (!_isPnl)
 			{
 				_decodeResource(raw, containsHeader);
 				if (_type != ResourceType.Panl) throw new ArgumentException("Raw header is not for a Panl resource");
-				_images = new Bitmap[1];
-				decodeImage(_rawData, 0);
+
+				decodeImage(_rawData);
 			}
 			else
 			{
 				_rawData = raw;
 				int count = 0, offset, pos = 0;
 				for (offset = 0; offset < _rawData.Length; ) if (_rawData[offset++] == 0xFF) count++;
-				_images = new Bitmap[count];
 				offset = 0;
 				for (int i = 0; i < count; i++)
 				{
 					byte[] remainder = new byte[_rawData.Length - offset];
 					ArrayFunctions.TrimArray(_rawData, offset, remainder);
-					PanlInfo pi = decodeImage(remainder, i);
+					PanlInfo pi = decodeImage(remainder);
 					pos += pi.RawLength;
 					offset = pos;
 				}
 			}
+			_isModified = false;
 		}
 
 		/// <summary>Preparess the resource for writing and updates <see cref="Resource.RawData"/>.</summary>
@@ -286,7 +308,7 @@ namespace Idmr.LfdReader
 		{
 			//TODO: test Panl.Write()
 			byte[] raw = null;
-			for (int i = 0; i < _images.Length; i++)
+			for (int i = 0; i < _images.Count; i++)
 			{
 				BitmapData bd = GraphicsFunctions.GetBitmapData(_images[i]);
 				byte[] pixels = new byte[bd.Stride * bd.Height];
@@ -333,7 +355,7 @@ namespace Idmr.LfdReader
 		public ImageIndexer Images => _imageIndexer;
 
 		/// <summary>Gets the number of images contained within the resource.</summary>
-		public int NumberOfImages => _images.Length;
+		public int NumberOfImages => _images.Count;
 
 		/// <summary>Maximum allowable image width.</summary>
 		/// <remarks>Value is <b>640</b>.</remarks>

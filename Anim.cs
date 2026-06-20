@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.5
+ * Version: 2.5+
  */
 
 /* CHANGE LOG
+ * [ADD] Dispose
  * v2.5, 260214
  * [UPD] FrameCollection ctors now use numFrames, blank ANIM still inits to 50
  * v1.2, 160712
@@ -135,6 +136,23 @@ namespace Idmr.LfdReader
 			catch (Exception x) { throw new LoadFileException(x); }
 		}
 
+		/// <summary>Clean up any resources being used.</summary>
+		/// <param name="disposing"><see langword="true"/> if managed resources should be disposed; otherwise, <see langword="false"/>.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+
+			if (disposing)
+			{
+				for (int i = 0; i < _frames.Count; i++) _frames[i].Dispose();
+				_frames.Clear();
+			}
+			_frames = null;
+			_palette = null;
+
+			base.Dispose(disposing);
+		}
+
 		#region public methods
 		/// <summary>Processes raw data to populate the resource.</summary>
 		/// <param name="raw">Raw byte data.</param>
@@ -142,47 +160,44 @@ namespace Idmr.LfdReader
 		/// <exception cref="ArgumentException">Header-defined <see cref="Type"/> is not <see cref="Resource.ResourceType.Anim"/>.</exception>
 		public override void DecodeResource(byte[] raw, bool containsHeader)
 		{
-#if DEBUG
-			System.Diagnostics.Debug.WriteLine("ANIM" + _name);
-#endif
 			_decodeResource(raw, containsHeader);
 			if (_type != ResourceType.Anim) throw new ArgumentException("Raw header is not for an Anim resource");
+
 			short numberOfFrames = BitConverter.ToInt16(_rawData, 0);
+			_frames?.Clear();
 			_frames = new FrameCollection(this, numberOfFrames);
 			for (int i = 0; i < numberOfFrames; i++) _frames.Add(new Frame(this));
 			int frameLength;
 			int offset = 2;
-			for (int i = 0; i < NumberOfFrames; i++)
+			foreach (var f in _frames)
 			{
-#if DEBUG
-				System.Diagnostics.Debug.WriteLine("Frame " + i);
-#endif
 				frameLength = BitConverter.ToInt32(_rawData, offset);
 				byte[] delt = new byte[frameLength];
 				ArrayFunctions.TrimArray(_rawData, offset + 4, delt);
-				_frames[i]._delt.DecodeResource(delt, false);
-				if (HasDefinedPalette) _frames[i]._delt.Palette = _palette;
+				f._delt.DecodeResource(delt, false);
+				if (HasDefinedPalette) f._delt.Palette = _palette;
 				offset += frameLength + 4;
 			}
 			recalculateDimensions();
+			_isModified = false;
 		}
 
 		/// <summary>Prepares the resource for writing and updates <see cref="Resource.RawData"/>.</summary>
 		public override void EncodeResource()
 		{
 			int len = 2;
-			for (int i = 0; i < NumberOfFrames; i++)
+			foreach (var f in _frames)
 			{
-				_frames[i]._delt.EncodeResource();
-				len += _frames[i]._delt.Length + 4;
+				f._delt.EncodeResource();
+				len += f._delt.Length + 4;
 			}
 			byte[] raw = new byte[len];
 			int offset = 0;
 			ArrayFunctions.WriteToArray(NumberOfFrames, raw, ref offset);
-			for (int i = 0; i < NumberOfFrames; i++)
+			foreach (var f in _frames)
 			{
-				ArrayFunctions.WriteToArray(_frames[i]._delt.Length + 4, raw, ref offset);
-				ArrayFunctions.WriteToArray(_frames[i]._delt.RawData, raw, ref offset);
+				ArrayFunctions.WriteToArray(f._delt.Length + 4, raw, ref offset);
+				ArrayFunctions.WriteToArray(f._delt.RawData, raw, ref offset);
 			}
 			_rawData = raw;
 
@@ -194,35 +209,37 @@ namespace Idmr.LfdReader
 		public void SetPalette(ColorPalette palette)
 		{
 			_palette = palette;
-			for (int i = 0; i < _frames.Count; i++) _frames[i]._delt.Palette = _palette;
+			foreach (var f in _frames) f._delt.Palette = _palette;
+			Dirty();
 		}
 		/// <summary>Sets the colors used for the Anim.</summary>
 		/// <param name="palettes">The colors to be used.</param>
 		/// <remarks>All <see cref="Frame.Image">Images</see> are updated.</remarks>
-		public void SetPalette(Pltt[] palettes) { SetPalette(Pltt.ConvertToPalette(palettes)); }
+		public void SetPalette(Pltt[] palettes) => SetPalette(Pltt.ConvertToPalette(palettes));
 		#endregion public methods
-		
+
 		#region public properties
 		/// <summary>Determines if <see cref="Frame.Image">Images</see> should be returned sized relative to <see cref="Location"/>.</summary>
 		public bool RelativePosition { get; set; }
-		
+
 		/// <summary>Gets total number of frames within the resource.</summary>
-		public short NumberOfFrames { get { return (short)_frames.Count; } }
+		public short NumberOfFrames => (short)_frames.Count;
 
 		/// <summary>Gets or sets the Left screen location of the resource.</summary>
 		/// <remarks>Each <see cref="Frame"/> will update its <see cref="Frame.Position"/> to maintain it's relative distance to <see cref="Location"/>.</remarks>
 		/// <exception cref="BoundaryException"><i>value</i> causes portion of image to be off-screen.</exception>
 		public short Left
 		{
-			get { return _left; }
+			get => _left;
 			set
 			{
 				if (value >= Delt.MaximumWidth - _width || value < 0)
 					throw new BoundaryException("value", "0-" + (Delt.MaximumWidth - _width));
+
 				short diff = (short)(value - _left);
 				for (int f = 0; f < NumberOfFrames; f++) _frames[f].Left += diff;
 				_left = value;
-                _isModified = true;
+				_isModified = true;
 			}
 		}
 		/// <summary>Gets or sets the Top screen location of the resource.</summary>
@@ -230,27 +247,28 @@ namespace Idmr.LfdReader
 		/// <exception cref="BoundaryException"><i>value</i> causes portion of image to be off-screen.</exception>
 		public short Top
 		{
-			get { return _top; }
+			get => _top;
 			set
 			{
 				if (value >= Delt.MaximumHeight - _height || value < 0)
 					throw new BoundaryException("value", "0-" + (Delt.MaximumHeight - _height));
+
 				short diff = (short)(value - _top);
 				for (int f = 0; f < NumberOfFrames; f++) _frames[f].Top += diff;
 				_top = value;
-                _isModified = true;
+				_isModified = true;
 			}
 		}
 		/// <summary>Gets the maximum width occupied by the resource.</summary>
-		public short Width { get { return _width; } }
+		public short Width => _width;
 		/// <summary>Gets the maximum height occupied by the resource.</summary>
-		public short Height { get { return _height; } }
+		public short Height => _height;
 		/// <summary>Gets or sets the resource screen location.</summary>
 		/// <remarks>Each <see cref="Frame"/> will update its <see cref="Frame.Position"/> to maintain it's relative distance to <see cref="Location"/>.</remarks>
 		/// <exception cref="BoundaryException"><i>value</i> causes portion of image to be off-screen.</exception>
 		public Point Location
 		{
-			get { return new Point(_left, _top); }
+			get => new Point(_left, _top);
 			set
 			{
 				try
@@ -263,18 +281,18 @@ namespace Idmr.LfdReader
 			}
 		}
 		/// <summary>Gets the maximum size occupied by the image.</summary>
-		public Size Size { get { return new Size(_width, _height); } }
+		public Size Size => new Size(_width, _height);
 
 		/// <summary>Gets if the Anim palette has been defined.</summary>
-		public bool HasDefinedPalette { get { return _palette != null; } }
+		public bool HasDefinedPalette => _palette != null;
 		
-		/// <summary>When <b>true</b>, locks the overall Anim boundaries.</summary>
+		/// <summary>When <see langword="true"/>, locks the overall Anim boundaries.</summary>
 		/// <remarks>When fixed, <see cref="Frame.Image"/> and <see cref="Frame.Position"/> cannot be edited in a manner that would result in portions of the <see cref="Frame"/> residing outside the original boundaries of the Anim.<br/>
-		/// Defaults to <b>false</b>.</remarks>
+		/// Defaults to <see langword="false"/>.</remarks>
 		public bool HasFixedDimensions { get; set; }
 
 		/// <summary>Gets the collection of images.</summary>
-		public FrameCollection Frames { get { return _frames; } }
+		public FrameCollection Frames => _frames;
 		#endregion public properties
 		
 		internal void recalculateDimensions()
@@ -293,6 +311,7 @@ namespace Idmr.LfdReader
 			_top = top;
 			_width = (short)(right - left + 1);
 			_height = (short)(bottom - top + 1);
+			Dirty();
 		}
 	}
 }

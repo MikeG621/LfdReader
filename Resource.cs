@@ -1,6 +1,6 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2025 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2026 Michael Gaisser (mjgaisser@gmail.com)
  * 
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the Mozilla Public License; either version 2.0 of the
@@ -13,10 +13,11 @@
  * If a copy of the MPL (MPL.txt) was not distributed with this file,
  * you can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Version: 2.4
+ * Version: 2.4+
  */
 
 /* CHANGE LOG
+ * [ADD] IDisposable, IsDirty
  * v2.4, 250202
  * [ADD] Dirty()
  * v2.0, 210309
@@ -50,7 +51,7 @@ namespace Idmr.LfdReader
 	/// <para>Every Resource contains a Header of <b>0x10</b> bytes, which is comprised of the identifying <see cref="Type"/>, <see cref="Name"/> and resource <see cref="Length"/>.
 	/// This Header is what makes up the SubHeader for <see cref="Rmap"/> resources.
 	/// The <see cref="RawData"/> array is the complete contents of the resource, with its size equal to the Length value.</para></example>
-	public class Resource
+	public class Resource : IDisposable
 	{
 		/// <summary>Full path to the lfd file.</summary>
 		protected string _fileName = "untitled.lfd";
@@ -64,6 +65,8 @@ namespace Idmr.LfdReader
 		protected byte[] _rawData = null;
         /// <summary>Flag to denote if resource must be encoded before writing.</summary>
         internal bool _isModified = false;
+		/// <summary>Flag to denote that the resource has already been disposed.</summary>
+		protected bool _disposed;
 
 		/// <summary>Enumeration of all known LFD Resource Types.</summary>
 		/// <remarks>Values are simply taken from the raw data (<b>int</b> or 4-byte ASCII <b>string</b>).</remarks>
@@ -291,7 +294,7 @@ namespace Idmr.LfdReader
 			set
 			{
 				_name = StringFunctions.GetTrimmed(value, 8);
-				_isModified = true;
+				Dirty();
 			}
 		}
 		/// <summary>Gets the length of the raw byte data, not including header.</summary>
@@ -302,6 +305,8 @@ namespace Idmr.LfdReader
 		public byte[] RawData => (byte[])_rawData.Clone();
 		/// <summary>Gets or sets the object that contains user-defined information.</summary>
 		public object Tag { get; set; }
+		/// <summary>Gets if the resource is known to be modified.</summary>
+		public bool IsDirty => _isModified;
 		
 		/// <summary>Total length of header information.</summary>
 		/// <remarks>Value is <b>16</b>.</remarks>
@@ -377,6 +382,29 @@ namespace Idmr.LfdReader
 			}
 			else _rawData = raw;
 		}
-		#endregion protected methods
+		#endregion
+
+		#region IDisposable members
+		/// <summary>Clean up any resources being used.</summary>
+		/// <param name="disposing"><see langword="true"/> if managed resources should be disposed; otherwise, <see langword="false"/>.</param>
+		protected virtual void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+			if (disposing)
+			{
+				// none, handled by inherited members
+			}
+
+			_rawData = null;
+			_disposed = true;
+		}
+
+		/// <summary>Release all resources used.</summary>
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+		#endregion
 	}
 }

@@ -93,12 +93,12 @@ namespace Idmr.LfdReader
 		/// <summary>Gets or sets the collection of <see cref="Frame">Frames</see> contained within the Act.</summary>
 		public FrameCollection Frames
 		{
-			get { return _act.Frames; }
+			get => _act.Frames;
 			set
-            {
-                _act.Frames = value;
-                _isModified = true;
-            }
+			{
+				_act.Frames = value;
+				_isModified = true;
+			}
 		}
 
 		/// <summary>Gets or sets the pixel location used to "pin" the object in-game.</summary>
@@ -106,25 +106,25 @@ namespace Idmr.LfdReader
 		/// <remarks><see cref="Frame.Location"/> values will update as necessary.</remarks>
 		public Point Center
 		{
-			get { return _act.Center; }
+			get => _act.Center;
 			set
-            {
-                _act.Center = value;
-                _isModified = true;
-            }
+			{
+				_act.Center = value;
+				_isModified = true;
+			}
 		}
-		
+
 		/// <summary>Gets the overall height of the object.</summary>
-		public int Height { get { return _act.Height; } }
-		
+		public int Height => _act.Height;
+
 		/// <summary>Gets the number of images contained within the resource.</summary>
-		public int NumberOfFrames { get { return _act.NumberOfFrames; } }
-		
+		public int NumberOfFrames => _act.NumberOfFrames;
+
 		/// <summary>Gets the overall size of the object.</summary>
-		public Size Size { get { return _act.Size; } }
-		
+		public Size Size => _act.Size;
+
 		/// <summary>Gets the overall width of the object.</summary>
-		public int Width { get { return _act.Width; } }
+		public int Width => _act.Width;
 		#endregion public properties
 	}
 }

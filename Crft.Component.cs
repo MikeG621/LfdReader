@@ -8,6 +8,7 @@
  */
 
 /* CHANGE LOG
+ * v2.2, 230401
  * [NEW] Shape.IsTwoSided and Shape.IsGouraudShaded properties
  * v2.1, 221030
  * [NEW] Lod.Line class, and Shape.Lines property
@@ -136,14 +137,14 @@ namespace Idmr.LfdReader
                 /// Each value is read-only.</remarks>
 				public Indexer<byte> Data { get; internal set; }
 				/// <summary>Gets if the Shape is double-sided.</summary>
-				/// <remarks>Top bit of <see cref="Type"/>, if <b>false</b> then the shape is single-sided.</remarks>
-                public bool IsTwoSided { get { return (Type & 0x80) == 0x80; } }
+				/// <remarks>Top bit of <see cref="Type"/>, if <see langword="false"/> then the shape is single-sided.</remarks>
+				public bool IsTwoSided => (Type & 0x80) == 0x80;
 				/// <summary>Gets if the Shape uses Gouraud (interpolated) shading.</summary>
-				/// <remarks>Second bit of <see cref="Type"/>, if <b>false</b> then the shape is flat shaded.</remarks>
-				public bool IsGouraudShaded { get { return (Type & 0x40) == 0x40; } }
-                /// <summary>From the separate array following the Shape collection.</summary>
-                /// <remarks>Looks unique among the other Shapes and can be 0 to ShapeCount, likely an ID value.</remarks>
-                public byte Unknown1 { get; internal set; }
+				/// <remarks>Second bit of <see cref="Type"/>, if <see langword="false"/> then the shape is flat shaded.</remarks>
+				public bool IsGouraudShaded => (Type & 0x40) == 0x40;
+				/// <summary>From the separate array following the Shape collection.</summary>
+				/// <remarks>Looks unique among the other Shapes and can be 0 to ShapeCount, likely an ID value.</remarks>
+				public byte Unknown1 { get; internal set; }
 				/// <summary>From the separate array following the Shape collection.</summary>
 				/// <remarks>Immediately follows Unknown1.</remarks>
 				public short Unknown2 { get; internal set; }

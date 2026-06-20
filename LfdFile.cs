@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.5.2
+ * Version: 2.5.2+
  */
 
 /* CHANGE LOG
+ * [ADD] Name
  * v2.5.2, 260517
  * [FIX] Resource modified flag reset during Write
  * v2.4, 250202
@@ -155,9 +156,11 @@ namespace Idmr.LfdReader
 		/// <summary>Gets the full path to the file.</summary>
 		public string FilePath { get; private set; } = "resource.lfd";
 		/// <summary>Gets the file name and extension of the file.</summary>
-		public string FileName => Common.StringFunctions.GetFileName(FilePath);
+		public string FileName => Path.GetFileName(FilePath);
 		/// <summary>Gets if <see cref="Rmap"/> is defined.</summary>
 		public bool HasRmap => (_rmp != null);
+		/// <summary>Gets the file name without extension.</summary>
+		public string Name => Path.GetFileNameWithoutExtension(FilePath);
 		/// <summary>Gets or sets the Rmap resource for the file.</summary>
 		/// <exception cref="ArgumentException">Cannot set if file is defined by the <see cref="LfdCategory.Cockpit"/> preset.</exception>
 		public Rmap Rmap

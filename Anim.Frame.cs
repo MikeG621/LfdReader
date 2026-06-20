@@ -1,13 +1,14 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2021 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2025 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.0
+ * Version: 2.0+
  */
 
 /* CHANGE LOG
+ * [ADD] IDisposable
  * v2.0, 210309
  * [FIX] getting the image when RelativePosition is used
  * v1.2, 160712
@@ -28,11 +29,12 @@ namespace Idmr.LfdReader
 	{
 		/// <summary>Object for the individual images in the resource.</summary>
 		/// <remarks>Each Frame is practically an individual <see cref="Delt"/> resource with the added consideration that is must lie within the boundaries set by the parent Anim resource.</remarks>
-		public class Frame
+		public class Frame : IDisposable
 		{
 			internal Anim _parent;
 			internal Delt _delt = new Delt();
-			
+			private bool _disposed;
+
 			/// <summary>Blank constructor.</summary>
 			/// <param name="parent">Parent Anim resource.</param>
 			internal Frame(Anim parent)
@@ -42,32 +44,34 @@ namespace Idmr.LfdReader
 			
 			/// <summary>Gets or sets the global left position of the frame.</summary>
 			/// <exception cref="BoundaryException">Value would result in portions of the image being outside the acceptable boundaries.</exception>
-			/// <remarks>If <see cref="HasFixedDimensions"/> is <b>false</b>, the parent dimensions will adjust as necessary.<br/>
+			/// <remarks>If <see cref="HasFixedDimensions"/> is <see langword="false"/>, the parent dimensions will adjust as necessary.<br/>
 			/// Otherwise, out-of-bounds content results in an exception.</remarks>
 			public short Left
 			{
-				get { return _delt.Left; }
+				get => _delt.Left;
 				set
 				{
 					if (_parent.HasFixedDimensions && (value < _parent._left || value + Width > _parent._left + _parent._width))
 						throw new BoundaryException("Left", _parent._left + "-" + (_parent._left + _parent._width - Width));
+
 					_delt.Left = value;
 					_parent.recalculateDimensions();
-                    _parent._isModified = true;
+					_parent._isModified = true;
 				}
 			}
-			
+
 			/// <summary>Gets or sets the global top position of the frame.</summary>
 			/// <exception cref="BoundaryException">Value would result in portions of the image being outside the acceptable boundaries.</exception>
-			/// <remarks>If <see cref="HasFixedDimensions"/> is <b>false</b>, the parent dimensions will adjust as necessary.<br/>
+			/// <remarks>If <see cref="HasFixedDimensions"/> is <see langword="false"/>, the parent dimensions will adjust as necessary.<br/>
 			/// Otherwise, out-of-bounds content results in an exception.</remarks>
 			public short Top
 			{
-				get { return _delt.Top; }
+				get => _delt.Top;
 				set
 				{
 					if (_parent.HasFixedDimensions && (value < _parent._top || value + Height > _parent._top + _parent._height))
 						throw new BoundaryException("Top", _parent._top + "-" + (_parent._top + _parent._height - Height));
+
 					_delt.Top = value;
 					_parent.recalculateDimensions();
                     _parent._isModified = true;
@@ -75,14 +79,14 @@ namespace Idmr.LfdReader
 			}
 			
 			/// <summary>Gets the width of the frame.</summary>
-			public short Width { get { return _delt.Width; } }
+			public short Width => _delt.Width;
 			
 			/// <summary>Gets the height of the frame.</summary>
-			public short Height { get { return _delt.Height; } }
+			public short Height => _delt.Height;
 			
 			/// <summary>Gets or sets the frame image.</summary>
 			/// <remarks><para><see cref="Delt.ErrorImage"/> is returned if there's an error retrieving the image.</para>
-			/// <para>When setting the image, if <see cref="HasFixedDimensions"/> is <b>false</b>, the parent dimensions will adjust as necessary.
+			/// <para>When setting the image, if <see cref="HasFixedDimensions"/> is <see langword="false"/>, the parent dimensions will adjust as necessary.
 			/// Otherwise, out-of-bounds content results in an exception.
 			/// <i>value</i> is converted to <see cref="PixelFormat.Format8bppIndexed"/> using the current <see cref="Anim"/> palette if it exists.
 			/// If the palette is undefined, loading a <see cref="PixelFormat.Format8bppIndexed"/> image will set the palette for the <see cref="Anim"/>.</para></remarks>
@@ -129,13 +133,34 @@ namespace Idmr.LfdReader
 			
 			/// <summary>Gets or sets the global position of the frame.</summary>
 			/// <exception cref="BoundaryException">The value results in portions of the image being outside the acceptable boundaries.</exception>
-			/// <remarks>If <see cref="HasFixedDimensions"/> is <b>false</b>, the parent dimensions will adjust as necessary.
+			/// <remarks>If <see cref="HasFixedDimensions"/> is <see langword="false"/>, the parent dimensions will adjust as necessary.
 			/// Otherwise, out-of-bounds content results in an exception.</remarks>
 			public Point Position
 			{
-				get { return new Point(Left, Top); }
+				get => new Point(Left, Top);
 				set { Left = (short)value.X; Top = (short)value.Y; }
 			}
+
+			#region IDisposable members
+			/// <summary>Clean up any resources being used.</summary>
+			/// <param name="disposing"><see langword="true"/> if managed resources should be disposed; otherwise, <see langword="false"/>.</param>
+			protected virtual void Dispose(bool disposing)
+			{
+				if (_disposed) return;
+
+				if (disposing) _delt.Dispose();
+				_delt = null;
+				_parent = null;
+				_disposed = true;
+			}
+
+			/// <summary>Release all resources used.</summary>
+			public void Dispose()
+			{
+				Dispose(true);
+				GC.SuppressFinalize(this);
+			}
+			#endregion
 		}
 	}
 }

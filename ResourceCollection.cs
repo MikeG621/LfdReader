@@ -77,7 +77,7 @@ namespace Idmr.LfdReader
 		#region public methods
 		/// <summary>Finds the resource with the specified <see cref="Resource.Tag"/> value.</summary>
 		/// <param name="tag">User-defined data.</param>
-		/// <returns>The first matching Resource, otherwise <b>null</b>.</returns>
+		/// <returns>The first matching Resource, otherwise <see langword="null"/>.</returns>
 		public Resource GetResourceByTag(object tag)
 		{
 			for (int i = 0; i < Count; i++)
@@ -171,7 +171,7 @@ namespace Idmr.LfdReader
 		/// <param name="label">The identifying string of the Resource in the form of "<see cref="Type">TYPE</see><see cref="Resource.Name"/>".</param>
 		/// <exception cref="ArgumentException">Resource not found.</exception>
 		/// <exception cref="InvalidOperationException">Attempted to set when structure is locked and <see cref="Resource.Type"/> or <see cref="Resource.Name"/> have been changed.</exception>
-		/// <returns>The Resource matching <paramref name="label"/>, otherwise <b>null</b>.</returns>
+		/// <returns>The Resource matching <paramref name="label"/>, otherwise <see langword="null"/>.</returns>
 		/// <remarks><paramref name="label"/> is the same format as <see cref="Resource.ToString()"/>.</remarks>
 		public Resource this[string label]
 		{
@@ -194,11 +194,11 @@ namespace Idmr.LfdReader
 		}
 		
 		/// <summary>Gets the number of objects in the Collection.</summary>
-		/// <remarks>If internal List is <b>null</b>, returns <b>-1</b>.</remarks>
+		/// <remarks>If internal List is <see langword="null"/>, returns <b>-1</b>.</remarks>
 		public int Count { get { return (_items == null ? -1 : _items.Count); } }
 		
 		/// <summary>Gets or sets whether or not the structure is unlocked.</summary>
-		/// <remarks>Default is <b>false</b>, set to <b>true</b> when initialized with <see cref="ResourceCollection()"/> or <see cref="LfdFile.LfdCategory.Normal"/>.<br/>
+		/// <remarks>Default is <see langword="false"/>, set to <see langword="true"/> when initialized with <see cref="ResourceCollection()"/> or <see cref="LfdFile.LfdCategory.Normal"/>.<br/>
 		///	When locked, <see cref="Resource.Type"/> and <see cref="Resource.Name"/> are read-only, Collection cannot be resized.</remarks>
 		public bool CanEditStructure { get; set; }
 		#endregion public properties
