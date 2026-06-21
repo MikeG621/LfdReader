@@ -1,13 +1,14 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2023 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2026 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.2
+ * Version: 2.2+
  */
 
 /* CHANGE LOG
+ * [UPD] Indexers replaced with ReadOnlyCollection
  * v2.2, 230401
  * [NEW] Shape.IsTwoSided and Shape.IsGouraudShaded properties
  * v2.1, 221030
@@ -17,7 +18,7 @@
  */
 
 using System;
-using Idmr.Common;
+using System.Collections.ObjectModel;
 
 namespace Idmr.LfdReader
 {
@@ -28,23 +29,15 @@ namespace Idmr.LfdReader
 		{
 			/// <summary>Initialize the mesh with the specified number of Lods (levels of detail).</summary>
 			/// <param name="lodCount">The count to create.</param>
-			/// <remarks><see cref="Lods"/> is created with read only flags set.</remarks>
 			public Component(int lodCount)
 			{
 				Lod[] lods = new Lod[lodCount];
-				bool[] readOnly = new bool[lodCount];
-				for (int i = 0; i < lodCount; i++)
-				{
-					lods[i] = new Lod();
-					readOnly[i] = true;
-				}
-
-				Lods = new Indexer<Lod>(lods, readOnly);
+				for (int i = 0; i < lodCount; i++) lods[i] = new Lod();
+				Lods = Array.AsReadOnly(lods);
 			}
 
 			/// <summary>Gets the Lods.</summary>
-			/// <remarks>Each Lod is read-only.</remarks>
-			public Indexer<Lod> Lods { get; }
+			public ReadOnlyCollection<Lod> Lods { get; internal set; }
 		}
 
 		/// <summary>Represents a single Level of Detail (LOD) mesh.</summary>
@@ -58,18 +51,15 @@ namespace Idmr.LfdReader
 			/// <summary>At 0x3.</summary>
 			public byte Unknown2 { get; internal set; }
 			/// <summary>Gets the color indices.</summary>
-			/// <remarks>Each value is read-only.</remarks>
-			public Indexer<byte> ColorIndices { get; internal set; }
+			public ReadOnlyCollection<byte> ColorIndices { get; internal set; }
 			/// <summary>Gets the minimum value for the bounding box.</summary>
 			public Vertex16 MinimumBound { get; internal set; }
 			/// <summary>Gets the maximum value for the bounding box.</summary>
 			public Vertex16 MaximumBound { get; internal set; }
 			/// <summary>Gets the vertices for the Lod.</summary>
-			/// <remarks>Each vertex is read-only.</remarks>
-			public Indexer<Vertex16> MeshVertices { get; internal set; }
+			public ReadOnlyCollection<Vertex16> MeshVertices { get; internal set; }
 			/// <summary>Gets the Shapes for the Lod.</summary>
-			/// <remarks>Each shape is read-only.</remarks>
-			public Indexer<Shape> Shapes { get; internal set; }
+			public ReadOnlyCollection<Shape> Shapes { get; internal set; }
 			// <summary>Gets the unknown data at the end of the Lod</summary>
 			// <remarks>Might be texture related? Each entry is read-only</remarks>
 			//public Indexer<UnknownData> UnkData { get; internal set; }
@@ -133,9 +123,8 @@ namespace Idmr.LfdReader
 				/// <summary>Gets the Shape's Type.</summary>
 				public byte Type { get; internal set; }
                 /// <summary>Gets the data array.</summary>
-                /// <remarks>Length is (Type &amp; 0x0F)*2 + 3. The array of pairs are Vertex indices, the remaining 3 are unknown.<br/>
-                /// Each value is read-only.</remarks>
-				public Indexer<byte> Data { get; internal set; }
+                /// <remarks>Length is (Type &amp; 0x0F)*2 + 3. The array of pairs are Vertex indices, the remaining 3 are unknown.</remarks>
+				public ReadOnlyCollection<byte> Data { get; internal set; }
 				/// <summary>Gets if the Shape is double-sided.</summary>
 				/// <remarks>Top bit of <see cref="Type"/>, if <see langword="false"/> then the shape is single-sided.</remarks>
 				public bool IsTwoSided => (Type & 0x80) == 0x80;
@@ -149,8 +138,7 @@ namespace Idmr.LfdReader
 				/// <remarks>Immediately follows Unknown1.</remarks>
 				public short Unknown2 { get; internal set; }
 				/// <summary>Gets the lines made up of vertex pairs from <see cref="Data"/>.</summary>
-				/// <remarks>Indices are read-only.</remarks>
-				public Indexer<Line> Lines { get; internal set; }
+				public ReadOnlyCollection<Line> Lines { get; internal set; }
 			}
 
 			/// <summary>Represents a single line within a mesh</summary>

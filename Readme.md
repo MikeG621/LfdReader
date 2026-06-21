@@ -9,25 +9,27 @@ Library for editing LucasArts *.LFD resource files.
 
 ## Latest Release
 #### WIP 3.0
-- IDisposable has been implemented throughout.
+- `IDisposable` has been implemented throughout.
 - Better application of the Dirty flag throughout.
+- Many `Indexer` types changed to a proper Collection are ***BREAKING CHANGES*** due to the `Length` parameter switching to `Count`.
 - (LfdFile) Added a Name property for the filename minus ".lfd" extension.
 - (Resource) IsDirty added to expose the flag.
 - (ANIM) FrameCollection collection members now implemented directly.
-- (ANIM) FrameCollection.Remove() marked OBS in favor of new RemoveAt().
+- (ANIM) `FrameCollection.Remove()` marked OBS in favor of new `RemoveAt()`.
+- (CRFT, CPLX, SHIP) Readonly `Indexer` usage replaced with `ReadOnlyCollection<>`.
 - (FONT) Fixed missing type assignment in the generic constructors.
-- (FONT) Height and NumberOfGlyphs now write-enabled.
+- (FONT) `Height` and `NumberOfGlyphs` now write-enabled.
 - (FONT) Internally reworked the glyphs to be a collection instead of an array, no external changes.
-- (FONT) GlyphIndexer now implements Indexer directly, IEnumerable added.
+- (FONT) `GlyphIndexer` now implements Indexer directly, `IEnumerable` added.
 - (PANL) Internal array now a collection
-- (PANL) ImageIndexer now implements Indexer directly, IEnumerable added.
-- (PLTT) Palette property marked OBS in favor of new ConvertToPalette() overload.
-- (PLTT) IndexRotator struct renamed to just Rotator.
-- (PLTT) Rotator.RotateColors() no longer internally clones the array.
-- (PLTT) RotatorIndexer class created.
-- (TEXT) TextString type and related TextStringCollection created.
+- (PANL) `ImageIndexer` now implements Indexer directly, `IEnumerable` added.
+- (PLTT) `Palette` property marked OBS in favor of new `ConvertToPalette()` overload.
+- (PLTT) IndexRotator struct renamed to just `Rotator`.
+- (PLTT) `Rotator.RotateColors()` no longer internally clones the array.
+- (PLTT) `RotatorIndexer` class created.
+- (TEXT) `TextString` type and related `TextStringCollection` created.
   - The TextString object handles substrings natively, instead of each application needing to sort it out.
-- (TEXT) The Strings array has been deleted in favor of the new Strings collection  ***BREAKING CHANGE***.
+- (TEXT) The original Strings array has been deleted in favor of the new `Strings` collection  ***BREAKING CHANGE***.
   - There really wasn't a way to just mark this as OBS and have it work alongside the new collection, as the changes to the original array could not be monitored.
 
 #### 2.5.2, 17 May 2026

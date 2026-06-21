@@ -1,13 +1,14 @@
 ﻿/*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2023 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2026 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.1
+ * Version: 2.1+
  */
 
 /* CHANGE LOG
+ * [UPD] Indexers replaced with ReadOnlyCollection
  * v2.1, 221030
  * [NEW] operator to SHIP
  * [NEW] creation of Lines during Decode
@@ -17,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using Idmr.Common;
 
@@ -188,9 +190,22 @@ namespace Idmr.LfdReader
 		{
 			if (_disposed) return;
 
-			if (disposing)
+			if (disposing) { /* do nothing */ }
+			foreach (var c in Components)
 			{
-				//TODO: proper dispose
+				foreach (var lod in c.Lods)
+				{
+					lod.ColorIndices = null;
+					lod.MeshVertices = null;
+					lod.VertexNormals = null;
+					foreach (var s in lod.Shapes)
+					{
+						s.Data = null;
+						s.Lines = null;
+					}
+					lod.Shapes = null;
+				}
+				c.Lods = null;
 			}
 			Components = null;
 			ShadingSets = null;
@@ -238,23 +253,18 @@ namespace Idmr.LfdReader
 			byte componentCount = _rawData[pos++];
 			Component[] components = new Component[componentCount];
 			byte shadingCount = _rawData[pos++];
-			bool[] readOnly;
 			if (shadingCount != 0)
 			{
-				Indexer<byte>[] sets = new Indexer<byte>[shadingCount];
+				ReadOnlyCollection<byte>[] sets = new ReadOnlyCollection<byte>[shadingCount];
 				int setLength = 16;
-				readOnly = new bool[setLength];
-				for (int i = 0; i < setLength; i++) readOnly[i] = true;
 				for (int i = 0; i < shadingCount; i++)
 				{
 					byte[] shadingSet = new byte[setLength];
 					ArrayFunctions.TrimArray(_rawData, pos, shadingSet);
 					pos += setLength;
-					sets[i] = new Indexer<byte>(shadingSet, readOnly);
+					sets[i] = Array.AsReadOnly(shadingSet);
 				}
-				readOnly = new bool[shadingCount];
-				for (int i = 0; i < shadingCount; i++) readOnly[i] = true;
-				ShadingSets = new Indexer<Indexer<byte>>(sets, readOnly);
+				ShadingSets = Array.AsReadOnly(sets);
 			}
 			else ShadingSets = null;
 
@@ -294,9 +304,7 @@ namespace Idmr.LfdReader
 					byte[] colors = new byte[shapeCount];
 					ArrayFunctions.TrimArray(_rawData, pos, colors);
 					pos += shapeCount;
-					readOnly = new bool[shapeCount];
-					for (int i = 0; i < shapeCount; i++) readOnly[i] = true;
-					lod.ColorIndices = new Indexer<byte>(colors, readOnly);
+					lod.ColorIndices = Array.AsReadOnly(colors);
 
 					lod.MinimumBound = new Crft.Lod.Vertex16(_rawData, ref pos);
 					lod.MinimumBound.X = convertInt16(lod.MinimumBound.X);
@@ -308,14 +316,12 @@ namespace Idmr.LfdReader
 					lod.MaximumBound.Z = convertInt16(lod.MaximumBound.Z);
 
 					Crft.Lod.Vertex16[] vertices = new Crft.Lod.Vertex16[vertexCount];
-					readOnly = new bool[vertexCount];
 					for (int v = 0; v < vertexCount; v++)
 					{
 						vertices[v] = new Crft.Lod.Vertex16(_rawData, ref pos);
 						vertices[v].X = convertInt16(vertices[v].X);
 						vertices[v].Y = convertInt16(vertices[v].Y);
 						vertices[v].Z = convertInt16(vertices[v].Z);
-						readOnly[v] = true;
 
 						for (int i = 0; i < 3; i++)
 						{
@@ -326,7 +332,7 @@ namespace Idmr.LfdReader
 							}
 						}
 					}
-					lod.MeshVertices = new Indexer<Crft.Lod.Vertex16>(vertices, readOnly);
+					lod.MeshVertices = Array.AsReadOnly(vertices);
 					Crft.Lod.Vector16[] normals = new Crft.Lod.Vector16[vertexCount];
 					for (int v = 0; v < vertexCount; v++)
 					{
@@ -335,7 +341,7 @@ namespace Idmr.LfdReader
 						normals[v].Y = convertInt16(normals[v].Y);
 						normals[v].Z = convertInt16(normals[v].Z);
 					}
-					lod.VertexNormals = new Indexer<Crft.Lod.Vector16>(normals, readOnly);
+					lod.VertexNormals = Array.AsReadOnly(normals);
 
 					normals = new Crft.Lod.Vector16[shapeCount];
 					short[] shapeJumps = new short[shapeCount];
@@ -358,25 +364,19 @@ namespace Idmr.LfdReader
 						shapes[s].Type = _rawData[pos++];
 						int len = (shapes[s].Type & 0x0F) * 2 + 3;
 						byte[] data = new byte[len];
-						readOnly = new bool[len];
-						for (int i = 0; i < len; i++) readOnly[i] = true;
 						ArrayFunctions.TrimArray(_rawData, pos, data);
 						pos += len;
-						shapes[s].Data = new Indexer<byte>(data, readOnly);
+						shapes[s].Data = Array.AsReadOnly(data);
 
                         byte shapeVertexCount = (byte)(shapes[s].Type & 0xF);
 						Crft.Lod.Line[] lines = new Crft.Lod.Line[shapeVertexCount / 2];
-                        readOnly = new bool[lines.Length];
-                        for (int i = 0; i < readOnly.Length; i++) readOnly[i] = true;
                         if (shapeVertexCount == 2)
                             lines[0] = new Crft.Lod.Line(shapes[s].Data[2], shapes[s].Data[3]);
                         else
                             for (int ln = 0; ln < lines.Length; ln++)
                                 lines[ln] = new Crft.Lod.Line(shapes[s].Data[ln * 2], shapes[s].Data[(ln + 1) * 2]);
-                        shapes[s].Lines = new Indexer<Crft.Lod.Line>(lines, readOnly);
+                        shapes[s].Lines = Array.AsReadOnly(lines);
                     }
-					readOnly = new bool[shapeCount];
-					for (int i = 0; i < shapeCount; i++) readOnly[i] = true;
 					try
 					{
 						for (int s = 0; s < shapeCount; s++)
@@ -387,7 +387,7 @@ namespace Idmr.LfdReader
 						}
 					}
 					catch { /* do nothing */ }
-					lod.Shapes = new Indexer<Crft.Lod.Shape>(shapes, readOnly);
+					lod.Shapes = Array.AsReadOnly(shapes);
 
 					/*short unkCount = convertInt16(_rawData, pos);
 					pos += 2;
@@ -432,18 +432,14 @@ namespace Idmr.LfdReader
 					else { lod.UnkData = null; }*/
 				}
 			}
-			readOnly = new bool[componentCount];
-			for (int i = 0; i < componentCount; i++) readOnly[i] = true;
-			Components = new Indexer<Component>(components, readOnly);
+			Components = Array.AsReadOnly(components);
 		}
 		#endregion public methods
 
 		/// <summary>Gets the components of the model.</summary>
-		/// <remarks>Each component is read-only.</remarks>
-		public Indexer<Component> Components { get; private set; }
+		public ReadOnlyCollection<Component> Components { get; private set; }
 		/// <summary>Gets the shading data.</summary>
-		/// <remarks>Each set is read-only.</remarks>
-		public Indexer<Indexer<byte>> ShadingSets { get; private set; }
+		public ReadOnlyCollection<ReadOnlyCollection<byte>> ShadingSets { get; private set; }
 
 		/// <summary>Transfers the wireframe data into a SHIP object.</summary>
 		/// <param name="craft">The CPLX wireframe data</param>
@@ -458,11 +454,11 @@ namespace Idmr.LfdReader
                 Unknown = 0,
                 ShadingSets = null
             };
-            byte componentCount = (byte)craft.Components.Length;
+            byte componentCount = (byte)craft.Components.Count;
 			var components = new Ship.Component[componentCount];
 			for (int c = 0; c < componentCount; c++)
 			{
-				byte lodCount = (byte)craft.Components[c].Lods.Length;
+				byte lodCount = (byte)craft.Components[c].Lods.Count;
 				components[c] = new Ship.Component(lodCount)
 				{
 					MeshType = Ship.MeshType.Default,
@@ -470,9 +466,7 @@ namespace Idmr.LfdReader
 				};
 			}
 
-            var readOnly = new bool[componentCount];
-            for (int i = 0; i < componentCount; i++) readOnly[i] = true;
-            ship.Components = new Indexer<Ship.Component>(components, readOnly);
+            ship.Components = Array.AsReadOnly(components);
 
             return ship;
 		}

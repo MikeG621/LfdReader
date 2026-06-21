@@ -93,12 +93,13 @@ namespace Idmr.LfdReader
 			/// <remarks>This is the preferred presence check versus a <see cref="SubstringCount"/> value check.</remarks>
 			public bool HasSubstrings => _value.Contains("\0");
 
-			/// <summary>The split, reminder that this re-splits on every access, store for use.</summary>
-			string[] _subs => _value.Split('\0');
+			/// <summary>Gets a copy of the substrings as an array.</summary>
+			/// <remarks>Editing strings in the array will *not* be reflected in the resource. Use <see cref="SetSubstring(int, string)"/>.</remarks>
+			public string[] GetSubstringArray() => _value.Split('\0');
 
 			/// <summary>Gets the number of substrings.</summary>
 			/// <remarks>A value of <b>1</b> denotes no additional substrings.</remarks>
-			public int SubstringCount => _subs.Length;
+			public int SubstringCount => GetSubstringArray().Length;
 
 			/// <summary>Gets the specified substring.</summary>
 			/// <param name="index">The substring index.</param>
@@ -106,7 +107,7 @@ namespace Idmr.LfdReader
 			/// <exception cref="ArgumentOutOfRangeException">Invalid value for <paramref name="index"/>.</exception>
 			public string GetSubstring(int index)
 			{
-				var subs = _subs;
+				var subs = GetSubstringArray();
 				if (index < 0 || index >= subs.Length) throw new ArgumentOutOfRangeException("index", $"index must be between 0-{subs.Length - 1}");
 				
 				return subs[index];
@@ -119,7 +120,7 @@ namespace Idmr.LfdReader
 			/// <remarks>If <paramref name="value"/> is <see langword="null"/> or empty, it is removed.</remarks>
 			public void SetSubstring(int index, string value)
 			{
-				var subs = _subs;
+				var subs = GetSubstringArray();
 				if (index < 0 || index >= subs.Length) throw new ArgumentOutOfRangeException("index", $"index must be between 0-{subs.Length - 1}");
 
 				subs[index] = value;

@@ -23,7 +23,6 @@ namespace Idmr.LfdReader
 		{
             /// <summary>Initialize the mesh with the specified number of Lods (levels of detail).</summary>
             /// <param name="lodCount">The count to create.</param>
-            /// <remarks><see cref="Cplx.Component.Lods"/> is created with read only flags set.</remarks>
             public Component(int lodCount) : base(lodCount) { }
 
 			/// <summary>Gets the assignment of the Component.</summary>
