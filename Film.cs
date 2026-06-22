@@ -1,13 +1,14 @@
 /*
  * Idmr.LfdReader.dll, Library file to read and write LFD resource files
- * Copyright (C) 2009-2023 Michael Gaisser (mjgaisser@gmail.com)
+ * Copyright (C) 2009-2026 Michael Gaisser (mjgaisser@gmail.com)
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.3
+ * Version: 2.3+
  */
 
 /* CHANGE LOG
+ * [ADD] Dispose
  * v2.3, 230716
  * [UPD] Chunk opcode updates: SetColorRange (new), Unknown11 > ApplyPalette, Unknown13 > Toggle, SetVolume (new), Unknown16 (new)
  * v2.0, 210309
@@ -17,6 +18,7 @@
  * v1.0
  */
 
+//TODO: this needs more work; Collections, etc.
 using System;
 using System.IO;
 using Idmr.Common;
@@ -89,6 +91,21 @@ namespace Idmr.LfdReader
 			catch (Exception x) { throw new LoadFileException(x); }
 		}
 
+		/// <summary>Clean up any resources being used.</summary>
+		/// <param name="disposing"><see langword="true"/> if managed resources should be disposed; otherwise, <see langword="false"/>.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (_disposed) return;
+
+			for (int b = 0; b < _blocks.Length; b++)
+			{
+				for (int c = 0; c < _blocks[b].Chunks.Length; c++) _blocks[b].Chunks[c].Vars = null;
+				_blocks[b].Chunks = null;
+			}
+			_blocks = null;
+			base.Dispose(disposing);
+		}
+
 		#region public methods
 		/// <summary>Processes raw data to populate the resource.</summary>
 		/// <param name="raw">Raw byte data.</param>
@@ -143,11 +160,11 @@ namespace Idmr.LfdReader
 
 		#region public properties
 		/// <summary>Gets the number of animation frames.</summary>
-		public short NumberOfFrames { get { return _numberOfFrames; } }
+		public short NumberOfFrames => _numberOfFrames;
 		/// <summary>Gets the raw Block data.</summary>
-		public Block[] Blocks { get { return _blocks; } }
+		public Block[] Blocks => _blocks;
 		/// <summary>Gets the number of <see cref="Block">Blocks</see> contained in the resource.</summary>
-		public short NumberOfBlocks { get { return (short)_blocks.Length; } }
+		public short NumberOfBlocks => (short)_blocks.Length;
 		#endregion public properties
 
 		/// <summary>Container for the primary mechanism that controls FILM behaviour.</summary>
@@ -215,11 +232,7 @@ namespace Idmr.LfdReader
 				}
 			}
 			/// <summary>Gets or sets the Block type.</summary>
-			public BlockType Type
-			{ 
-				get { return _type; }
-				set { _type = value; }
-			}
+			public BlockType Type { get => _type; set => _type = value; }
 			/// <summary>Gets the numerical category for the Block's Type.</summary>
 			public short TypeNum
 			{
@@ -235,21 +248,14 @@ namespace Idmr.LfdReader
 			}
 			/// <summary>Gets or sets the Block name.</summary>
 			/// <remarks>Restricted to 8 characters.</remarks>
-			public string Name
-			{
-				get { return _name; }
-				set { _name = StringFunctions.GetTrimmed(value, 8); }
-			}
+			public string Name { get => _name; set => _name = StringFunctions.GetTrimmed(value, 8); }
 			/// <summary>Gets Chunk data of the Block.</summary>
-			public Chunk[] Chunks { get; }
+			public Chunk[] Chunks { get; internal set; }
 			/// <summary>Gets the number of Chunks contained in the Block.</summary>
-			public short NumberOfChunks { get { return (short)(Chunks != null ? Chunks.Length : 0); } }
+			public short NumberOfChunks => (short)(Chunks != null ? Chunks.Length : 0);
 			/// <summary>Gets a representative string of the Block.</summary>
 			/// <returns>Block in the format <see cref="Type">TYPE</see> <see cref="Name"/>.</returns>
-			public override string ToString()
-			{
-				return Enum.GetName(typeof(BlockType), _type).ToUpper() + _name;
-			}
+			public override string ToString() => Enum.GetName(typeof(BlockType), _type).ToUpper() + _name;
 		}
 		/// <summary>Container for individual commands contained within <see cref="Block">Blocks</see>.</summary>
 		public struct Chunk
@@ -318,7 +324,7 @@ namespace Idmr.LfdReader
 			/// <summary>Gets or sets the arguments for the chunk (when applicable).</summary>
 			public short[] Vars { get; set; }
 			/// <summary>Gets the total byte length of the Chunk.</summary>
-			public short Length { get { return (short)(4 + (Vars != null ? Vars.Length << 1 : 0)); } }
+			public short Length => (short)(4 + (Vars != null ? Vars.Length << 1 : 0));
 
 			/// <summary>Gets a representation of the command.</summary>
 			/// <returns>Command in the form of <see cref="Code"/>: <see cref="Vars"/>[0], Vars[1]...</returns>
