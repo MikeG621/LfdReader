@@ -32,10 +32,6 @@ Library for editing LucasArts *.LFD resource files.
 - (TEXT) The original Strings array has been deleted in favor of the new `Strings` collection  ***BREAKING CHANGE***.
   - There really wasn't a way to just mark this as OBS and have it work alongside the new collection, as the changes to the original array could not be monitored.
 
-#### 2.5.2, 17 May 2026
-- (MASK) No code changes, just updated the XML example for the help file.
-- (LfdFile) The per-resource modified flag now resets during Write().
-
 ### Additional Information
 
 #### Dependencies
@@ -47,6 +43,10 @@ File structure information per resource is found in the individual class files.
 Programmer's reference can be found in the [help file](help/Idmr.LfdReader.chm).
 
 ### Version History
+#### 2.5.2, 17 May 2026
+- (MASK) No code changes, just updated the XML example for the help file.
+- (LfdFile) The per-resource modified flag now resets during Write().
+
 #### v2.5.1, 10 May 2026
 - (BLAS) Fixed an error in EncodeResource() when importing new sound data. [Issue [TSE #1](https://github.com/MikeG621/TieSoundEditor/issues/1)].
 
