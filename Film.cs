@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.3+
+ * Version: 3.0
  */
 
 /* CHANGE LOG
+ * v3.0, 260821
  * [ADD] Dispose
  * v2.3, 230716
  * [UPD] Chunk opcode updates: SetColorRange (new), Unknown11 > ApplyPalette, Unknown13 > Toggle, SetVolume (new), Unknown16 (new)

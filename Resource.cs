@@ -13,10 +13,11 @@
  * If a copy of the MPL (MPL.txt) was not distributed with this file,
  * you can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Version: 2.4+
+ * Version: 3.0
  */
 
 /* CHANGE LOG
+ * v3.0, 260821
  * [ADD] IDisposable, IsDirty
  * v2.4, 250202
  * [ADD] Dirty()

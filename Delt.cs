@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.5+
+ * Version: 3.0
  */
 
 /* CHANGE LOG
+ * v3.0, 260821
  * [ADD] Dispose
  * v2.5, 260214
  * [FIX] direct width/height validation instead of using try/catch

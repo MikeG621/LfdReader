@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.1+
+ * Version: 3.0
  */
 
 /* CHANGE LOG
+ * v3.0, 260821
  * [UPD] Indexers replaced with ReadOnlyCollection
  * v2.1, 221030
  * [NEW] operator to SHIP

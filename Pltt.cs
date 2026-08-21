@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 2.3+
+ * Version: 3.0
  */
 
 /* CHANGE LOG
+ * v3.0, 260821
  * [UPD] Palette OBS'd in favor of a ConvertToPalette overload
  * [UPD] IndexRotator renamed to just Rotator
  * [UPD] RotateColors doesn't internally Clone anymore

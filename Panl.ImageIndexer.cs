@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 1.1+
+ * Version: 3.0
  */
 
 /* CHANGE LOG
+ * v3.0, 260821
  * [UPD] Removed Indexer inheritance, IEnumerable implemented directly
  * v1.1, 141215
  * [UPD] changed license to MPL

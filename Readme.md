@@ -8,7 +8,7 @@ Author: [Michael Gaisser](mailto:mjgaisser@gmail.com)
 Library for editing LucasArts *.LFD resource files.
 
 ## Latest Release
-#### WIP 3.0
+#### 3.0, 21 Aug 2023
 - `IDisposable` has been implemented throughout.
 - Better application of the Dirty flag throughout.
 - Many `Indexer` types changed to a proper Collection are ***BREAKING CHANGES*** due to the `Length` parameter switching to `Count`.
