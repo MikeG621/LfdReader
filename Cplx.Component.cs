@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 3.0
+ * Version: 3.0+
  */
 
 /* CHANGE LOG
+ * [UPD] removed the now-useless readonly bool array
  * v3.0, 260821
  * [UPD] Indexers replaced with ReadOnlyCollection
  * v2.1, 221030
@@ -31,11 +32,9 @@ namespace Idmr.LfdReader
 			public Component(int lodCount)
 			{
 				Lod[] lods = new Lod[lodCount];
-				bool[] readOnly = new bool[lodCount];
 				for (int i = 0; i < lodCount; i++)
 				{
 					lods[i] = new Lod();
-					readOnly[i] = true;
 				}
 
 				Lods = Array.AsReadOnly(lods);

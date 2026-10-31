@@ -8,6 +8,7 @@
  */
 
 /* CHANGE LOG
+ * [FIX YOGEME#142] Endian flip wasn't doing negatives correctly.
  * v3.0, 260821
  * [UPD] Indexers replaced with ReadOnlyCollection
  * v2.1, 221030
@@ -36,11 +37,11 @@ namespace Idmr.LfdReader
 	/// <code>
 	/// RawData
 	/// {
-	///   /* 0x00 */ short Length
+	///   /* 0x00 */ short JumpToNext // NOTE: There are cases where this obviously isn't true, see CONTAIN
 	///   /* 0x02 */ byte NumComponents
 	///   /* 0x03 */ byte NumShadingSets
 	///   /* 0x04 */ ShadingSet[NumShadingSets]
-	///				 short[NumComponents] ComponentOffsets
+	///				 short[NumComponents] ComponentOffsets //NOTE: This is another one that is sometimes visibly wrong. Again, see CONTAIN
 	///				 Component[NumComponents]
 	/// }
 	/// 
@@ -132,7 +133,7 @@ namespace Idmr.LfdReader
 	///   /* 0x02 */ byte
 	/// }
 	/// </code>
-	/// <para>The first <i>Length</i> value is the remaining data after it, so it will always equal (<see cref="Resource.Length"/>-2).</para>
+	/// <para>The <i>JumpToNext</i> value is the number of bytes until the next <see cref="Resource"/> after reading the value, so it will always equal (<see cref="Resource.Length"/>-2).</para>
 	/// <para>The <i>ComponentsOffsets</i> values are jump offsets from the beginning of their respective value, such that if an offset value is at location p, the component will be at (p+offset).</para>
 	/// <para>The <i>LodHeader.Offset</i> is a jump offset from the beginning of the LodHeader object, such that if LodHeader[i] is at location p, the Mesh will start at (p+offset).
 	/// This also means that LodHeader[0].Offset will be the entire length of the array.
@@ -142,7 +143,7 @@ namespace Idmr.LfdReader
 	/// E.g. if the current index is 5 and the Y value is 0x7F02, then it will be using MeshVertices[5 - (2 >> 1)].Y, or [4].Y.</para>
 	/// <para><i>ShapeSettings.Offset</i> is a jump offset from the beginning of the ShapeSettings object, similar to LodHeader.Offset.</para>
 	/// <para><see cref="Crft.Lod.Shape.Type">Shape.Type</see> uses the bottom nibble for the number of vertices, top nibble for type as a bitfield. The first bit is IsTwoSided, the second bit is IsGouraudShaded.
-	/// <see cref="Crft.Lod.Shape.Data">Data</see> is length(3 + (numVertices* 2)).
+	/// <see cref="Crft.Lod.Shape.Data">Data</see> is length(3 + (numVertices * 2)).
 	/// If the number of vertices is 2, then Data has a pair of vertex indexes for a line defined in Data[2] and Data[3].
 	/// Otherwise, for each vertex there is a line, with the vertex indexes defined in Data[v * 2] and Data[(v + 1) * 2].</para>
 	/// <para>After that there's some Unknown data which is currently not read into the class.
@@ -218,7 +219,7 @@ namespace Idmr.LfdReader
 		/// <returns>The opposite endianess, can go either way.</returns>
 		short convertInt16(short original)
 		{
-			short result = (short)((original >> 8) | ((original & 0xFF) << 8));
+			short result = (short)(((original & 0xFF00) >> 8) | ((original & 0xFF) << 8));
 			return result;
 		}
 		/// <summary>Swaps the endianess of the given value.</summary>

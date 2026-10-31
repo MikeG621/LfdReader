@@ -8,6 +8,10 @@ Author: [Michael Gaisser](mailto:mjgaisser@gmail.com)
 Library for editing LucasArts *.LFD resource files.
 
 ## Latest Release
+#### WIP
+- (CPLX) Fixed an issue causing bad negative values, distoring the wireframe [Issue [YOGEME #142](https://github.com/MikeG621/YOGEME/issues/142)].
+- (CRFT, CPLX, SHIP) Added `Vertex16.ToString()` override.
+
 #### 3.0, 21 Aug 2023
 - `IDisposable` has been implemented throughout.
 - Better application of the Dirty flag throughout.

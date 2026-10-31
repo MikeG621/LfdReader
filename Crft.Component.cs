@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 3.0
+ * Version: 3.0+
  */
 
 /* CHANGE LOG
+ * [NEW] Added Vertex16.ToString override
  * v3.0, 260821
  * [UPD] Indexers replaced with ReadOnlyCollection
  * v2.2, 230401
@@ -104,6 +105,8 @@ namespace Idmr.LfdReader
 						else if (index == 2) Z = value;
 					}
 				}
+
+				public override string ToString() => $"({X} {Y} {Z})";
 			}
 
 			/// <summary>Represents a direction in 3D space.</summary>
