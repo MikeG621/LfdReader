@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 3.0
+ * Version: 3.1
  */
 
 /* CHANGE LOG
+ * v3.1, 261107
  * [FIX YOGEME#142] Endian flip wasn't doing negatives correctly.
  * v3.0, 260821
  * [UPD] Indexers replaced with ReadOnlyCollection
@@ -77,9 +78,9 @@ namespace Idmr.LfdReader
 	/// 			 ShapeSettings[NumShapes]
 	/// 			 Shape[NumShapes] MeshGeometry
 	/// 			 Unknown1[NumShapes]
-	/// 			 short NumUnk2
-	/// 			 Unknown2[NumUnk2]
-	/// 			 Unknown3[NumUnk2]
+	/// 			 short NumMarkingPolys
+	/// 			 MarkIDs[NumMarkingPolys]
+	/// 			 MarkData[NumMarkingPolys]
 	/// }
 	/// 
 	/// Vertex16 (size 0x6)
@@ -107,30 +108,39 @@ namespace Idmr.LfdReader
 	///   /* 0x01 */ short
 	/// }
 	/// 
-	/// Unknown2 (size 0x3)
+	/// MarkIDs (size 0x3)
 	/// {
-	///   /* 0x00 */ byte
+	///   /* 0x00 */ ID
 	///   /* 0x01 */ short Offset
 	/// }
 	/// 
-	/// Unknown3
+	/// MarkData
 	/// {
-	///   /* 0x00 */ byte Type?
-	///   #if (Type == 1)
-	///     /* 0x01 */ byte
-	///     /* 0x02 */ byte ArraySize
-	///     /* 0x03 */ Triplet[ArraySize]
-	///   #elseif (Type == 2)
-	///     /* 0x01 */ byte[16]
-	///     // Don't know if length is fixed
-	///   #endif
+	///   /* 0x00 */ byte MarkCount
+	///   /* 0x01 */ byte[MarkCount] Colors
+	///              MarkInfo[MarkCount]
 	/// }
 	/// 
-	/// Triplet
+	/// MarkInfo
 	/// {
-	///   /* 0x00 */ byte
-	///   /* 0x01 */ byte
-	///   /* 0x02 */ byte
+	///   /* 0x00 */ byte Type
+	///   #if (Type == 1)
+	///     /* 0x01 */ byte VertexCount
+	///     /* 0x02 */ VertexInfo[VertexCount]
+	///   #elseif (Type == 2 || (Type >= 0x11 && Type <= 0xFE)) // Line type of increasing thickness
+	///     /* 0x01 */ VertexInfo[2]
+	///   #elseif (Type == 0xFF)
+	///     /* 0x01 */ int ClippingDistance
+	///   #else // Poly
+	///     /* 0x01 */ VertexInto[Type]
+	///   #endif
+	///	}
+	/// 
+	/// VertexInfo
+	/// {
+	///   /* 0x00 */ byte VertexID
+	///   /* 0x01 */ byte LeftFactor
+	///   /* 0x02 */ byte RightFactor
 	/// }
 	/// </code>
 	/// <para>The <i>JumpToNext</i> value is the number of bytes until the next <see cref="Resource"/> after reading the value, so it will always equal (<see cref="Resource.Length"/>-2).</para>
@@ -144,10 +154,10 @@ namespace Idmr.LfdReader
 	/// <para><i>ShapeSettings.Offset</i> is a jump offset from the beginning of the ShapeSettings object, similar to LodHeader.Offset.</para>
 	/// <para><see cref="Crft.Lod.Shape.Type">Shape.Type</see> uses the bottom nibble for the number of vertices, top nibble for type as a bitfield. The first bit is IsTwoSided, the second bit is IsGouraudShaded.
 	/// <see cref="Crft.Lod.Shape.Data">Data</see> is length(3 + (numVertices * 2)).
-	/// If the number of vertices is 2, then Data has a pair of vertex indexes for a line defined in Data[2] and Data[3].
+	/// If the number of vertices is 2, then Data has a pair of vertex indexes for a line defined in Data[2] and Data[3]. Data[0] is the radius of the line.
 	/// Otherwise, for each vertex there is a line, with the vertex indexes defined in Data[v * 2] and Data[(v + 1) * 2].</para>
-	/// <para>After that there's some Unknown data which is currently not read into the class.
-	/// The Offset within Unknown2 points to the Unknown3 struct, measured from Unknown2 start position.</para></example>
+	/// <para>After that there's some Unknown data which is currently not read into the class. Then we reach the markings for FlightGroup colors.
+	/// The Offset within MarkIDs points to the MarkData struct, measured from the MarkIDs start position.</para></example>
 	public partial class Cplx : Resource
 	{
 
@@ -197,7 +207,6 @@ namespace Idmr.LfdReader
 			{
 				foreach (var lod in c.Lods)
 				{
-					lod.ColorIndices = null;
 					lod.MeshVertices = null;
 					lod.VertexNormals = null;
 					foreach (var s in lod.Shapes)
@@ -306,7 +315,6 @@ namespace Idmr.LfdReader
 					byte[] colors = new byte[shapeCount];
 					ArrayFunctions.TrimArray(_rawData, pos, colors);
 					pos += shapeCount;
-					lod.ColorIndices = Array.AsReadOnly(colors);
 
 					lod.MinimumBound = new Crft.Lod.Vertex16(_rawData, ref pos);
 					lod.MinimumBound.X = convertInt16(lod.MinimumBound.X);
@@ -362,6 +370,7 @@ namespace Idmr.LfdReader
 					{
 						shapes[s] = new Crft.Lod.Shape();
 						pos = shapeJumpStart + s * 8 + shapeJumps[s];
+						shapes[s].Color = colors[s];
 						shapes[s].FaceNormal = normals[s];
 						shapes[s].Type = _rawData[pos++];
 						int len = (shapes[s].Type & 0x0F) * 2 + 3;

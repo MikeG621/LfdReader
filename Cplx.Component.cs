@@ -4,10 +4,11 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 3.0+
+ * Version: 3.1
  */
 
 /* CHANGE LOG
+ * v3.1, 261107
  * [UPD] removed the now-useless readonly bool array
  * v3.0, 260821
  * [UPD] Indexers replaced with ReadOnlyCollection

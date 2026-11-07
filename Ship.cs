@@ -4,10 +4,12 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 3.0
+ * Version: 3.1
  */
 
 /* CHANGE LOG
+ * v3.1, 261107
+ * [UPD] Mostly just the example XML for now, minor fixes due to CRFT updates
  * v3.0, 260821
  * [UPD] Indexers replaced with ReadOnlyCollection
  * v2.1, 221030
@@ -35,25 +37,28 @@ namespace Idmr.LfdReader
 	/// <code>
 	/// RawData
 	/// {
-	///   /* 0x00 */ short Length
+	///   /* 0x00 */ short JumpToNext
 	///   /* 0x02 */ byte[30] Unknown
 	///   /* 0x20 */ byte NumComponents
 	///   /* 0x21 */ byte NumShadingSets
 	///   /* 0x22 */ short Unknown
-	///   /* 0x24 */ ShadingSet[NumShadingSets]
+	///   /* 0x24 */ ShadingHeader[NumShadingSets]
 	/// 			 MeshSettings[NumComponents]
 	/// 			 Component[NumComponents]
 	/// }
 	/// 
-	/// ShadingSet (size 0x6)
+	/// ShadingHeader (size 0x6)
 	/// {
-	///   ???	// don't know what this does
+	///   /* 0x00 */ short Offset
+	///   /* 0x02 */ int Distance
 	/// }
 	/// 
 	/// MeshSettings (size 0x40)
 	/// {
 	///   /* 0x00 */ short Type (enum)
+	///   /* 0x2B */ byte NumHardpoints
 	///   /* 0x2C */ short ComponentOffset
+	///   /* 0x2E */ short HardpointOffset
 	///	}
 	///	
 	/// Component
@@ -80,12 +85,12 @@ namespace Idmr.LfdReader
 	/// 			 Vertex16 MaximumBound
 	/// 			 Vertex16[NumVertices] MeshVertices
 	/// 			 Vertex16[NumVertices] VertexNormals
-	/// 			 ShapeSettings[NumShapes]
+	/// 			 ShapeHeader[NumShapes]
 	/// 			 Shape[NumShapes]    MeshGeometry
 	/// 			 Unknown1[NumShapes]
-	/// 			 short NumUnk2
-	/// 			 Unknown2[NumUnk2]
-	/// 			 Unknown3[NumUnk2]
+	/// 			 short NumMarkShapes
+	/// 			 MarkHeader[NumMarkShapes]
+	/// 			 MarkShape[NumMarkShapes]
 	/// }
 	/// 
 	/// Vertex16 (size 0x6)
@@ -95,7 +100,7 @@ namespace Idmr.LfdReader
 	///   /* 0x04 */ short Z
 	/// }
 	/// 
-	/// ShapeSettings (size 0x8)
+	/// ShapeHeader (size 0x8)
 	/// {
 	///   /* 0x00 */ Vertex16 FaceNormal
 	///   /* 0x06 */ short Offset
@@ -113,33 +118,42 @@ namespace Idmr.LfdReader
 	///   /* 0x01 */ short
 	/// }
 	/// 
-	/// Unknown2 (size 0x3)
+	/// MarkHeader (size 0x3)
 	/// {
-	///   /* 0x00 */ byte
+	///   /* 0x00 */ byte ID
 	///   /* 0x01 */ short Offset
 	/// }
 	/// 
-	/// Unknown3
+	/// MarkShape
 	/// {
-	///   /* 0x00 */ byte Type?
-	///   #if (Type == 1)
-	///     /* 0x01 */ byte
-	///     /* 0x02 */ byte ArraySize
-	///     /* 0x03 */ Triplet[ArraySize]
-	///   #else
-	///     /* 0x01 */ byte[]
-	///     // I've seen Types 2-5 and 7, but don't know how the data is sized
-	///   #endif
+	///   /* 0x00 */ byte MarkCount
+	///   /* 0x01 */ byte[MarkCount] Colors
+	///              MarkInfo[MarkCount]
 	/// }
 	/// 
-	/// Triplet
+	/// MarkInfo
 	/// {
-	///   /* 0x00 */ byte
-	///   /* 0x01 */ byte
-	///   /* 0x02 */ byte
+	///   /* 0x00 */ byte Type
+	///   #if (Type == 1)
+	///     /* 0x01 */ byte VertexCount
+	///     /* 0x02 */ VertexInfo[VertexCount]
+	///   #elseif (Type == 2 || (Type >= 0x11 && Type <= 0xFE)) // Line type of increasing thickness
+	///     /* 0x01 */ VertexInfo[2]
+	///   #elseif (Type == 0xFF)
+	///     /* 0x01 */ int ClippingDistance
+	///   #else // Poly
+	///     /* 0x01 */ VertexInfo[Type]
+	///   #endif
+	///	}
+	/// 
+	/// VertexInfo
+	/// {
+	///   /* 0x00 */ byte VertexID
+	///   /* 0x01 */ byte LeftFactor
+	///   /* 0x02 */ byte RightFactor
 	/// }
 	/// </code>
-	/// <para>The first <i>Length</i> value is the remaining data after it, so it will always equal (<see cref="Resource.Length"/>-2).</para>
+	/// <para>The first <i>JumpToNext</i> value is the remaining data after it, so it will always equal (<see cref="Resource.Length"/>-2). Allows skipping over the resource during I/O.</para>
 	/// <para>The <i>ComponentsOffsets</i> values are jump offsets from the beginning of their respective MeshSettings, such that if an offset value is at location (p+0x2C), the component will be at (p+offset).</para>
 	/// <para>The <i>LodHeader.Offset</i> is a jump offset from the beginning of the LodHeader object, such that if LodHeader[i] is at location p, the Mesh will start at (p+offset).
 	/// This also means that LodHeader[0].Offset will be the entire length of the array.
@@ -147,13 +161,14 @@ namespace Idmr.LfdReader
 	/// <para>In <i>LodMesh.MeshVertices</i>, if the top byte of a value is <b>0x7F</b> then it's repeating a previous vertex's value.
 	/// The repeat will match the sub-type (X-X, Y-Y, Z-Z) and the appropriate index is calculated with the bottom byte, right-shifted once, and subtracted from the current index.
 	/// E.g. if the current index is 5 and the Y value is 0x7F02, then it will be using MeshVertices[5 - (2 >> 1)].Y, or [4].Y.</para>
-	/// <para><i>ShapeSettings.Offset</i> is a jump offset from the beginning of the ShapeSettings object, similar to LodHeader.Offset.</para>
+	/// <para><i>ShapeHeader.Offset</i> is a jump offset from the beginning of the ShapeHeader object, similar to LodHeader.Offset.</para>
 	/// <para><see cref="Crft.Lod.Shape.Type">Shape.Type</see> uses the bottom nibble for the number of vertices, top nibble for type as a bitfield. The first bit is IsTwoSided, the second bit is IsGouraudShaded.
 	/// <see cref="Crft.Lod.Shape.Data">Data</see> is length(3 + (numVertices* 2)).
-	/// If the number of vertices is 2, then Data has a pair of vertex indexes for a line defined in Data[2] and Data[3].
+	/// If the number of vertices is 2, then Data has a pair of vertex indexes for a line defined in Data[2] and Data[3]. Data[0] is the radius of the line.
 	/// Otherwise, for each vertex there is a line, with the vertex indexes defined in Data[v * 2] and Data[(v + 1) * 2].</para>
-	/// <para>After that there's some Unknown data which is currently not read into the class.
-	/// The Offset within Unknown2 points to the Unknown3 struct, measured from Unknown2's start position.<br/>
+	/// <para>After that there's some Unknown data which is currently not read into the class. Then we reach the markings for FlightGroup colors.
+	/// The Offset within MarkHeader points to the MarkShape struct, measured from the MarkHeader start position.<br/>
+	/// Colors should be mapped to VGA.PAC, according to the documentation I've seen.<br/>
 	/// Some meshes are missing the <i>Unknown1</i> array. I've noticed this in SPECIES.LFD:SHIPCONTAIN, on a <i>Signature</i>=81 LOD.</para></example>
 	public partial class Ship : Resource
 	{
@@ -278,7 +293,6 @@ namespace Idmr.LfdReader
 			{
 				foreach (var lod in c.Lods)
 				{
-					lod.ColorIndices = null;
 					lod.MeshVertices = null;
 					lod.VertexNormals = null;
 					foreach (var s in lod.Shapes)
@@ -368,7 +382,6 @@ namespace Idmr.LfdReader
 					byte[] colors = new byte[shapeCount];
 					ArrayFunctions.TrimArray(_rawData, pos, colors);
 					pos += shapeCount;
-					lod.ColorIndices = Array.AsReadOnly(colors);
 
 					lod.MinimumBound = new Crft.Lod.Vertex16(_rawData, ref pos);
 					lod.MaximumBound = new Crft.Lod.Vertex16(_rawData, ref pos);
@@ -409,6 +422,7 @@ namespace Idmr.LfdReader
 					{
 						shapes[s] = new Crft.Lod.Shape();
 						pos = shapeJumpStart + s * 8 + shapeJumps[s];
+						shapes[s].Color = colors[s];
 						shapes[s].FaceNormal = normals[s];
 						shapes[s].Type = _rawData[pos++];
 						int len = (shapes[s].Type & 0x0F) * 2 + 3;

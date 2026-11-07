@@ -4,11 +4,13 @@
  * Licensed under the MPL v2.0 or later
  * 
  * Full notice in help/Idmr.LfdReader.chm
- * Version: 3.0+
+ * Version: 3.1
  */
 
 /* CHANGE LOG
- * [NEW] Added Vertex16.ToString override
+ * v3.1, 261107
+ * [NEW] Added Vertex16.ToString and Vector16.ToStrings overrides
+ * [NEW] Redid format, with Lines and Marking types
  * v3.0, 260821
  * [UPD] Indexers replaced with ReadOnlyCollection
  * v2.2, 230401
@@ -48,12 +50,15 @@ namespace Idmr.LfdReader
 			/// <summary>Gets the distance at which the LOD becomes active.</summary>
 			public int Distance { get; internal set; }
 
+			/// <summary>Gets the Lod signature.</summary>
+			/// <remarks>May also be a Type value, currently only known to affect if <see cref="Shape.Unknown1"/> and <see cref="Shape.Unknown2"/> are present.</remarks>
+			public byte Signature { get; internal set; }
 			/// <summary>At 0x1, after the signature.</summary>
 			public byte Unknown1 { get; internal set; }
 			/// <summary>At 0x3.</summary>
 			public byte Unknown2 { get; internal set; }
 			/// <summary>Gets the color indices.</summary>
-			public ReadOnlyCollection<byte> ColorIndices { get; internal set; }
+			//public ReadOnlyCollection<byte> ColorIndices { get; internal set; }
 			/// <summary>Gets the minimum value for the bounding box.</summary>
 			public Vertex16 MinimumBound { get; internal set; }
 			/// <summary>Gets the maximum value for the bounding box.</summary>
@@ -62,9 +67,9 @@ namespace Idmr.LfdReader
 			public ReadOnlyCollection<Vertex16> MeshVertices { get; internal set; }
 			/// <summary>Gets the Shapes for the Lod.</summary>
 			public ReadOnlyCollection<Shape> Shapes { get; internal set; }
-			// <summary>Gets the unknown data at the end of the Lod</summary>
-			// <remarks>Might be texture related? Each entry is read-only</remarks>
-			//public Indexer<UnknownData> UnkData { get; internal set; }
+			/// <summary>Gets the marking data for the Lod</summary>
+			/// <remarks>Each entry is read-only</remarks>
+			public ReadOnlyCollection<MarkingShape> MarkShapes { get; internal set; } = null;
 
 			/// <summary>Represents a single point in 3D space.</summary>
 			public class Vertex16
@@ -106,6 +111,8 @@ namespace Idmr.LfdReader
 					}
 				}
 
+				/// <summary>Returns a string that represents the current object.</summary>
+				/// <returns>A string formatted as "({X} {Y} {Z})".</returns>
 				public override string ToString() => $"({X} {Y} {Z})";
 			}
 
@@ -117,11 +124,18 @@ namespace Idmr.LfdReader
 
 				/// <summary>Gets the RSS length of the vector.</summary>
 				public short Magnitude => (short)Math.Sqrt(X * X + Y * Y + Z * Z);
+
+				/// <summary>Returns a string that represents the current object.</summary>
+				/// <returns>A string formatted as "({X} {Y} {Z}) Mag: {Magnitude}".</returns>
+				public override string ToString() => base.ToString() + " Mag: " + Magnitude;
 			}
 
 			/// <summary>Represents a single line or face within the mesh.</summary>
 			public class Shape
 			{
+				/// <summary>Gets the color index of the shape.</summary>
+				public byte Color { get; internal set; }
+
 				/// <summary>Gets the normal vector of the shape.</summary>
 				public Vector16 FaceNormal { get; internal set; }
 				/// <summary>Gets the Shape's Type.</summary>
@@ -164,23 +178,47 @@ namespace Idmr.LfdReader
 				public int Vertex2 { get; internal set; }
 			}
 
-			// <summary>Represents an unknown data set at the end of the Mesh data</summary>
-			/*public class UnknownData
+			/// <summary>Represents the data to produce FlightGroup markings on a mesh.</summary>
+			public class MarkingShape
 			{
 				/// <summary>From the preceding jump array</summary>
-				/// <remarks>Probably an ID value, looks unique and can be 0 to ShapeCount</remarks>
-				public byte Unknown { get; internal set; }
+				/// <remarks>Probably an ID value, looks unique and can be 0 to ShapeCount, could be the Index of the Shape being marked.</remarks>
+				public byte ID { get; internal set; }
 
-				/// <summary>Gets the type of the <see cref="Data"/> structure</summary>
-				/// <remarks>Looks like this can either equal <b>1</b> or <b>2</b>.</remarks>
+				/// <summary>Gets the number of markings for the shape.</summary>
+				public byte MarkCount { get; internal set; }
+
+				/// <summary>Gets the Color indexes used by the marks.</summary>
+				public ReadOnlyCollection<byte> Colors { get; internal set; }
+
+				/// <summary>Gets the info for the individual marks.</summary>
+				public ReadOnlyCollection<MarkInfo> Marks { get; internal set; }
+			}
+
+			/// <summary>Represents the data used to define individual marks.</summary>
+			public class MarkInfo
+			{
+				/// <summary>Gets the format for <see cref="Data"/>.</summary>
 				public byte Type { get; internal set; }
 
-				/// <summary>Gets the data array</summary>
-				/// <remarks>If Type==1, data is { Unk, ArrayCount } followed by 3*ArrayCount bytes<br/>
-				/// If Type==2, data is 16 bytes.<br/>
-				/// Each value is read-only</remarks>
-				public Indexer<byte> Data { get; internal set; }
-			}*/
+				/// <summary>If <see cref="Type"/> is <b>0xFF</b>, returns the distance beyond which Marks that follow will not be drawn.<br/>
+				/// Otherwise, <b>-1</b>.</summary>
+				public int ClippingDistance { get; internal set; } = -1;
+
+				/// <summary>Gets the vertices that define where the marks are drawn.</summary>
+				public ReadOnlyCollection<VertexInfo> Vertices { get; internal set; } = null;
+
+				/// <summary>Represents a single vertex reference within a mark.</summary>
+				public struct VertexInfo
+				{
+					/// <summary>The ID of the vertex used, multiplied by 2.</summary>
+					public byte VertexID;
+					/// <summary>A multiplier in the position calc based on the difference to the previous vertex.</summary>
+					public byte LeftFactor;
+					/// <summary>A multiplier in the position calc based on the difference to the next vertex.</summary>
+					public byte RightFactor;
+				}
+			}
 		}
 	}
 }

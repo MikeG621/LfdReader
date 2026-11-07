@@ -8,10 +8,22 @@ Author: [Michael Gaisser](mailto:mjgaisser@gmail.com)
 Library for editing LucasArts *.LFD resource files.
 
 ## Latest Release
-#### WIP
+#### 3.1, 07 Nov 2026
 - (CPLX) Fixed an issue causing bad negative values, distoring the wireframe [Issue [YOGEME #142](https://github.com/MikeG621/YOGEME/issues/142)].
-- (CRFT, CPLX, SHIP) Added `Vertex16.ToString()` override.
+- (CRFT, CPLX, SHIP) Added `Vertex16.ToString()` and `Vector16.ToString` overrides.
+- (CRFT) Redid types, including Marking data now being read (was Unk previously). Is now fully defined, CPLX and SHIP will follow.
 
+### Additional Information
+
+#### Dependencies
+- [Idmr.Common](https://github.com/MikeG621/Common) (v1.1 or later)
+- [Idmr.ImageFormat.Act](https://github.com/MikeG621/ImageFormat-Act) (v2.0 or later), necessary only for LfdReader.Xact
+
+File structure information per resource is found in the individual class files.
+
+Programmer's reference can be found in the [help file](help/Idmr.LfdReader.chm).
+
+### Version History
 #### 3.0, 21 Aug 2023
 - `IDisposable` has been implemented throughout.
 - Better application of the Dirty flag throughout.
@@ -36,17 +48,6 @@ Library for editing LucasArts *.LFD resource files.
 - (TEXT) The original Strings array has been deleted in favor of the new `Strings` collection  ***BREAKING CHANGE***.
   - There really wasn't a way to just mark this as OBS and have it work alongside the new collection, as the changes to the original array could not be monitored.
 
-### Additional Information
-
-#### Dependencies
-- [Idmr.Common](https://github.com/MikeG621/Common) (v1.1 or later)
-- [Idmr.ImageFormat.Act](https://github.com/MikeG621/ImageFormat-Act) (v2.0 or later), necessary only for LfdReader.Xact
-
-File structure information per resource is found in the individual class files.
-
-Programmer's reference can be found in the [help file](help/Idmr.LfdReader.chm).
-
-### Version History
 #### 2.5.2, 17 May 2026
 - (MASK) No code changes, just updated the XML example for the help file.
 - (LfdFile) The per-resource modified flag now resets during Write().
